@@ -16,9 +16,9 @@
     <UsePartialTypes>false</UsePartialTypes>
     <AssemblyName>Xamarin.Cognitive.Face.NuGet</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <Owners>Colby Williams, Nate Rickard</Owners>
-    <Copyright>Copyright © 2017 Colby Williams and Nate Rickard</Copyright>
-    <PackageTags>Xamarin, Xamarin.iOS, Xamarin.Android, iOS, Android, Face, Oxford, ProjectOxford, Microsoft, Cognitive, CognitiveServices,</PackageTags>
+    <Owners>colbylwilliams, naterickard</Owners>
+    <Copyright>Copyright © 2017 Colby Williams, Nate Rickard</Copyright>
+    <PackageTags>Xamarin, Xamarin.iOS, Xamarin.Android, iOS, Android, Face, Oxford, ProjectOxford, Microsoft, Cognitive, CognitiveServices</PackageTags>
     <Title>Xamarin.Cognitive.Face</Title>
     <Summary>Microsoft Cognitive Services Face API client library for Xamarin.iOS and Xamarin.Android.</Summary>
     <PackageProjectUrl>https://github.com/colbylwilliams/Cognitive-Face-Xamarin</PackageProjectUrl>
