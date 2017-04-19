@@ -1,0 +1,6 @@
+[submodule "Cognitive-Face-iOS-Xamarin"]
+	path = Cognitive-Face-iOS-Xamarin
+	url = https://github.com/colbylwilliams/Cognitive-Face-iOS-Xamarin
+[submodule "Cognitive-Face-Android-Xamarin"]
+	path = Cognitive-Face-Android-Xamarin
+	url = https://github.com/NateRickard/Cognitive-Face-Android-Xamarin

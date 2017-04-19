@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(NuGetAuthoringPath)\NuGet.Packaging.Authoring.props" Condition="Exists('$(NuGetAuthoringPath)\NuGet.Packaging.Authoring.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{DA36DEFA-D104-4483-8727-8FEFAE2DA627}</ProjectGuid>
+    <Description>Microsoft Cognitive Services Face API client library for Xamarin.iOS and Xamarin.Android.</Description>
+    <PackageId>Xamarin.Cognitive.Face</PackageId>
+    <PackageVersion>0.2.2-preview</PackageVersion>
+    <Authors>Colby Williams, Nate Rickard</Authors>
+    <DevelopmentDependency>false</DevelopmentDependency>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Xamarin.Cognitive.Face</RootNamespace>
+    <UsePartialTypes>false</UsePartialTypes>
+    <AssemblyName>Xamarin.Cognitive.Face.NuGet</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <Owners>Colby Williams, Nate Rickard</Owners>
+    <Copyright>Copyright © 2017 Colby Williams and Nate Rickard</Copyright>
+    <PackageTags>Xamarin, Xamarin.iOS, Xamarin.Android, iOS, Android, Face, Oxford, ProjectOxford, Microsoft, Cognitive, CognitiveServices,</PackageTags>
+    <Title>Xamarin.Cognitive.Face</Title>
+    <Summary>Microsoft Cognitive Services Face API client library for Xamarin.iOS and Xamarin.Android.</Summary>
+    <PackageProjectUrl>https://github.com/colbylwilliams/Cognitive-Face-Xamarin</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/colbylwilliams/Cognitive-Face-Xamarin/blob/master/LICENSE</PackageLicenseUrl>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <OutputPath>bin\Debug</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Xamarin.Cognitive.Face.Android\Xamarin.Cognitive.Face.Android.csproj">
+      <Project>{8057BA86-1825-4A74-9BCC-7F63CC45AC7E}</Project>
+      <Name>Xamarin.Cognitive.Face.Android</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Xamarin.Cognitive.Face.iOS\Xamarin.Cognitive.Face.iOS.csproj">
+      <Project>{2F1B0B37-6328-42CB-9EA3-DE55F9967FA0}</Project>
+      <Name>Xamarin.Cognitive.Face.iOS</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="NuGet.Build.Packaging">
+      <Version>0.1.157-dev</Version>
+      <PrivateAssets>All</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.Common.targets" />
+  <Import Project="$(NuGetAuthoringPath)\NuGet.Packaging.Authoring.targets" Condition="Exists('$(NuGetAuthoringPath)\NuGet.Packaging.Authoring.targets')" />
+</Project>
