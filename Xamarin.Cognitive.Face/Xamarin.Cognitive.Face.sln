@@ -135,5 +135,6 @@ Global
 		$2.SpaceAfterMethodCallName = True
 		$2.SpaceBeforeOpenSquareBracket = True
 		$2.scope = text/x-csharp
+		version = 0.2.3
 	EndGlobalSection
 EndGlobal

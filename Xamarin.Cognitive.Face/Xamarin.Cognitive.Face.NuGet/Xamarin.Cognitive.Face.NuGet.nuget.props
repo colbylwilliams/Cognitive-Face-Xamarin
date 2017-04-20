@@ -4,6 +4,6 @@
     <NuGetPackageRoot>/Users/colbywilliams/.nuget/packages/</NuGetPackageRoot>
   </PropertyGroup>
   <ImportGroup>
-    <Import Project="$(NuGetPackageRoot)nuget.build.packaging/0.1.157-dev/build/NuGet.Build.Packaging.props" Condition="Exists('$(NuGetPackageRoot)nuget.build.packaging/0.1.157-dev/build/NuGet.Build.Packaging.props')" />
+    <Import Project="$(NuGetPackageRoot)nuget.build.packaging/0.1.248/build/NuGet.Build.Packaging.props" Condition="Exists('$(NuGetPackageRoot)nuget.build.packaging/0.1.248/build/NuGet.Build.Packaging.props')" />
   </ImportGroup>
 </Project>

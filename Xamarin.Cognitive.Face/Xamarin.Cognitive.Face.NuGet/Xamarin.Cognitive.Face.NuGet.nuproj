@@ -23,15 +23,16 @@
     <Summary>Microsoft Cognitive Services Face API client library for Xamarin.iOS and Xamarin.Android.</Summary>
     <PackageProjectUrl>https://github.com/colbylwilliams/Cognitive-Face-Xamarin</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/colbylwilliams/Cognitive-Face-Xamarin/blob/master/LICENSE</PackageLicenseUrl>
+    <ReleaseVersion>0.2.3</ReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
-    <OutputPath>bin\Debug</OutputPath>
+    <OutputPath>..\..\builds\Debug</OutputPath>
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <OutputPath>bin\Release</OutputPath>
+    <OutputPath>..\..\builds\Release</OutputPath>
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
@@ -46,7 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="NuGet.Build.Packaging">
-      <Version>0.1.157-dev</Version>
+      <Version>0.1.248</Version>
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
   </ItemGroup>
