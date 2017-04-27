@@ -11,7 +11,7 @@ Project("{5DD5E4FA-CB73-4610-85AB-557B54E96AA9}") = "Xamarin.Cognitive.Face.NuGe
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Bindings", "Bindings", "{D35AB5DF-1CB6-428D-9806-8ABF04E7AD65}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cognitive.Face.iOS", "..\Cognitive-Face-iOS-Xamarin\Cognitive.Face.iOS\Cognitive.Face.iOS.csproj", "{C13B9CDB-003C-4CDB-9C05-1E79F9AB27D1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cognitive.Face.iOS", "..\Cognitive-Face-iOS-Xamarin\Cognitive.Face.iOS\Xamarin.Cognitive.Face.iOS.csproj", "{C13B9CDB-003C-4CDB-9C05-1E79F9AB27D1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cognitive.Face.Android", "..\Cognitive-Face-Android-Xamarin\Cognitive.Face.Android\Cognitive.Face.Android.csproj", "{A1046082-B104-4925-BC08-82D7386E5CF9}"
 EndProject
