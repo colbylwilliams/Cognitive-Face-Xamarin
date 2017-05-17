@@ -10,7 +10,7 @@
     <RootNamespace>Xamarin.Cognitive.Face</RootNamespace>
     <AssemblyName>Xamarin.Cognitive.Face</AssemblyName>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
-    <ReleaseVersion>0.2.3</ReleaseVersion>
+    <ReleaseVersion>0.3.0</ReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
