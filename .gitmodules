@@ -4,3 +4,6 @@
 [submodule "Cognitive-Face-Android-Xamarin"]
 	path = Cognitive-Face-Android-Xamarin
 	url = https://github.com/NateRickard/Cognitive-Face-Android-Xamarin
+[submodule "Xamarin.Cognitive.Face/Xamarin.Cognitive.Face.Sample/Modules/NomadCode.UIExtensions"]
+	path = Xamarin.Cognitive.Face/Xamarin.Cognitive.Face.Sample/Modules/NomadCode.UIExtensions
+	url = https://github.com/colbylwilliams/NomadCode.UIExtensions
