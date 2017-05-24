@@ -46,10 +46,12 @@
     <Reference Include="Mono.Android" />
     <Reference Include="Java.Interop" />
     <Reference Include="Cognitive.Face.Android">
-      <HintPath>..\..\packages\Xamarin.Cognitive.Face.0.2.1-preview\lib\monoandroid71\Cognitive.Face.Android.dll</HintPath>
+      <HintPath>..\..\packages\Xamarin.Cognitive.Face.0.3.0-preview\lib\monoandroid71\Cognitive.Face.Android.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Xamarin.Cognitive.Face">
-      <HintPath>..\..\packages\Xamarin.Cognitive.Face.0.2.1-preview\lib\monoandroid71\Xamarin.Cognitive.Face.dll</HintPath>
+      <HintPath>..\..\packages\Xamarin.Cognitive.Face.0.3.0-preview\lib\monoandroid71\Xamarin.Cognitive.Face.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>

@@ -88,7 +88,11 @@
       <HintPath>..\..\packages\Xamarin.Cognitive.Face.0.2.1-preview\lib\xamarinios10\Cognitive.Face.iOS.dll</HintPath>
     </Reference>
     <Reference Include="Xamarin.Cognitive.Face">
-      <HintPath>..\..\packages\Xamarin.Cognitive.Face.0.2.1-preview\lib\xamarinios10\Xamarin.Cognitive.Face.dll</HintPath>
+      <HintPath>..\..\packages\Xamarin.Cognitive.Face.0.3.0-preview\lib\xamarinios10\Xamarin.Cognitive.Face.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Xamarin.Cognitive.Face.iOS">
+      <HintPath>..\..\packages\Xamarin.Cognitive.Face.0.3.0-preview\lib\xamarinios10\Xamarin.Cognitive.Face.iOS.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
