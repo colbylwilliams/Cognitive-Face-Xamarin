@@ -9,6 +9,30 @@
     <Import_RootNamespace>Xamarin.Cognitive.Face.Sample.Shared</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)MyClass.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions\StringExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions\TaskExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Face.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\FaceGroup.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\FaceModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\IdentificationResult.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Person.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\PersonGroup.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\SimilarFaceResult.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\VerificationType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\VerifyResult.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\Accessories.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\Attribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\Blur.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\Exposure.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\FaceAttributes.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\FaceEmotion.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\FaceHeadPose.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\FacialHair.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\Hair.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\Makeup.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\Noise.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\Occlusion.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utilities\Log.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FaceClient.cs" />
   </ItemGroup>
 </Project>

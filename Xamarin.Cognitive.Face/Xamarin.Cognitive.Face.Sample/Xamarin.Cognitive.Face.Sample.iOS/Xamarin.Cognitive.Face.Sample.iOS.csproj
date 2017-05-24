@@ -9,7 +9,7 @@
     <RootNamespace>Xamarin.Cognitive.Face.Sample.iOS</RootNamespace>
     <AssemblyName>Xamarin.Cognitive.Face.Sample.iOS</AssemblyName>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
-    <ReleaseVersion>0.2.3</ReleaseVersion>
+    <ReleaseVersion>0.3.0</ReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhoneSimulator' ">
     <DebugSymbols>true</DebugSymbols>
@@ -84,15 +84,8 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="Xamarin.iOS" />
-    <Reference Include="Cognitive.Face.iOS">
-      <HintPath>..\..\packages\Xamarin.Cognitive.Face.0.2.1-preview\lib\xamarinios10\Cognitive.Face.iOS.dll</HintPath>
-    </Reference>
-    <Reference Include="Xamarin.Cognitive.Face">
-      <HintPath>..\..\packages\Xamarin.Cognitive.Face.0.3.0-preview\lib\xamarinios10\Xamarin.Cognitive.Face.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Xamarin.Cognitive.Face.iOS">
-      <HintPath>..\..\packages\Xamarin.Cognitive.Face.0.3.0-preview\lib\xamarinios10\Xamarin.Cognitive.Face.iOS.dll</HintPath>
+    <Reference Include="MBProgressHUD">
+      <HintPath>..\..\packages\mbprogresshud.0.9.2.0\lib\Xamarin.iOS\MBProgressHUD.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -101,6 +94,16 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
+    <Folder Include="Extensions\" />
+    <Folder Include="View\" />   
+    <Folder Include="View\Cells\" />
+    <Folder Include="View\Admin\" />
+    <Folder Include="View\Shared\" />
+    <Folder Include="View\Detection\" />
+    <Folder Include="View\FindSimilarFaces\" />
+    <Folder Include="View\Identification\" />
+    <Folder Include="View\Verification\" />
+    <Folder Include="View\Grouping\" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="LaunchScreen.storyboard" />
@@ -114,11 +117,123 @@
   <ItemGroup>
     <Compile Include="Main.cs" />
     <Compile Include="AppDelegate.cs" />
-    <Compile Include="ViewController.cs" />
-    <Compile Include="ViewController.designer.cs">
-      <DependentUpon>ViewController.cs</DependentUpon>
+    <Compile Include="Extensions\FaceExtensions.cs" />
+    <Compile Include="FaceState.cs" />
+    <Compile Include="FaceClient.cs" />
+    <Compile Include="Extensions\UIExtensions.cs" />
+    <Compile Include="View\FaceNavigationController.cs" />
+    <Compile Include="View\FaceNavigationController.designer.cs">
+      <DependentUpon>FaceNavigationController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\FaceViewController.cs" />
+    <Compile Include="View\FaceViewController.designer.cs">
+      <DependentUpon>FaceViewController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\Admin\GroupDetailViewController.cs" />
+    <Compile Include="View\Admin\GroupDetailViewController.designer.cs">
+      <DependentUpon>GroupDetailViewController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\Admin\GroupPersonCollectionViewController.cs" />
+    <Compile Include="View\Admin\GroupPersonCollectionViewController.designer.cs">
+      <DependentUpon>GroupPersonCollectionViewController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\Admin\GroupsTableViewController.cs" />
+    <Compile Include="View\Admin\GroupsTableViewController.designer.cs">
+      <DependentUpon>GroupsTableViewController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\Admin\GroupsViewController.cs" />
+    <Compile Include="View\Admin\GroupsViewController.designer.cs">
+      <DependentUpon>GroupsViewController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\Admin\PersonDetailViewController.cs" />
+    <Compile Include="View\Admin\PersonDetailViewController.designer.cs">
+      <DependentUpon>PersonDetailViewController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\Admin\PersonFaceCollectionViewController.cs" />
+    <Compile Include="View\Admin\PersonFaceCollectionViewController.designer.cs">
+      <DependentUpon>PersonFaceCollectionViewController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\Cells\DetectionResultsTableViewCell.cs" />
+    <Compile Include="View\Cells\DetectionResultsTableViewCell.designer.cs">
+      <DependentUpon>DetectionResultsTableViewCell.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\Cells\FaceCVC.cs" />
+    <Compile Include="View\Cells\FaceCVC.designer.cs">
+      <DependentUpon>FaceCVC.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\Cells\GestureCVC.cs" />
+    <Compile Include="View\Cells\GroupPersonCVC.cs" />
+    <Compile Include="View\Cells\GroupPersonCVC.designer.cs">
+      <DependentUpon>GroupPersonCVC.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\Cells\IHandleResults.cs" />
+    <Compile Include="View\Cells\ISupportActions.cs" />
+    <Compile Include="View\Cells\IdentifyResultTableViewCell.cs" />
+    <Compile Include="View\Cells\IdentifyResultTableViewCell.designer.cs">
+      <DependentUpon>IdentifyResultTableViewCell.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\Cells\SimilarFaceResultTableViewCell.cs" />
+    <Compile Include="View\Cells\SimilarFaceResultTableViewCell.designer.cs">
+      <DependentUpon>SimilarFaceResultTableViewCell.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\Cells\SimpleCVHeader.cs" />
+    <Compile Include="View\Cells\SimpleCVHeader.designer.cs">
+      <DependentUpon>SimpleCVHeader.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\Detection\DetectionResultsTableViewController.cs" />
+    <Compile Include="View\Detection\DetectionResultsTableViewController.designer.cs">
+      <DependentUpon>DetectionResultsTableViewController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\Detection\DetectionViewController.cs" />
+    <Compile Include="View\Detection\DetectionViewController.designer.cs">
+      <DependentUpon>DetectionViewController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\FindSimilarFaces\FindSimilarFacesViewController.cs" />
+    <Compile Include="View\FindSimilarFaces\FindSimilarFacesViewController.designer.cs">
+      <DependentUpon>FindSimilarFacesViewController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\FindSimilarFaces\SimilarFaceResultsTableViewController.cs" />
+    <Compile Include="View\FindSimilarFaces\SimilarFaceResultsTableViewController.designer.cs">
+      <DependentUpon>SimilarFaceResultsTableViewController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\Grouping\FaceGroupingViewController.cs" />
+    <Compile Include="View\Grouping\FaceGroupingViewController.designer.cs">
+      <DependentUpon>FaceGroupingViewController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\Grouping\GroupingResultCollectionViewController.cs" />
+    <Compile Include="View\Grouping\GroupingResultCollectionViewController.designer.cs">
+      <DependentUpon>GroupingResultCollectionViewController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\Identification\IdentifyFaceViewController.cs" />
+    <Compile Include="View\Identification\IdentifyFaceViewController.designer.cs">
+      <DependentUpon>IdentifyFaceViewController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\Identification\IdentifyResultsTableViewController.cs" />
+    <Compile Include="View\Identification\IdentifyResultsTableViewController.designer.cs">
+      <DependentUpon>IdentifyResultsTableViewController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\Shared\BaseCollectionViewController.cs" />
+    <Compile Include="View\Shared\BaseTableViewController.cs" />
+    <Compile Include="View\Shared\BaseViewController.cs" />
+    <Compile Include="View\Shared\FaceResultsTableViewController.cs" />
+    <Compile Include="View\Shared\FaceSelectionCollectionViewController.cs" />
+    <Compile Include="View\Shared\FaceSelectionCollectionViewController.designer.cs">
+      <DependentUpon>FaceSelectionCollectionViewController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\Shared\ItemsPerRowCollectionViewController.cs" />
+    <Compile Include="View\Shared\PopoverPresentationViewController.cs" />
+    <Compile Include="View\Verification\VerificationViewController.cs" />
+    <Compile Include="View\Verification\VerificationViewController.designer.cs">
+      <DependentUpon>VerificationViewController.cs</DependentUpon>
     </Compile>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Cognitive-Face-iOS-Xamarin\Cognitive.Face.iOS\Xamarin.Cognitive.Face.iOS.csproj">
+      <Project>{C13B9CDB-003C-4CDB-9C05-1E79F9AB27D1}</Project>
+      <Name>Xamarin.Cognitive.Face.iOS</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="..\Modules\NomadCode.UIExtensions\NomadCode.UIExtensions\NomadCode.UIExtensions\NomadCode.UIExtensions.projitems" Label="Shared" Condition="Exists('..\Modules\NomadCode.UIExtensions\NomadCode.UIExtensions\NomadCode.UIExtensions\NomadCode.UIExtensions.projitems')" />
   <Import Project="..\Xamarin.Cognitive.Face.Sample.Shared\Xamarin.Cognitive.Face.Sample.Shared.projitems" Label="Shared" Condition="Exists('..\Xamarin.Cognitive.Face.Sample.Shared\Xamarin.Cognitive.Face.Sample.Shared.projitems')" />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
 </Project>
