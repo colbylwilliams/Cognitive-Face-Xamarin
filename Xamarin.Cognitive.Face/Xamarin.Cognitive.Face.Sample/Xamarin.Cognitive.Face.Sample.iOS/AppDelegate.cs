@@ -18,9 +18,15 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 
 		public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions)
 		{
-			// Override point for customization after application launch.
-			// If not required for your application you can safely delete this method
-			//Xamarin.Cognitive.Face.iOS.
+			string faceApiKey = "";
+
+			if (string.IsNullOrEmpty(faceApiKey))
+			{
+				throw new System.Exception("No API key set.  Please sign up for a Face API key at https://azure.microsoft.com/en-us/services/cognitive-services/face/");
+			}
+
+			FaceClient.Shared.SubscriptionKey = faceApiKey;
+
 			return true;
 		}
 
