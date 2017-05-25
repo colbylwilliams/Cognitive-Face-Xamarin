@@ -38,7 +38,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Xamarin.Cognitive.Face.Android\Xamarin.Cognitive.Face.Android.csproj">
       <Project>{8057BA86-1825-4A74-9BCC-7F63CC45AC7E}</Project>
-      <Name>Xamarin.Cognitive.Face.Android</Name>
+      <Name>Xamarin.Cognitive.Face.Droid</Name>
     </ProjectReference>
     <ProjectReference Include="..\Xamarin.Cognitive.Face.iOS\Xamarin.Cognitive.Face.iOS.csproj">
       <Project>{2F1B0B37-6328-42CB-9EA3-DE55F9967FA0}</Project>
