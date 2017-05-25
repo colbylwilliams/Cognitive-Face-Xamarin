@@ -9,10 +9,10 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Xamarin.Cognitive.Face</RootNamespace>
     <AssemblyName>Xamarin.Cognitive.Face</AssemblyName>
-    <TargetFrameworkVersion>v7.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
     <MonoAndroidResourcePrefix>Resources</MonoAndroidResourcePrefix>
     <MonoAndroidAssetsPrefix>Assets</MonoAndroidAssetsPrefix>
-    <AndroidUseLatestPlatformSdk>true</AndroidUseLatestPlatformSdk>
+    <AndroidUseLatestPlatformSdk>false</AndroidUseLatestPlatformSdk>
     <ReleaseVersion>0.3.0</ReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -47,7 +47,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Cognitive-Face-Android-Xamarin\Cognitive.Face.Android\Cognitive.Face.Android.csproj">
       <Project>{A1046082-B104-4925-BC08-82D7386E5CF9}</Project>
-      <Name>Cognitive.Face.Android</Name>
+      <Name>Cognitive.Face.Droid</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
