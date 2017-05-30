@@ -107,6 +107,10 @@ Global
 		{F1B643EA-4615-4BF3-8734-0C54E19F4BFE}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
 		{F1B643EA-4615-4BF3-8734-0C54E19F4BFE}.Debug|iPhone.ActiveCfg = Debug|Any CPU
 		{F1B643EA-4615-4BF3-8734-0C54E19F4BFE}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{88B24322-1B98-4F7A-8CB5-18D2D4CA2958}.Debug|Any CPU.ActiveCfg = Debug|iPhoneSimulator
+		{88B24322-1B98-4F7A-8CB5-18D2D4CA2958}.Debug|Any CPU.Build.0 = Debug|iPhoneSimulator
+		{88B24322-1B98-4F7A-8CB5-18D2D4CA2958}.Debug|iPhoneSimulator.ActiveCfg = Debug|iPhoneSimulator
+		{88B24322-1B98-4F7A-8CB5-18D2D4CA2958}.Debug|iPhoneSimulator.Build.0 = Debug|iPhoneSimulator
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{C13B9CDB-003C-4CDB-9C05-1E79F9AB27D1} = {D35AB5DF-1CB6-428D-9806-8ABF04E7AD65}
@@ -129,6 +133,8 @@ Global
 		$2.SpaceBeforeOpenSquareBracket = True
 		$0.TextStylePolicy = $3
 		$3.scope = text/plain
+		$0.DotNetNamingPolicy = $4
+		$4.DirectoryNamespaceAssociation = PrefixedHierarchical
 		version = 0.3.0
 	EndGlobalSection
 EndGlobal
