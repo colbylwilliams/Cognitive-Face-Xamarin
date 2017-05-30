@@ -31,6 +31,8 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 			if (Group != null)
 			{
 				GroupName.Text = Group.Name;
+
+				checkTrainingStatus ().Forget ();
 			}
 		}
 
@@ -140,6 +142,26 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 			catch (Exception)
 			{
 				this.ShowSimpleHUD ("Failed in training group.");
+			}
+		}
+
+
+		async Task checkTrainingStatus ()
+		{
+			var status = await FaceClient.Shared.GetGroupTrainingStatus (Group);
+
+			switch (status.Status)
+			{
+				case "notstarted":
+				case "failed":
+					var result = await this.ShowTwoOptionAlert ("Training Status", "This group needs to be trained.  Train now?");
+
+					if (result)
+					{
+						await trainGroup ();
+					}
+
+					break;
 			}
 		}
 	}
