@@ -34,5 +34,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\Occlusion.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\Log.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FaceClient.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\TrainingStatus.cs" />
   </ItemGroup>
 </Project>
