@@ -32,7 +32,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 			{
 				GroupName.Text = Group.Name;
 
-				checkTrainingStatus ().Forget ();
+				CheckTrainingStatus ().Forget ();
 			}
 		}
 
@@ -47,11 +47,11 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 
 			if (Group == null)
 			{
-				createNewGroup ().Forget ();
+				CreateNewGroup ().Forget ();
 			}
 			else
 			{
-				updateGroup ().Forget ();
+				UpdateGroup ().Forget ();
 			}
 		}
 
@@ -79,7 +79,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 					return;
 				}
 
-				await createNewGroup ();
+				await CreateNewGroup ();
 			}
 
 			if (Group != null) //just to make sure we succeeded in the case we created a new group above
@@ -89,7 +89,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 		}
 
 
-		async Task updateGroup ()
+		async Task UpdateGroup ()
 		{
 			try
 			{
@@ -98,7 +98,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 				await FaceClient.Shared.UpdatePersonGroup (Group, GroupName.Text);
 
 				//_shouldExit = NO;
-				await trainGroup ();
+				await TrainGroup ();
 
 				this.ShowSimpleHUD ("Group saved");
 			}
@@ -109,7 +109,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 		}
 
 
-		async Task createNewGroup ()
+		async Task CreateNewGroup ()
 		{
 			try
 			{
@@ -128,7 +128,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 		}
 
 
-		async Task trainGroup ()
+		async Task TrainGroup ()
 		{
 			try
 			{
@@ -146,7 +146,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 		}
 
 
-		async Task checkTrainingStatus ()
+		async Task CheckTrainingStatus ()
 		{
 			var status = await FaceClient.Shared.GetGroupTrainingStatus (Group);
 
@@ -158,7 +158,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 
 					if (result)
 					{
-						await trainGroup ();
+						await TrainGroup ();
 					}
 
 					break;
