@@ -204,6 +204,11 @@ namespace Xamarin.Cognitive.Face.Sample
 		}
 
 
+		/// <summary>
+		/// Gets the group training status: notstarted, running, succeeded, failed
+		/// </summary>
+		/// <returns>The group training status.</returns>
+		/// <param name="personGroup">Person group.</param>
 		public Task<TrainingStatus> GetGroupTrainingStatus (PersonGroup personGroup)
 		{
 			try

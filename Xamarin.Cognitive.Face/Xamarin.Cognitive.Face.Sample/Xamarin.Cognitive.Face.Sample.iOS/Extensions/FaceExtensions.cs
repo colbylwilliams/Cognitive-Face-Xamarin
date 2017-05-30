@@ -32,6 +32,19 @@ namespace Xamarin.Cognitive.Face.Sample.iOS.Extensions
 		}
 
 
+		public static DateTime? AsDateSafe (this string dateString, DateTime? defaultValue = null)
+		{
+			DateTime? date = defaultValue;
+
+			if (DateTime.TryParse (dateString, out DateTime dt))
+			{
+				date = dt;
+			}
+
+			return date;
+		}
+
+
 		public static PersonGroup ToPersonGroup (this MPOPersonGroup personGroup)
 		{
 			return new PersonGroup
@@ -59,8 +72,8 @@ namespace Xamarin.Cognitive.Face.Sample.iOS.Extensions
 		{
 			return new TrainingStatus
 			{
-				CreatedDateTime = DateTime.Parse (status.StartTime),
-				LastActionDateTime = DateTime.Parse (status.EndTime),
+				CreatedDateTime = status.StartTime.AsDateSafe (),
+				LastActionDateTime = status.EndTime.AsDateSafe (),
 				//Message = status.
 				Status = status.Status
 			};
