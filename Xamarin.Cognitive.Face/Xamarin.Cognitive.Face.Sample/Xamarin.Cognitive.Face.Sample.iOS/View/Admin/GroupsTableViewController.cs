@@ -126,7 +126,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 
 				//await this.ShowHUD ()
 
-				await FaceClient.Shared.DeleteGroup (personGroup);
+				await FaceClient.Shared.DeletePersonGroup (personGroup);
 
 				//TableView.ReloadData ();
 			}

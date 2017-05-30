@@ -28,7 +28,7 @@ namespace Xamarin.Cognitive.Face.Sample
 		}
 
 
-		#region Groups
+		#region Person Group
 
 
 		public Task<List<PersonGroup>> GetGroups (bool forceRefresh = false)
@@ -55,6 +55,30 @@ namespace Xamarin.Cognitive.Face.Sample
 				}
 
 				return Task.FromResult (Groups);
+			}
+			catch (Exception ex)
+			{
+				Log.Error (ex);
+				throw;
+			}
+		}
+
+
+		public Task<PersonGroup> GetPersonGroup (string personGroupId)
+		{
+			try
+			{
+				var tcs = new TaskCompletionSource<PersonGroup> ();
+
+				Client.GetPersonGroupWithPersonGroupId (personGroupId, (personGroup, error) =>
+				{
+					tcs.FailTaskIfErrored (error.ToException ());
+					if (tcs.IsNullFinishCanceledOrFaulted ()) return;
+
+					tcs.SetResult (personGroup.ToPersonGroup ());
+				}).Resume ();
+
+				return tcs.Task;
 			}
 			catch (Exception ex)
 			{
@@ -126,7 +150,7 @@ namespace Xamarin.Cognitive.Face.Sample
 		}
 
 
-		public Task DeleteGroup (PersonGroup personGroup)
+		public Task DeletePersonGroup (PersonGroup personGroup)
 		{
 			try
 			{
@@ -168,6 +192,30 @@ namespace Xamarin.Cognitive.Face.Sample
 
 					tcs.SetResult (true);
 
+				}).Resume ();
+
+				return tcs.Task;
+			}
+			catch (Exception ex)
+			{
+				Log.Error (ex);
+				throw;
+			}
+		}
+
+
+		public Task<TrainingStatus> GetGroupTrainingStatus (PersonGroup personGroup)
+		{
+			try
+			{
+				var tcs = new TaskCompletionSource<TrainingStatus> ();
+
+				Client.GetPersonGroupTrainingStatusWithPersonGroupId (personGroup.Id, (trainingStatus, error) =>
+				{
+					tcs.FailTaskIfErrored (error.ToException ());
+					if (tcs.IsNullFinishCanceledOrFaulted ()) return;
+
+					tcs.SetResult (trainingStatus.ToTrainingStatus ());
 				}).Resume ();
 
 				return tcs.Task;
