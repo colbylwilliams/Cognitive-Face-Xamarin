@@ -35,6 +35,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 				throw new System.Exception ("No API key set.  Please sign up for a Face API key at https://azure.microsoft.com/en-us/services/cognitive-services/face/");
 			}
 
+			//FaceClient.Shared.Endpoint = FaceClient.Endpoints.EastUS2;
 			FaceClient.Shared.SubscriptionKey = faceApiKey;
 
 			return true;

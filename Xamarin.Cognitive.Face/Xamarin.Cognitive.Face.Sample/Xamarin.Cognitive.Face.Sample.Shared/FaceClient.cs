@@ -11,6 +11,22 @@ namespace Xamarin.Cognitive.Face.Sample
 		public static FaceClient Shared => _shared ?? (_shared = new FaceClient ());
 
 		public string SubscriptionKey { get; set; }
+		public string Endpoint { get; set; } = Endpoints.WestUS;
+
+
+		public static class Endpoints
+		{
+			public const string WestUS = "https://westus.api.cognitive.microsoft.com/face/v1.0/";
+
+			public const string EastUS2 = "https://eastus2.api.cognitive.microsoft.com/face/v1.0/";
+
+			public const string WestCentralUS = "https://westcentralus.api.cognitive.microsoft.com/face/v1.0/";
+
+			public const string WestEurope = "https://westeurope.api.cognitive.microsoft.com/face/v1.0/";
+
+			public const string SEAsia = "https://southeastasia.api.cognitive.microsoft.com/face/v1.0/";
+		}
+
 
 		public List<PersonGroup> Groups { get; private set; } = new List<PersonGroup> ();
 
