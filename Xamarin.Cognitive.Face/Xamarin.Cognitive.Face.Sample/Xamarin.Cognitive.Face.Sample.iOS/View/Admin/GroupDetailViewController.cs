@@ -148,20 +148,28 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 
 		async Task CheckTrainingStatus ()
 		{
-			var status = await FaceClient.Shared.GetGroupTrainingStatus (Group);
-
-			switch (status.Status)
+			try
 			{
-				case TrainingStatus.TrainingStatusType.NotStarted:
-				case TrainingStatus.TrainingStatusType.Failed:
-					var result = await this.ShowTwoOptionAlert ("Training Status", "This group needs to be trained.  Train now?");
+				var status = await FaceClient.Shared.GetGroupTrainingStatus (Group);
 
-					if (result)
-					{
-						await TrainGroup ();
-					}
+				switch (status.Status)
+				{
+					case TrainingStatus.TrainingStatusType.NotStarted:
+					case TrainingStatus.TrainingStatusType.Failed:
+						var result = await this.ShowTwoOptionAlert ("Training Status", "This group needs to be trained.  Train now?");
 
-					break;
+						if (result)
+						{
+							await TrainGroup ();
+						}
+
+						break;
+				}
+			}
+			catch (Exception ex)
+			{
+				Log.Error (ex);
+				this.ShowSimpleHUD ("Failed to get group training status.");
 			}
 		}
 	}

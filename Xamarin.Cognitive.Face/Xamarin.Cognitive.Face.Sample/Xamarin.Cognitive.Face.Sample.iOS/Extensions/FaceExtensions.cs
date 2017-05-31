@@ -72,9 +72,9 @@ namespace Xamarin.Cognitive.Face.Sample.iOS.Extensions
 		{
 			var traingingStatus = TrainingStatus.FromString (status.Status);
 
-			traingingStatus.CreatedDateTime = status.StartTime.AsDateSafe ();
-			traingingStatus.LastActionDateTime = status.EndTime.AsDateSafe ();
-			//Message = status.
+			traingingStatus.CreatedDateTime = status.CreatedDateTime.AsDateSafe ();
+			traingingStatus.LastActionDateTime = status.LastActionDateTime.AsDateSafe ();
+			traingingStatus.Message = status.Message;
 
 			return traingingStatus;
 		}
