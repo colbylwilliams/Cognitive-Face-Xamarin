@@ -36,5 +36,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)FaceClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\TrainingStatus.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\FaceState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utilities\TaskQueue.cs" />
   </ItemGroup>
 </Project>
