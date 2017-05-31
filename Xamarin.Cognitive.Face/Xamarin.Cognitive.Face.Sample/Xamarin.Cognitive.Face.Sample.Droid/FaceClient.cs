@@ -204,8 +204,15 @@ namespace Xamarin.Cognitive.Face.Sample
 						arrPeople.Select (p => p.ToPerson ())
 					);
 
-					personGroup.People.Clear ();
-					personGroup.People.AddRange (people);
+					if (personGroup.People != null)
+					{
+						personGroup.People.Clear ();
+						personGroup.People.AddRange (people);
+					}
+					else
+					{
+						personGroup.People = people;
+					}
 
 					return people;
 				}

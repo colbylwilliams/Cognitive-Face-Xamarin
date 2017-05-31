@@ -43,7 +43,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 			{
 				this.ShowHUD ("Loading group");
 
-				if (Group.People?.Count == 0)
+				if (!Group.PeopleLoaded)
 				{
 					await FaceClient.Shared.GetPeopleForGroup (Group);
 				}
