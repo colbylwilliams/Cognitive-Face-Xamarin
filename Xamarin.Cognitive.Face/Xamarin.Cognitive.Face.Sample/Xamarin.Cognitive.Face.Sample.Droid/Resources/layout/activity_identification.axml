@@ -83,7 +83,6 @@
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentStart="true"
                     android:text="@string/manage_person_groups"
-                    android:onClick="managePersonGroups"
                     style="@style/ButtonStyle" />
             </RelativeLayout>
             <RelativeLayout
