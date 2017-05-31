@@ -23,7 +23,7 @@
     <Summary>Microsoft Cognitive Services Face API client library for Xamarin.iOS and Xamarin.Android.</Summary>
     <PackageProjectUrl>https://github.com/colbylwilliams/Cognitive-Face-Xamarin</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/colbylwilliams/Cognitive-Face-Xamarin/blob/master/LICENSE</PackageLicenseUrl>
-    <ReleaseVersion>0.3.0</ReleaseVersion>
+    <ReleaseVersion>1.3.2</ReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
