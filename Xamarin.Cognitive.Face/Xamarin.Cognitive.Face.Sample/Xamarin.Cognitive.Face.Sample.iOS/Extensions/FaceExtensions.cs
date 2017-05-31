@@ -70,13 +70,13 @@ namespace Xamarin.Cognitive.Face.Sample.iOS.Extensions
 
 		public static TrainingStatus ToTrainingStatus (this MPOTrainingStatus status)
 		{
-			return new TrainingStatus
-			{
-				CreatedDateTime = status.StartTime.AsDateSafe (),
-				LastActionDateTime = status.EndTime.AsDateSafe (),
-				//Message = status.
-				//Status = status.Status
-			};
+			var traingingStatus = TrainingStatus.FromString (status.Status);
+
+			traingingStatus.CreatedDateTime = status.StartTime.AsDateSafe ();
+			traingingStatus.LastActionDateTime = status.EndTime.AsDateSafe ();
+			//Message = status.
+
+			return traingingStatus;
 		}
 
 
