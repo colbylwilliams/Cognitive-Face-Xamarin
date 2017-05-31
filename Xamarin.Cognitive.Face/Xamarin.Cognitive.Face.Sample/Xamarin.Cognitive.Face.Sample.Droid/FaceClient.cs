@@ -204,7 +204,7 @@ namespace Xamarin.Cognitive.Face.Sample
 						arrPeople.Select (p => p.ToPerson ())
 					);
 
-					if (personGroup.People != null)
+					if (personGroup.PeopleLoaded)
 					{
 						personGroup.People.Clear ();
 						personGroup.People.AddRange (people);
@@ -247,7 +247,10 @@ namespace Xamarin.Cognitive.Face.Sample
 						UserData = userData
 					};
 
-					personGroup.People.Add (person);
+					if (personGroup.PeopleLoaded)
+					{
+						personGroup.People.Add (person);
+					}
 
 					return person;
 				}
@@ -270,6 +273,30 @@ namespace Xamarin.Cognitive.Face.Sample
 
 					person.Name = personName;
 					person.UserData = userData;
+				}
+				catch (Exception ex)
+				{
+					Log.Error (ex);
+					throw;
+				}
+			});
+		}
+
+
+		public Task DeletePerson (PersonGroup personGroup, Person person)
+		{
+			return Task.Run (() =>
+			{
+				try
+				{
+					var personUUID = UUID.FromString (person.Id);
+
+					Client.DeletePerson (personGroup.Id, personUUID);
+
+					if (personGroup.PeopleLoaded && personGroup.People.Contains (person))
+					{
+						personGroup.People.Remove (person);
+					}
 				}
 				catch (Exception ex)
 				{
@@ -309,13 +336,6 @@ namespace Xamarin.Cognitive.Face.Sample
 			 });
 		}
 
-		public Task DeletePerson (string mPersonGroupId, UUID mPersonId)
-		{
-			return Task.Run (() =>
-			 {
-				 Client.DeletePerson (mPersonGroupId, mPersonId);
-			 });
-		}
 
 		public Task TrainPersonGroup (string mPersonGroupId)
 		{
