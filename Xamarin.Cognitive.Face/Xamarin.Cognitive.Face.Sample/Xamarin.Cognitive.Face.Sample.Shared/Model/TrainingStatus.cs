@@ -29,5 +29,21 @@ namespace Xamarin.Cognitive.Face.Sample.Shared
 				Status = status
 			};
 		}
+
+
+		/// <summary>
+		/// Creates a TrainingStatus object from a string representation: notstarted, running, succeeded, failed.
+		/// </summary>
+		/// <returns>TrainingStatus</returns>
+		/// <param name="status">Status.</param>
+		public static TrainingStatus FromString (string status)
+		{
+			if (Enum.TryParse (status, true, out TrainingStatusType type))
+			{
+				return FromStatus (type);
+			}
+
+			return null;
+		}
 	}
 }
