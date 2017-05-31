@@ -117,6 +117,7 @@
     <Compile Include="UI\VerificationMenuActivity.cs" />
     <Compile Include="FaceDemoApp.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
+    <Compile Include="Extensions\FaceExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
@@ -165,6 +166,7 @@
   <ItemGroup>
     <Folder Include="Resources\drawable\" />
     <Folder Include="Resources\layout\" />
+    <Folder Include="Extensions\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Cognitive-Face-Android-Xamarin\Cognitive.Face.Android\Cognitive.Face.Droid.csproj">
