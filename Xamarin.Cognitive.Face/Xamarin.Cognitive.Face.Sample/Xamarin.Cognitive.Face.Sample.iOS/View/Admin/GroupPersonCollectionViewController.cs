@@ -129,7 +129,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 					{
 						this.ShowHUD ($"Deleting {person.Name}");
 
-						await FaceClient.Shared.DeletePerson (person, Group);
+						await FaceClient.Shared.DeletePerson (Group, person);
 
 						this.ShowSimpleHUD ($"{person.Name} deleted");
 

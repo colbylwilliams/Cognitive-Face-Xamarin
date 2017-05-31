@@ -333,20 +333,20 @@ namespace Xamarin.Cognitive.Face.Sample
 		}
 
 
-		public Task DeletePerson (Person person, PersonGroup group)
+		public Task DeletePerson (PersonGroup personGroup, Person person)
 		{
 			try
 			{
 				var tcs = new TaskCompletionSource<bool> ();
 
-				Client.DeletePersonWithPersonGroupId (group.Id, person.Id, error =>
+				Client.DeletePersonWithPersonGroupId (personGroup.Id, person.Id, error =>
 				{
 					tcs.FailTaskIfErrored (error.ToException ());
 					if (tcs.IsNullFinishCanceledOrFaulted ()) return;
 
-					if (group.People.Contains (person))
+					if (personGroup.PeopleLoaded && personGroup.People.Contains (person))
 					{
-						group.People.Remove (person);
+						personGroup.People.Remove (person);
 					}
 
 					tcs.SetResult (true);
