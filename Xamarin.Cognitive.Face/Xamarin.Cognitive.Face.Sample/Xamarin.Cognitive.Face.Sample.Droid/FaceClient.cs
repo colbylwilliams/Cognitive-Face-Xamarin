@@ -157,13 +157,6 @@ namespace Xamarin.Cognitive.Face.Sample
 		}
 
 
-		class TrainingStatusErrorCode
-		{
-			public static string PersonGroupNotFound = "PersonGroupNotFound";
-			public static string PersonGroupNotTrained = "PersonGroupNotTrained";
-		}
-
-
 		/// <summary>
 		/// Gets the group training status: notstarted, running, succeeded, failed
 		/// </summary>
@@ -181,12 +174,9 @@ namespace Xamarin.Cognitive.Face.Sample
 				}
 				catch (Face.Droid.Rest.ClientException cex)
 				{
-					if (cex.Error?.Code == TrainingStatusErrorCode.PersonGroupNotTrained)
+					if (cex.Error?.Code == ErrorCodes.TrainingStatus.PersonGroupNotTrained)
 					{
-						return new TrainingStatus
-						{
-							Status = "notstarted"
-						};
+						return TrainingStatus.FromStatus (TrainingStatus.TrainingStatusType.NotStarted);
 					}
 
 					Log.Error (cex);

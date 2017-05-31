@@ -17,18 +17,6 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Extensions
 		}
 
 
-		//public static float AsFloatSafe (this NSNumber number, float defaultValue = 0)
-		//{
-		//	return number?.FloatValue ?? defaultValue;
-		//}
-
-
-		//public static bool AsBoolSafe (this NSNumber number, bool defaultValue = false)
-		//{
-		//	return number?.BoolValue ?? defaultValue;
-		//}
-
-
 		public static DateTime ToDateTime (this Java.Util.Date jDate)
 		{
 			return epoch.AddMilliseconds (jDate.Time);
@@ -71,7 +59,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Extensions
 				CreatedDateTime = status.CreatedDateTime.ToDateTime (),
 				LastActionDateTime = status.LastActionDateTime.ToDateTime (),
 				Message = status.Message,
-				//Status = status.
+				Status = (TrainingStatus.TrainingStatusType) (status.Status.Ordinal () + 1)
 			};
 		}
 
