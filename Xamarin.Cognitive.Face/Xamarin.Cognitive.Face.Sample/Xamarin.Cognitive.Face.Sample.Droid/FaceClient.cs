@@ -157,6 +157,13 @@ namespace Xamarin.Cognitive.Face.Sample
 		}
 
 
+		class TrainingStatusErrorCode
+		{
+			public static string PersonGroupNotFound = "PersonGroupNotFound";
+			public static string PersonGroupNotTrained = "PersonGroupNotTrained";
+		}
+
+
 		/// <summary>
 		/// Gets the group training status: notstarted, running, succeeded, failed
 		/// </summary>
@@ -171,6 +178,19 @@ namespace Xamarin.Cognitive.Face.Sample
 					var trainingStatus = Client.GetPersonGroupTrainingStatus (personGroupId);
 
 					return trainingStatus.ToTrainingStatus ();
+				}
+				catch (Face.Droid.Rest.ClientException cex)
+				{
+					if (cex.Error?.Code == TrainingStatusErrorCode.PersonGroupNotTrained)
+					{
+						return new TrainingStatus
+						{
+							Status = "notstarted"
+						};
+					}
+
+					Log.Error (cex);
+					throw;
 				}
 				catch (Exception ex)
 				{
@@ -263,13 +283,13 @@ namespace Xamarin.Cognitive.Face.Sample
 		}
 
 
-		public Task UpdatePerson (Person person, PersonGroup group, string personName, string userData = null)
+		public Task UpdatePerson (Person person, PersonGroup personGroup, string personName, string userData = null)
 		{
 			return Task.Run (() =>
 			{
 				try
 				{
-					Client.UpdatePerson (group.Id, UUID.FromString (person.Id), personName, userData);
+					Client.UpdatePerson (personGroup.Id, UUID.FromString (person.Id), personName, userData);
 
 					person.Name = personName;
 					person.UserData = userData;
@@ -296,6 +316,70 @@ namespace Xamarin.Cognitive.Face.Sample
 					if (personGroup.PeopleLoaded && personGroup.People.Contains (person))
 					{
 						personGroup.People.Remove (person);
+					}
+				}
+				catch (Exception ex)
+				{
+					Log.Error (ex);
+					throw;
+				}
+			});
+		}
+
+
+		public Task<Person> GetPerson (PersonGroup personGroup, string personId)
+		{
+			//if people are already loaded for this group try to find it there...
+			if (personGroup.PeopleLoaded)
+			{
+				var person = personGroup.People.FirstOrDefault (p => p.Id == personId);
+
+				if (person != null)
+				{
+					return Task.FromResult (person);
+				}
+			}
+
+			return Task.Run (() =>
+			{
+				try
+				{
+					var personUUID = UUID.FromString (personId);
+
+					var jPerson = Client.GetPerson (personGroup.Id, personUUID);
+					var person = jPerson.ToPerson ();
+
+					//add them to the group?
+					if (personGroup.PeopleLoaded)
+					{
+						personGroup.People.Add (person);
+					}
+
+					return person;
+				}
+				catch (Exception ex)
+				{
+					Log.Error (ex);
+					throw;
+				}
+			});
+		}
+
+
+		public Task DeletePersonFace (Person person, PersonGroup personGroup, Shared.Face face)
+		{
+			return Task.Run (() =>
+			{
+				try
+				{
+					var personUUID = UUID.FromString (person.Id);
+					var faceUUID = UUID.FromString (face.Id);
+
+					Client.DeletePersonFace (personGroup.Id, personUUID, faceUUID);
+
+					if (person.Faces.Contains (face))
+					{
+						person.Faces.Remove (face);
 					}
 				}
 				catch (Exception ex)
@@ -342,14 +426,6 @@ namespace Xamarin.Cognitive.Face.Sample
 			return Task.Run (() =>
 			 {
 				 Client.TrainPersonGroup (mPersonGroupId);
-			 });
-		}
-
-		public Task DeletePersonFace (string mPersonGroupId, UUID mPersonId, UUID mFaceId)
-		{
-			return Task.Run (() =>
-			 {
-				 Client.DeletePersonFace (mPersonGroupId, mPersonId, mFaceId);
 			 });
 		}
 
