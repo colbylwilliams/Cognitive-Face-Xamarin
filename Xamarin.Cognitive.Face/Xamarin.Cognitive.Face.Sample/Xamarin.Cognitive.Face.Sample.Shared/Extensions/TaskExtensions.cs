@@ -37,23 +37,5 @@ namespace Xamarin.Cognitive.Face.Sample.Shared.Extensions
 					throw;
 			}
 		}
-
-
-		public static void FailTaskIfErrored<T> (this TaskCompletionSource<T> tcs, Exception error)
-		{
-			if (error != null)
-			{
-				tcs.TrySetException (error);
-			}
-		}
-
-
-		public static void FailTaskByCondition<T> (this TaskCompletionSource<T> tcs, bool failureCondition, string error)
-		{
-			if (failureCondition)
-			{
-				tcs.TrySetException (new Exception (error));
-			}
-		}
 	}
 }

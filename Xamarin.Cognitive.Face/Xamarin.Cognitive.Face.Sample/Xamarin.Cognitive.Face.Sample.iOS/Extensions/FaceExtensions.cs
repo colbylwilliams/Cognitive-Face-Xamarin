@@ -75,7 +75,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS.Extensions
 				CreatedDateTime = status.StartTime.AsDateSafe (),
 				LastActionDateTime = status.EndTime.AsDateSafe (),
 				//Message = status.
-				Status = status.Status
+				//Status = status.Status
 			};
 		}
 

@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using UIKit;
 using Xamarin.Cognitive.Face.iOS;
-using Xamarin.Cognitive.Face.Sample.iOS;
+using Xamarin.Cognitive.Face.Sample.iOS.Domain;
 using Xamarin.Cognitive.Face.Sample.iOS.Extensions;
 using Xamarin.Cognitive.Face.Sample.Shared;
 using Xamarin.Cognitive.Face.Sample.Shared.Extensions;
@@ -28,20 +29,50 @@ namespace Xamarin.Cognitive.Face.Sample
 		}
 
 
+		void ProcessError (Foundation.NSError error)
+		{
+			if (error != null)
+			{
+				if (error.Domain != null)
+				{
+					const string errorKey = "http response is not success : ";
+					var detailsIndex = error.Domain.IndexOf (errorKey, StringComparison.Ordinal) + errorKey.Length;
+					var errorJson = error.Domain.Substring (detailsIndex);
+
+					var errorDetail = JsonConvert.DeserializeObject<ErrorDetail> (errorJson);
+
+					throw new ErrorDetailException (errorDetail.Error);
+				}
+
+				throw new Exception (error.Description);
+			}
+		}
+
+
+		void ThrowConditionalError (bool failureCondition, string error)
+		{
+			if (failureCondition)
+			{
+				throw new Exception (error);
+			}
+		}
+
+
 		#region Person Group
 
 
 		public Task<List<PersonGroup>> GetGroups (bool forceRefresh = false)
 		{
-			try
+			if (Groups.Count == 0 || forceRefresh)
 			{
-				if (Groups.Count == 0 || forceRefresh)
-				{
-					var tcs = new TaskCompletionSource<List<PersonGroup>> ();
+				var tcs = new TaskCompletionSource<List<PersonGroup>> ();
 
-					Client.ListPersonGroupsWithCompletion ((groups, error) =>
+				Client.ListPersonGroupsWithCompletion ((groups, error) =>
+				{
+					try
 					{
-						tcs.FailTaskIfErrored (error.ToException ());
+						ProcessError (error);
+
 						if (tcs.IsNullFinishCanceledOrFaulted ()) return;
 
 						Groups = new List<PersonGroup> (
@@ -49,155 +80,148 @@ namespace Xamarin.Cognitive.Face.Sample
 						);
 
 						tcs.SetResult (Groups);
-					}).Resume ();
+					}
+					catch (Exception ex)
+					{
+						Log.Error (ex);
+						tcs.TrySetException (ex);
+					}
+				}).Resume ();
 
-					return tcs.Task;
-				}
+				return tcs.Task;
+			}
 
-				return Task.FromResult (Groups);
-			}
-			catch (Exception ex)
-			{
-				Log.Error (ex);
-				throw;
-			}
+			return Task.FromResult (Groups);
 		}
 
 
 		public Task<PersonGroup> GetPersonGroup (string personGroupId)
 		{
-			try
-			{
-				var tcs = new TaskCompletionSource<PersonGroup> ();
+			var tcs = new TaskCompletionSource<PersonGroup> ();
 
-				Client.GetPersonGroupWithPersonGroupId (personGroupId, (personGroup, error) =>
+			Client.GetPersonGroupWithPersonGroupId (personGroupId, (personGroup, error) =>
+			{
+				try
 				{
-					tcs.FailTaskIfErrored (error.ToException ());
-					if (tcs.IsNullFinishCanceledOrFaulted ()) return;
+					ProcessError (error);
 
 					tcs.SetResult (personGroup.ToPersonGroup ());
-				}).Resume ();
+				}
+				catch (Exception ex)
+				{
+					Log.Error (ex);
+					tcs.TrySetException (ex);
+				}
+			}).Resume ();
 
-				return tcs.Task;
-			}
-			catch (Exception ex)
-			{
-				Log.Error (ex);
-				throw;
-			}
+			return tcs.Task;
 		}
 
 
 		public Task<PersonGroup> CreatePersonGroup (string groupName, string userData = null)
 		{
-			try
+			var tcs = new TaskCompletionSource<PersonGroup> ();
+			var personGroupId = Guid.NewGuid ().ToString ();
+
+			Client.CreatePersonGroupWithId (personGroupId, groupName, userData, error =>
 			{
-				var tcs = new TaskCompletionSource<PersonGroup> ();
-
-				var personGroupId = Guid.NewGuid ().ToString ();
-
-				Client.CreatePersonGroupWithId (personGroupId, groupName, userData, error =>
+				try
 				{
-					tcs.FailTaskIfErrored (error.ToException ());
-					if (tcs.IsNullFinishCanceledOrFaulted ()) return;
+					ProcessError (error);
 
-					var group = new PersonGroup
+					var personGroup = new PersonGroup
 					{
 						Name = groupName,
 						Id = personGroupId,
 						UserData = userData
 					};
 
-					Groups.Add (group);
+					Groups.Add (personGroup);
 
-					tcs.SetResult (group);
-				}).Resume ();
+					tcs.SetResult (personGroup);
+				}
+				catch (Exception ex)
+				{
+					Log.Error (ex);
+					tcs.TrySetException (ex);
+				}
+			}).Resume ();
 
-				return tcs.Task;
-			}
-			catch (Exception ex)
-			{
-				Log.Error (ex);
-				throw;
-			}
+			return tcs.Task;
 		}
 
 
 		public Task UpdatePersonGroup (PersonGroup personGroup, string groupName, string userData = null)
 		{
-			try
-			{
-				var tcs = new TaskCompletionSource<bool> ();
+			var tcs = new TaskCompletionSource<bool> ();
 
-				Client.UpdatePersonGroupWithPersonGroupId (personGroup.Id, groupName, userData, error =>
+			Client.UpdatePersonGroupWithPersonGroupId (personGroup.Id, groupName, userData, error =>
+			{
+				try
 				{
-					tcs.FailTaskIfErrored (error.ToException ());
-					if (tcs.IsNullFinishCanceledOrFaulted ()) return;
+					ProcessError (error);
 
 					personGroup.Name = groupName;
 					personGroup.UserData = userData;
 
 					tcs.SetResult (true);
-				}).Resume ();
+				}
+				catch (Exception ex)
+				{
+					Log.Error (ex);
+					tcs.TrySetException (ex);
+				}
+			}).Resume ();
 
-				return tcs.Task;
-			}
-			catch (Exception ex)
-			{
-				Log.Error (ex);
-				throw;
-			}
+			return tcs.Task;
 		}
 
 
 		public Task DeletePersonGroup (string personGroupId)
 		{
-			try
-			{
-				var tcs = new TaskCompletionSource<bool> ();
+			var tcs = new TaskCompletionSource<bool> ();
 
-				Client.DeletePersonGroupWithPersonGroupId (personGroupId, error =>
+			Client.DeletePersonGroupWithPersonGroupId (personGroupId, error =>
+			{
+				try
 				{
-					tcs.FailTaskIfErrored (error.ToException ());
-					if (tcs.IsNullFinishCanceledOrFaulted ()) return;
+					ProcessError (error);
 
 					RemoveGroup (personGroupId);
 
 					tcs.SetResult (true);
-				}).Resume ();
+				}
+				catch (Exception ex)
+				{
+					Log.Error (ex);
+					tcs.TrySetException (ex);
+				}
+			}).Resume ();
 
-				return tcs.Task;
-			}
-			catch (Exception ex)
-			{
-				Log.Error (ex);
-				throw;
-			}
+			return tcs.Task;
 		}
 
 
 		public Task TrainGroup (PersonGroup personGroup)
 		{
-			try
-			{
-				var tcs = new TaskCompletionSource<bool> ();
+			var tcs = new TaskCompletionSource<bool> ();
 
-				Client.TrainPersonGroupWithPersonGroupId (personGroup.Id, error =>
+			Client.TrainPersonGroupWithPersonGroupId (personGroup.Id, error =>
+			{
+				try
 				{
-					tcs.FailTaskIfErrored (error.ToException ());
-					if (tcs.IsNullFinishCanceledOrFaulted ()) return;
+					ProcessError (error);
 
 					tcs.SetResult (true);
+				}
+				catch (Exception ex)
+				{
+					Log.Error (ex);
+					tcs.TrySetException (ex);
+				}
+			}).Resume ();
 
-				}).Resume ();
-
-				return tcs.Task;
-			}
-			catch (Exception ex)
-			{
-				Log.Error (ex);
-				throw;
-			}
+			return tcs.Task;
 		}
 
 
@@ -208,25 +232,32 @@ namespace Xamarin.Cognitive.Face.Sample
 		/// <param name="personGroupId">Person group Id.</param>
 		public Task<TrainingStatus> GetGroupTrainingStatus (string personGroupId)
 		{
-			try
-			{
-				var tcs = new TaskCompletionSource<TrainingStatus> ();
+			var tcs = new TaskCompletionSource<TrainingStatus> ();
 
-				Client.GetPersonGroupTrainingStatusWithPersonGroupId (personGroupId, (trainingStatus, error) =>
+			Client.GetPersonGroupTrainingStatusWithPersonGroupId (personGroupId, (trainingStatus, error) =>
+			{
+				try
 				{
-					tcs.FailTaskIfErrored (error.ToException ());
-					if (tcs.IsNullFinishCanceledOrFaulted ()) return;
+					ProcessError (error);
 
 					tcs.SetResult (trainingStatus.ToTrainingStatus ());
-				}).Resume ();
+				}
+				catch (ErrorDetailException ede)
+				{
+					if (ede.ErrorDetail.Code == ErrorCodes.TrainingStatus.PersonGroupNotTrained)
+					{
+						tcs.SetResult (TrainingStatus.FromStatus (TrainingStatus.TrainingStatusType.NotStarted));
+					}
+					else tcs.TrySetException (ede);
+				}
+				catch (Exception ex)
+				{
+					Log.Error (ex);
+					tcs.TrySetException (ex);
+				}
+			}).Resume ();
 
-				return tcs.Task;
-			}
-			catch (Exception ex)
-			{
-				Log.Error (ex);
-				throw;
-			}
+			return tcs.Task;
 		}
 
 
@@ -238,51 +269,56 @@ namespace Xamarin.Cognitive.Face.Sample
 
 		public Task<List<Person>> GetPeopleForGroup (PersonGroup personGroup, bool forceRefresh = false)
 		{
-			try
+			if (personGroup.PeopleLoaded && !forceRefresh)
 			{
-				if (personGroup.People?.Count > 0 && !forceRefresh)
-				{
-					return Task.FromResult (personGroup.People);
-				}
+				return Task.FromResult (personGroup.People);
+			}
 
-				var tcs = new TaskCompletionSource<List<Person>> ();
+			var tcs = new TaskCompletionSource<List<Person>> ();
 
-				Client.ListPersonsWithPersonGroupId (personGroup.Id, (mpoPeople, error) =>
+			Client.ListPersonsWithPersonGroupId (personGroup.Id, (mpoPeople, error) =>
+			{
+				try
 				{
-					tcs.FailTaskIfErrored (error.ToException ());
-					if (tcs.IsNullFinishCanceledOrFaulted ()) return;
+					ProcessError (error);
 
 					var people = new List<Person> (
 						mpoPeople.Select (p => p.ToPerson ())
 					);
 
-					personGroup.People.Clear ();
-					personGroup.People.AddRange (people);
+					if (personGroup.PeopleLoaded)
+					{
+						personGroup.People.Clear ();
+						personGroup.People.AddRange (people);
+					}
+					else
+					{
+						personGroup.People = people;
+					}
 
 					tcs.SetResult (people);
-				}).Resume ();
+				}
+				catch (Exception ex)
+				{
+					Log.Error (ex);
+					tcs.TrySetException (ex);
+				}
+			}).Resume ();
 
-				return tcs.Task;
-			}
-			catch (Exception ex)
-			{
-				Log.Error (ex);
-				throw;
-			}
+			return tcs.Task;
 		}
 
 
-		public Task<Person> CreatePerson (string personName, PersonGroup group, string userData = null)
+		public Task<Person> CreatePerson (string personName, PersonGroup personGroup, string userData = null)
 		{
-			try
-			{
-				var tcs = new TaskCompletionSource<Person> ();
+			var tcs = new TaskCompletionSource<Person> ();
 
-				Client.CreatePersonWithPersonGroupId (group.Id, personName, userData, (result, error) =>
+			Client.CreatePersonWithPersonGroupId (personGroup.Id, personName, userData, (result, error) =>
+			{
+				try
 				{
-					tcs.FailTaskIfErrored (error.ToException ());
-					tcs.FailTaskByCondition (string.IsNullOrEmpty (result.PersonId), "CreatePersonResult returned invalid person Id");
-					if (tcs.IsNullFinishCanceledOrFaulted ()) return;
+					ProcessError (error);
+					ThrowConditionalError (string.IsNullOrEmpty (result.PersonId), "CreatePersonResult returned invalid person Id");
 
 					var person = new Person
 					{
@@ -291,58 +327,56 @@ namespace Xamarin.Cognitive.Face.Sample
 						UserData = userData
 					};
 
-					group.People.Add (person);
+					personGroup.People.Add (person);
 
 					tcs.SetResult (person);
-				}).Resume ();
+				}
+				catch (Exception ex)
+				{
+					Log.Error (ex);
+					tcs.TrySetException (ex);
+				}
+			}).Resume ();
 
-				return tcs.Task;
-			}
-			catch (Exception ex)
-			{
-				Log.Error (ex);
-				throw;
-			}
+			return tcs.Task;
 		}
 
 
-		public Task UpdatePerson (Person person, PersonGroup group, string personName, string userData = null)
+		public Task UpdatePerson (Person person, PersonGroup personGroup, string personName, string userData = null)
 		{
-			try
-			{
-				var tcs = new TaskCompletionSource<bool> ();
+			var tcs = new TaskCompletionSource<bool> ();
 
-				Client.UpdatePersonWithPersonGroupId (group.Id, person.Id, personName, userData, error =>
+			Client.UpdatePersonWithPersonGroupId (personGroup.Id, person.Id, personName, userData, error =>
+			{
+				try
 				{
-					tcs.FailTaskIfErrored (error.ToException ());
-					if (tcs.IsNullFinishCanceledOrFaulted ()) return;
+					ProcessError (error);
 
 					person.Name = personName;
 					person.UserData = userData;
 
 					tcs.SetResult (true);
-				}).Resume ();
+				}
+				catch (Exception ex)
+				{
+					Log.Error (ex);
+					tcs.TrySetException (ex);
+				}
+			}).Resume ();
 
-				return tcs.Task;
-			}
-			catch (Exception ex)
-			{
-				Log.Error (ex);
-				throw;
-			}
+			return tcs.Task;
 		}
 
 
 		public Task DeletePerson (PersonGroup personGroup, Person person)
 		{
-			try
-			{
-				var tcs = new TaskCompletionSource<bool> ();
+			var tcs = new TaskCompletionSource<bool> ();
 
-				Client.DeletePersonWithPersonGroupId (personGroup.Id, person.Id, error =>
+			Client.DeletePersonWithPersonGroupId (personGroup.Id, person.Id, error =>
+			{
+				try
 				{
-					tcs.FailTaskIfErrored (error.ToException ());
-					if (tcs.IsNullFinishCanceledOrFaulted ()) return;
+					ProcessError (error);
 
 					if (personGroup.PeopleLoaded && personGroup.People.Contains (person))
 					{
@@ -350,59 +384,61 @@ namespace Xamarin.Cognitive.Face.Sample
 					}
 
 					tcs.SetResult (true);
-				}).Resume ();
+				}
+				catch (Exception ex)
+				{
+					Log.Error (ex);
+					tcs.TrySetException (ex);
+				}
+			}).Resume ();
 
-				return tcs.Task;
-			}
-			catch (Exception ex)
-			{
-				Log.Error (ex);
-				throw;
-			}
+			return tcs.Task;
 		}
 
 
-		public Task<Person> GetPerson (PersonGroup group, string personId)
+		public Task<Person> GetPerson (PersonGroup personGroup, string personId)
 		{
-			try
+			//if people are already loaded for this group try to find it there...
+			if (personGroup.PeopleLoaded)
 			{
-				//if people are already loaded for this group try to find it there...
-				if (group.People?.Count > 0)
-				{
-					var person = group.People.FirstOrDefault (p => p.Id == personId);
+				var person = personGroup.People.FirstOrDefault (p => p.Id == personId);
 
-					if (person != null)
-					{
-						return Task.FromResult (person);
-					}
+				if (person != null)
+				{
+					return Task.FromResult (person);
 				}
+			}
 
-				var tcs = new TaskCompletionSource<Person> ();
+			var tcs = new TaskCompletionSource<Person> ();
 
-				Client.GetPersonWithPersonGroupId (group.Id, personId, (mpoPerson, error) =>
+			Client.GetPersonWithPersonGroupId (personGroup.Id, personId, (mpoPerson, error) =>
+			{
+				try
 				{
-					tcs.FailTaskIfErrored (error.ToException ());
-					if (tcs.IsNullFinishCanceledOrFaulted ()) return;
+					ProcessError (error);
 
 					var person = mpoPerson.ToPerson ();
 
 					//add them to the group?
-					group.People.Add (person);
+					if (personGroup.PeopleLoaded)
+					{
+						personGroup.People.Add (person);
+					}
 
 					tcs.SetResult (person);
-				}).Resume ();
+				}
+				catch (Exception ex)
+				{
+					Log.Error (ex);
+					tcs.TrySetException (ex);
+				}
+			}).Resume ();
 
-				return tcs.Task;
-			}
-			catch (Exception ex)
-			{
-				Log.Error (ex);
-				throw;
-			}
+			return tcs.Task;
 		}
 
 
-		public Task AddFaceForPerson (Person person, PersonGroup group, Shared.Face face, UIImage photo, string userData = null, float quality = .8f)
+		public Task AddFaceForPerson (Person person, PersonGroup personGroup, Shared.Face face, UIImage photo, string userData = null, float quality = .8f)
 		{
 			var tcs = new TaskCompletionSource<bool> ();
 
@@ -412,20 +448,27 @@ namespace Xamarin.Cognitive.Face.Sample
 
 				using (var jpgData = photo.AsJPEG (quality))
 				{
-					Client.AddPersonFaceWithPersonGroupId (group.Id, person.Id, jpgData, userData, faceRect, (result, error) =>
+					Client.AddPersonFaceWithPersonGroupId (personGroup.Id, person.Id, jpgData, userData, faceRect, (result, error) =>
 					{
-						tcs.FailTaskIfErrored (error.ToException ());
-						tcs.FailTaskByCondition (string.IsNullOrEmpty (result?.PersistedFaceId), "AddPersistedFaceResult returned invalid face Id");
-						if (tcs.IsNullFinishCanceledOrFaulted ()) return;
+						try
+						{
+							ProcessError (error);
+							ThrowConditionalError (string.IsNullOrEmpty (result?.PersistedFaceId), "AddPersistedFaceResult returned invalid face Id");
 
-						face.Id = result.PersistedFaceId;
-						face.UpdatePhotoPath ();
+							face.Id = result.PersistedFaceId;
+							face.UpdatePhotoPath ();
 
-						person.Faces.Add (face);
+							person.Faces.Add (face);
 
-						face.SavePhotoFromSource (photo);
+							face.SavePhotoFromSource (photo);
 
-						tcs.SetResult (true);
+							tcs.SetResult (true);
+						}
+						catch (Exception ex)
+						{
+							Log.Error (ex);
+							tcs.TrySetException (ex);
+						}
 					}).Resume ();
 				}
 
@@ -439,16 +482,15 @@ namespace Xamarin.Cognitive.Face.Sample
 		}
 
 
-		public Task DeleteFace (Person person, PersonGroup group, Shared.Face face)
+		public Task DeletePersonFace (Person person, PersonGroup personGroup, Shared.Face face)
 		{
-			try
-			{
-				var tcs = new TaskCompletionSource<bool> ();
+			var tcs = new TaskCompletionSource<bool> ();
 
-				Client.DeletePersonFaceWithPersonGroupId (group.Id, person.Id, face.Id, error =>
+			Client.DeletePersonFaceWithPersonGroupId (personGroup.Id, person.Id, face.Id, error =>
+			{
+				try
 				{
-					tcs.FailTaskIfErrored (error.ToException ());
-					if (tcs.IsNullFinishCanceledOrFaulted ()) return;
+					ProcessError (error);
 
 					if (person.Faces.Contains (face))
 					{
@@ -456,19 +498,19 @@ namespace Xamarin.Cognitive.Face.Sample
 					}
 
 					tcs.SetResult (true);
-				}).Resume ();
+				}
+				catch (Exception ex)
+				{
+					Log.Error (ex);
+					tcs.TrySetException (ex);
+				}
+			}).Resume ();
 
-				return tcs.Task;
-			}
-			catch (Exception ex)
-			{
-				Log.Error (ex);
-				throw;
-			}
+			return tcs.Task;
 		}
 
 
-		public async Task<List<Shared.Face>> GetFacesForPerson (Person person, PersonGroup group)
+		public async Task<List<Shared.Face>> GetFacesForPerson (Person person, PersonGroup personGroup)
 		{
 			try
 			{
@@ -478,7 +520,7 @@ namespace Xamarin.Cognitive.Face.Sample
 				{
 					foreach (var faceId in person.FaceIds)
 					{
-						var face = await GetFaceForPerson (person, group, faceId);
+						var face = await GetFaceForPerson (person, personGroup, faceId);
 
 						person.Faces.Add (face);
 					}
@@ -496,29 +538,28 @@ namespace Xamarin.Cognitive.Face.Sample
 		}
 
 
-		public Task<Shared.Face> GetFaceForPerson (Person person, PersonGroup group, string persistedFaceId)
+		public Task<Shared.Face> GetFaceForPerson (Person person, PersonGroup personGroup, string persistedFaceId)
 		{
-			try
-			{
-				var tcs = new TaskCompletionSource<Shared.Face> ();
+			var tcs = new TaskCompletionSource<Shared.Face> ();
 
-				Client.GetPersonFaceWithPersonGroupId (group.Id, person.Id, persistedFaceId, (mpoFace, error) =>
+			Client.GetPersonFaceWithPersonGroupId (personGroup.Id, person.Id, persistedFaceId, (mpoFace, error) =>
+			{
+				try
 				{
-					tcs.FailTaskIfErrored (error.ToException ());
-					if (tcs.IsNullFinishCanceledOrFaulted ()) return;
+					ProcessError (error);
 
 					var face = mpoFace.ToFace ();
 
 					tcs.SetResult (face);
-				}).Resume ();
+				}
+				catch (Exception ex)
+				{
+					Log.Error (ex);
+					tcs.TrySetException (ex);
+				}
+			}).Resume ();
 
-				return tcs.Task;
-			}
-			catch (Exception ex)
-			{
-				Log.Error (ex);
-				throw;
-			}
+			return tcs.Task;
 		}
 
 
@@ -545,18 +586,25 @@ namespace Xamarin.Cognitive.Face.Sample
 				{
 					Client.DetectWithData (jpgData, true, true, attributes, (detectedFaces, error) =>
 					{
-						tcs.FailTaskIfErrored (error.ToException ());
-						if (tcs.IsNullFinishCanceledOrFaulted ()) return;
-
-						foreach (var detectedFace in detectedFaces)
+						try
 						{
-							var face = detectedFace.ToFace ();
-							faces.Add (face);
+							ProcessError (error);
 
-							face.SavePhotoFromSource (photo);
+							foreach (var detectedFace in detectedFaces)
+							{
+								var face = detectedFace.ToFace ();
+								faces.Add (face);
+
+								face.SavePhotoFromSource (photo);
+							}
+
+							tcs.SetResult (faces);
 						}
-
-						tcs.SetResult (faces);
+						catch (Exception ex)
+						{
+							Log.Error (ex);
+							tcs.TrySetException (ex);
+						}
 					}).Resume ();
 				}
 
@@ -589,17 +637,16 @@ namespace Xamarin.Cognitive.Face.Sample
 
 		Task<List<IdentificationResult>> IdentifyInternal (PersonGroup group, Shared.Face [] detectedFaces, int maxNumberOfCandidates = 1)
 		{
-			try
+			var results = new List<IdentificationResult> ();
+			var tcs = new TaskCompletionSource<List<IdentificationResult>> ();
+
+			var detectedFaceIds = detectedFaces.Select (f => f.Id).ToArray ();
+
+			Client.IdentifyWithPersonGroupId (group.Id, detectedFaceIds, maxNumberOfCandidates, async (identifyResults, error) =>
 			{
-				var results = new List<IdentificationResult> ();
-				var tcs = new TaskCompletionSource<List<IdentificationResult>> ();
-
-				var detectedFaceIds = detectedFaces.Select (f => f.Id).ToArray ();
-
-				Client.IdentifyWithPersonGroupId (group.Id, detectedFaceIds, maxNumberOfCandidates, async (identifyResults, error) =>
+				try
 				{
-					tcs.FailTaskIfErrored (error.ToException ());
-					if (tcs.IsNullFinishCanceledOrFaulted ()) return;
+					ProcessError (error);
 
 					foreach (MPOIdentifyResult result in identifyResults)
 					{
@@ -621,28 +668,27 @@ namespace Xamarin.Cognitive.Face.Sample
 					}
 
 					tcs.SetResult (results);
-				}).Resume ();
+				}
+				catch (Exception ex)
+				{
+					Log.Error (ex);
+					tcs.TrySetException (ex);
+				}
+			}).Resume ();
 
-				return tcs.Task;
-			}
-			catch (Exception ex)
-			{
-				Log.Error (ex);
-				throw;
-			}
+			return tcs.Task;
 		}
 
 
 		public Task<VerifyResult> Verify (Shared.Face face1, Shared.Face face2)
 		{
-			try
-			{
-				var tcs = new TaskCompletionSource<VerifyResult> ();
+			var tcs = new TaskCompletionSource<VerifyResult> ();
 
-				Client.VerifyWithFirstFaceId (face1.Id, face2.Id, (verifyResult, error) =>
+			Client.VerifyWithFirstFaceId (face1.Id, face2.Id, (verifyResult, error) =>
+			{
+				try
 				{
-					tcs.FailTaskIfErrored (error.ToException ());
-					if (tcs.IsNullFinishCanceledOrFaulted ()) return;
+					ProcessError (error);
 
 					var result = new VerifyResult
 					{
@@ -651,28 +697,27 @@ namespace Xamarin.Cognitive.Face.Sample
 					};
 
 					tcs.SetResult (result);
-				}).Resume ();
+				}
+				catch (Exception ex)
+				{
+					Log.Error (ex);
+					tcs.TrySetException (ex);
+				}
+			}).Resume ();
 
-				return tcs.Task;
-			}
-			catch (Exception ex)
-			{
-				Log.Error (ex);
-				throw;
-			}
+			return tcs.Task;
 		}
 
 
 		public Task<VerifyResult> Verify (Shared.Face face, Person person, PersonGroup personGroup)
 		{
-			try
-			{
-				var tcs = new TaskCompletionSource<VerifyResult> ();
+			var tcs = new TaskCompletionSource<VerifyResult> ();
 
-				Client.VerifyWithFaceId (face.Id, person.Id, personGroup.Id, (verifyResult, error) =>
+			Client.VerifyWithFaceId (face.Id, person.Id, personGroup.Id, (verifyResult, error) =>
+			{
+				try
 				{
-					tcs.FailTaskIfErrored (error.ToException ());
-					if (tcs.IsNullFinishCanceledOrFaulted ()) return;
+					ProcessError (error);
 
 					var result = new VerifyResult
 					{
@@ -681,30 +726,29 @@ namespace Xamarin.Cognitive.Face.Sample
 					};
 
 					tcs.SetResult (result);
-				}).Resume ();
+				}
+				catch (Exception ex)
+				{
+					Log.Error (ex);
+					tcs.TrySetException (ex);
+				}
+			}).Resume ();
 
-				return tcs.Task;
-			}
-			catch (Exception ex)
-			{
-				Log.Error (ex);
-				throw;
-			}
+			return tcs.Task;
 		}
 
 
 		public Task<List<SimilarFaceResult>> FindSimilar (Shared.Face targetFace, List<Shared.Face> faceList)
 		{
-			try
-			{
-				var tcs = new TaskCompletionSource<List<SimilarFaceResult>> ();
-				var faceIds = faceList.Select (f => f.Id).ToArray ();
-				var results = new List<SimilarFaceResult> ();
+			var tcs = new TaskCompletionSource<List<SimilarFaceResult>> ();
+			var faceIds = faceList.Select (f => f.Id).ToArray ();
+			var results = new List<SimilarFaceResult> ();
 
-				Client.FindSimilarWithFaceId (targetFace.Id, faceIds, (similarFaces, error) =>
+			Client.FindSimilarWithFaceId (targetFace.Id, faceIds, (similarFaces, error) =>
+			{
+				try
 				{
-					tcs.FailTaskIfErrored (error.ToException ());
-					if (tcs.IsNullFinishCanceledOrFaulted ()) return;
+					ProcessError (error);
 
 					foreach (var similarFace in similarFaces)
 					{
@@ -719,30 +763,29 @@ namespace Xamarin.Cognitive.Face.Sample
 					}
 
 					tcs.SetResult (results);
-				}).Resume ();
+				}
+				catch (Exception ex)
+				{
+					Log.Error (ex);
+					tcs.TrySetException (ex);
+				}
+			}).Resume ();
 
-				return tcs.Task;
-			}
-			catch (Exception ex)
-			{
-				Log.Error (ex);
-				throw;
-			}
+			return tcs.Task;
 		}
 
 
 		public Task<List<FaceGroup>> GroupFaces (List<Shared.Face> targetFaces)
 		{
-			try
-			{
-				var tcs = new TaskCompletionSource<List<FaceGroup>> ();
-				var faceIds = targetFaces.Select (f => f.Id).ToArray ();
-				var results = new List<FaceGroup> ();
+			var tcs = new TaskCompletionSource<List<FaceGroup>> ();
+			var faceIds = targetFaces.Select (f => f.Id).ToArray ();
+			var results = new List<FaceGroup> ();
 
-				Client.GroupWithFaceIds (faceIds, (groupResult, error) =>
+			Client.GroupWithFaceIds (faceIds, (groupResult, error) =>
+			{
+				try
 				{
-					tcs.FailTaskIfErrored (error.ToException ());
-					if (tcs.IsNullFinishCanceledOrFaulted ()) return;
+					ProcessError (error);
 
 					for (var i = 0; i < groupResult.Groups.Count; i++)
 					{
@@ -765,15 +808,15 @@ namespace Xamarin.Cognitive.Face.Sample
 					}
 
 					tcs.SetResult (results);
-				}).Resume ();
+				}
+				catch (Exception ex)
+				{
+					Log.Error (ex);
+					tcs.TrySetException (ex);
+				}
+			}).Resume ();
 
-				return tcs.Task;
-			}
-			catch (Exception ex)
-			{
-				Log.Error (ex);
-				throw;
-			}
+			return tcs.Task;
 		}
 
 

@@ -152,8 +152,8 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 
 			switch (status.Status)
 			{
-				case "notstarted":
-				case "failed":
+				case TrainingStatus.TrainingStatusType.NotStarted:
+				case TrainingStatus.TrainingStatusType.Failed:
 					var result = await this.ShowTwoOptionAlert ("Training Status", "This group needs to be trained.  Train now?");
 
 					if (result)

@@ -58,17 +58,6 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 		}
 
 
-		public static Exception ToException (this NSError error)
-		{
-			if (error != null)
-			{
-				return new Exception (error.Description);
-			}
-
-			return null;
-		}
-
-
 		public async static Task<UIImage> ShowImageSelectionDialog (this UIViewController vc)
 		{
 			var result = await vc.ShowActionSheet ("Select Image", "How would you like to choose an image?", "Select from album", "Take a photo");

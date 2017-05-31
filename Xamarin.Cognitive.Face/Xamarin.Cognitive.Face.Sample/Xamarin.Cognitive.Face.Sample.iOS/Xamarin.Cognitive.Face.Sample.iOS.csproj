@@ -87,6 +87,12 @@
     <Reference Include="MBProgressHUD">
       <HintPath>..\..\packages\mbprogresshud.0.9.2.0\lib\Xamarin.iOS\MBProgressHUD.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\packages\Newtonsoft.Json.9.0.1\lib\portable-net45+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Contents.json" />
@@ -104,6 +110,7 @@
     <Folder Include="View\Identification\" />
     <Folder Include="View\Verification\" />
     <Folder Include="View\Grouping\" />
+    <Folder Include="Domain\" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="LaunchScreen.storyboard" />
@@ -225,6 +232,8 @@
     <Compile Include="View\Verification\VerificationViewController.designer.cs">
       <DependentUpon>VerificationViewController.cs</DependentUpon>
     </Compile>
+    <Compile Include="Domain\Error.cs" />
+    <Compile Include="Domain\ErrorDetailException.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Cognitive-Face-iOS-Xamarin\Cognitive.Face.iOS\Xamarin.Cognitive.Face.iOS.csproj">
