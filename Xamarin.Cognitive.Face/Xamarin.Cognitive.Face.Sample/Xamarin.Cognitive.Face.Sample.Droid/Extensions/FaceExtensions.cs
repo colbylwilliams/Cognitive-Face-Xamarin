@@ -46,6 +46,12 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Extensions
 		}
 
 
+		public static string GetFormattedGroupName (this PersonGroup personGroup)
+		{
+			return string.Format ("{0} (Person count: {1})", personGroup.Name, personGroup.People?.Count);
+		}
+
+
 		public static Person ToPerson (this Face.Droid.Contract.Person person)
 		{
 			return new Person
