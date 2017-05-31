@@ -36,5 +36,15 @@ namespace Xamarin.Cognitive.Face.Sample
 		{
 			return GetGroupTrainingStatus (personGroup.Id);
 		}
+
+
+		public static class ErrorCodes
+		{
+			public static class TrainingStatus
+			{
+				public const string PersonGroupNotFound = "PersonGroupNotFound";
+				public const string PersonGroupNotTrained = "PersonGroupNotTrained";
+			}
+		}
 	}
 }
