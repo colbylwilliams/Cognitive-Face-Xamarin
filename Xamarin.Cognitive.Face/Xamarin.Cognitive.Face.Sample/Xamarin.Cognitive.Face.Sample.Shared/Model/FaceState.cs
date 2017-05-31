@@ -1,6 +1,4 @@
-﻿using Xamarin.Cognitive.Face.Sample.Shared;
-
-namespace Xamarin.Cognitive.Face.Sample.iOS
+﻿namespace Xamarin.Cognitive.Face.Sample.Shared
 {
 	public class FaceState
 	{

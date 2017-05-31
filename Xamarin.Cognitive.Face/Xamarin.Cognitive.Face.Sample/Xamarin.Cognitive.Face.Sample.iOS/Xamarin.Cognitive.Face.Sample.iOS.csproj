@@ -118,7 +118,6 @@
     <Compile Include="Main.cs" />
     <Compile Include="AppDelegate.cs" />
     <Compile Include="Extensions\FaceExtensions.cs" />
-    <Compile Include="FaceState.cs" />
     <Compile Include="FaceClient.cs" />
     <Compile Include="Extensions\UIExtensions.cs" />
     <Compile Include="View\FaceNavigationController.cs" />
