@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Java.Util;
 using Xamarin.Cognitive.Face.Droid;
+using Xamarin.Cognitive.Face.Sample.Droid.Extensions;
 using Xamarin.Cognitive.Face.Sample.Shared;
 
 namespace Xamarin.Cognitive.Face.Sample
@@ -17,96 +18,166 @@ namespace Xamarin.Cognitive.Face.Sample
 		FaceClient () { }
 
 
-		#region Groups
+		#region Person Group
 
 
-		public Task<List<PersonGroup>> GetGroups (bool forceRefresh = false)
+		public Task<List<PersonGroup>> GetPersonGroups (bool forceRefresh = false)
 		{
-			try
+			return Task.Run (() =>
 			{
-				if (Groups.Count == 0 || forceRefresh)
+				try
 				{
-					var groups = Client.ListPersonGroups ();
+					if (Groups.Count == 0 || forceRefresh)
+					{
+						var groups = Client.ListPersonGroups ();
 
-					Groups = new List<PersonGroup> (
-						groups.Select (g => new PersonGroup
-						{
-							Id = g.PersonGroupId,
-							Name = g.Name,
-							UserData = g.UserData
-						})
-					);
+						Groups = new List<PersonGroup> (
+							groups.Select (g => new PersonGroup
+							{
+								Id = g.PersonGroupId,
+								Name = g.Name,
+								UserData = g.UserData
+							})
+						);
+					}
+
+					return Groups;
 				}
+				catch (Exception ex)
+				{
+					Log.Error (ex);
+					throw;
+				}
+			});
+		}
 
-				return Task.FromResult (Groups);
-			}
-			catch (Exception ex)
+
+		public Task<PersonGroup> GetPersonGroup (string personGroupId)
+		{
+			return Task.Run (() =>
 			{
-				Log.Error (ex.Message);
-				throw;
-			}
+				try
+				{
+					var personGroup = Client.GetPersonGroup (personGroupId);
+
+					return personGroup.ToPersonGroup ();
+				}
+				catch (Exception ex)
+				{
+					Log.Error (ex);
+					throw;
+				}
+			});
 		}
 
 
 		public Task<PersonGroup> CreatePersonGroup (string groupName, string userData = null)
 		{
-			try
+			return Task.Run (() =>
 			{
-				var personGroupId = Guid.NewGuid ().ToString ();
-
-				Client.CreatePersonGroup (personGroupId, groupName, userData);
-
-				var group = new PersonGroup
+				try
 				{
-					Name = groupName,
-					Id = personGroupId,
-					UserData = userData
-				};
+					var personGroupId = Guid.NewGuid ().ToString ();
 
-				Groups.Add (group);
+					Client.CreatePersonGroup (personGroupId, groupName, userData);
 
-				return Task.FromResult (group);
-			}
-			catch (Exception ex)
-			{
-				Log.Error (ex.Message);
-				throw;
-			}
+					var personGroup = new PersonGroup
+					{
+						Name = groupName,
+						Id = personGroupId,
+						UserData = userData
+					};
+
+					Groups.Add (personGroup);
+
+					return personGroup;
+				}
+				catch (Exception ex)
+				{
+					Log.Error (ex);
+					throw;
+				}
+			});
 		}
 
 
 		public Task UpdatePersonGroup (PersonGroup personGroup, string groupName, string userData = null)
 		{
-			try
+			return Task.Run (() =>
 			{
-				Client.UpdatePersonGroup (personGroup.Id, groupName, userData);
+				try
+				{
+					Client.UpdatePersonGroup (personGroup.Id, groupName, userData);
 
-				personGroup.Name = groupName;
-				personGroup.UserData = userData;
-
-				return Task.FromResult (true);
-			}
-			catch (Exception ex)
-			{
-				Log.Error (ex.Message);
-				throw;
-			}
+					personGroup.Name = groupName;
+					personGroup.UserData = userData;
+				}
+				catch (Exception ex)
+				{
+					Log.Error (ex);
+					throw;
+				}
+			});
 		}
 
 
-		public Task TrainGroup (PersonGroup personGroup)
+		public Task DeletePersonGroup (string personGroupId)
 		{
-			try
+			return Task.Run (() =>
 			{
-				Client.TrainPersonGroup (personGroup.Id);
+				try
+				{
+					Client.DeletePersonGroup (personGroupId);
 
-				return Task.FromResult (true);
-			}
-			catch (Exception ex)
+					RemoveGroup (personGroupId);
+				}
+				catch (Exception ex)
+				{
+					Log.Error (ex);
+					throw;
+				}
+			});
+		}
+
+
+		public Task TrainPersonGroup (PersonGroup personGroup)
+		{
+			return Task.Run (() =>
 			{
-				Log.Error (ex.Message);
-				throw;
-			}
+				try
+				{
+					Client.TrainPersonGroup (personGroup.Id);
+				}
+				catch (Exception ex)
+				{
+					Log.Error (ex);
+					throw;
+				}
+			});
+		}
+
+
+		/// <summary>
+		/// Gets the group training status: notstarted, running, succeeded, failed
+		/// </summary>
+		/// <returns>The group training status.</returns>
+		/// <param name="personGroupId">Person group Id.</param>
+		public Task<TrainingStatus> GetGroupTrainingStatus (string personGroupId)
+		{
+			return Task.Run (() =>
+			{
+				try
+				{
+					var trainingStatus = Client.GetPersonGroupTrainingStatus (personGroupId);
+
+					return trainingStatus.ToTrainingStatus ();
+				}
+				catch (Exception ex)
+				{
+					Log.Error (ex);
+					throw;
+				}
+			});
 		}
 
 
@@ -116,54 +187,89 @@ namespace Xamarin.Cognitive.Face.Sample
 		#region Person
 
 
-		public Task<Person> CreatePerson (string personName, PersonGroup group, string userData = null)
+		public Task<List<Person>> GetPeopleForGroup (PersonGroup personGroup, bool forceRefresh = false)
 		{
-			try
+			if (personGroup.People?.Count > 0 && !forceRefresh)
 			{
-				var result = Client.CreatePerson (group.Id, personName, userData);
+				return Task.FromResult (personGroup.People);
+			}
 
-				var id = result.PersonId.ToString ();
-
-				if (string.IsNullOrEmpty (id))
+			return Task.Run (() =>
+			{
+				try
 				{
-					throw new Exception ("CreatePersonResult returned invalid person Id");
+					var arrPeople = Client.ListPersons (personGroup.Id);
+
+					var people = new List<Person> (
+						arrPeople.Select (p => p.ToPerson ())
+					);
+
+					personGroup.People.Clear ();
+					personGroup.People.AddRange (people);
+
+					return people;
 				}
-
-				var person = new Person
+				catch (Exception ex)
 				{
-					Name = personName,
-					Id = id,
-					UserData = userData
-				};
+					Log.Error (ex);
+					throw;
+				}
+			});
+		}
 
-				group.People.Add (person);
 
-				return Task.FromResult (person);
-			}
-			catch (Exception ex)
+		public Task<Person> CreatePerson (string personName, PersonGroup personGroup, string userData = null)
+		{
+			return Task.Run (() =>
 			{
-				Log.Error (ex.Message);
-				throw;
-			}
+				try
+				{
+					var result = Client.CreatePerson (personGroup.Id, personName, userData);
+
+					var id = result.PersonId.ToString ();
+
+					if (string.IsNullOrEmpty (id))
+					{
+						throw new Exception ("CreatePersonResult returned invalid person Id");
+					}
+
+					var person = new Person
+					{
+						Name = personName,
+						Id = id,
+						UserData = userData
+					};
+
+					personGroup.People.Add (person);
+
+					return person;
+				}
+				catch (Exception ex)
+				{
+					Log.Error (ex);
+					throw;
+				}
+			});
 		}
 
 
 		public Task UpdatePerson (Person person, PersonGroup group, string personName, string userData = null)
 		{
-			try
+			return Task.Run (() =>
 			{
-				Client.UpdatePerson (group.Id, UUID.FromString (person.Id), personName, userData);
+				try
+				{
+					Client.UpdatePerson (group.Id, UUID.FromString (person.Id), personName, userData);
 
-				person.Name = personName;
-				person.UserData = userData;
-
-				return Task.FromResult (true);
-			}
-			catch (Exception ex)
-			{
-				Log.Error (ex.Message);
-				throw;
-			}
+					person.Name = personName;
+					person.UserData = userData;
+				}
+				catch (Exception ex)
+				{
+					Log.Error (ex);
+					throw;
+				}
+			});
 		}
 
 
@@ -196,22 +302,6 @@ namespace Xamarin.Cognitive.Face.Sample
 			 });
 		}
 
-		public Task DeletePersonGroup (string mPersonGroupId)
-		{
-			return Task.Run (() =>
-			 {
-				 Client.DeletePersonGroup (mPersonGroupId);
-			 });
-		}
-
-		public Task CreatePersonGroup (string mPersonGroupId, string name, string userData)
-		{
-			return Task.Run (() =>
-			 {
-				 Client.CreatePersonGroup (mPersonGroupId, name, userData);
-			 });
-		}
-
 		public Task DeletePerson (string mPersonGroupId, UUID mPersonId)
 		{
 			return Task.Run (() =>
@@ -233,14 +323,6 @@ namespace Xamarin.Cognitive.Face.Sample
 			return Task.Run (() =>
 			 {
 				 Client.DeletePersonFace (mPersonGroupId, mPersonId, mFaceId);
-			 });
-		}
-
-		public Task<Face.Droid.Contract.CreatePersonResult> CreatePerson (string mPersonGroupId, string name, string userData)
-		{
-			return Task.Run (() =>
-			 {
-				 return Client.CreatePerson (mPersonGroupId, name, userData);
 			 });
 		}
 

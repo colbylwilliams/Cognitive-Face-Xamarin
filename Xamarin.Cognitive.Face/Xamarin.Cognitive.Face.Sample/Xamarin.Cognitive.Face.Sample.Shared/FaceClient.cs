@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Xamarin.Cognitive.Face.Sample.Shared;
 
 namespace Xamarin.Cognitive.Face.Sample
@@ -13,5 +15,26 @@ namespace Xamarin.Cognitive.Face.Sample
 		public List<PersonGroup> Groups { get; private set; } = new List<PersonGroup> ();
 
 
+		void RemoveGroup (string personGroupId)
+		{
+			var theGroup = Groups.FirstOrDefault (g => g.Id == personGroupId);
+
+			if (theGroup != null)
+			{
+				Groups.Remove (theGroup);
+			}
+		}
+
+
+		public Task DeletePersonGroup (PersonGroup personGroup)
+		{
+			return DeletePersonGroup (personGroup.Id);
+		}
+
+
+		public Task<TrainingStatus> GetGroupTrainingStatus (PersonGroup personGroup)
+		{
+			return GetGroupTrainingStatus (personGroup.Id);
+		}
 	}
 }

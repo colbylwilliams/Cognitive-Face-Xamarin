@@ -150,21 +150,18 @@ namespace Xamarin.Cognitive.Face.Sample
 		}
 
 
-		public Task DeletePersonGroup (PersonGroup personGroup)
+		public Task DeletePersonGroup (string personGroupId)
 		{
 			try
 			{
 				var tcs = new TaskCompletionSource<bool> ();
 
-				Client.DeletePersonGroupWithPersonGroupId (personGroup.Id, error =>
+				Client.DeletePersonGroupWithPersonGroupId (personGroupId, error =>
 				{
 					tcs.FailTaskIfErrored (error.ToException ());
 					if (tcs.IsNullFinishCanceledOrFaulted ()) return;
 
-					if (Groups.Contains (personGroup))
-					{
-						Groups.Remove (personGroup);
-					}
+					RemoveGroup (personGroupId);
 
 					tcs.SetResult (true);
 				}).Resume ();
@@ -208,14 +205,14 @@ namespace Xamarin.Cognitive.Face.Sample
 		/// Gets the group training status: notstarted, running, succeeded, failed
 		/// </summary>
 		/// <returns>The group training status.</returns>
-		/// <param name="personGroup">Person group.</param>
-		public Task<TrainingStatus> GetGroupTrainingStatus (PersonGroup personGroup)
+		/// <param name="personGroupId">Person group Id.</param>
+		public Task<TrainingStatus> GetGroupTrainingStatus (string personGroupId)
 		{
 			try
 			{
 				var tcs = new TaskCompletionSource<TrainingStatus> ();
 
-				Client.GetPersonGroupTrainingStatusWithPersonGroupId (personGroup.Id, (trainingStatus, error) =>
+				Client.GetPersonGroupTrainingStatusWithPersonGroupId (personGroupId, (trainingStatus, error) =>
 				{
 					tcs.FailTaskIfErrored (error.ToException ());
 					if (tcs.IsNullFinishCanceledOrFaulted ()) return;
@@ -239,18 +236,18 @@ namespace Xamarin.Cognitive.Face.Sample
 		#region Person
 
 
-		public Task<List<Person>> GetPeopleForGroup (PersonGroup group, bool forceRefresh = false)
+		public Task<List<Person>> GetPeopleForGroup (PersonGroup personGroup, bool forceRefresh = false)
 		{
 			try
 			{
-				if (group.People?.Count > 0 && !forceRefresh)
+				if (personGroup.People?.Count > 0 && !forceRefresh)
 				{
-					return Task.FromResult (group.People);
+					return Task.FromResult (personGroup.People);
 				}
 
 				var tcs = new TaskCompletionSource<List<Person>> ();
 
-				Client.ListPersonsWithPersonGroupId (group.Id, (mpoPeople, error) =>
+				Client.ListPersonsWithPersonGroupId (personGroup.Id, (mpoPeople, error) =>
 				{
 					tcs.FailTaskIfErrored (error.ToException ());
 					if (tcs.IsNullFinishCanceledOrFaulted ()) return;
@@ -259,8 +256,8 @@ namespace Xamarin.Cognitive.Face.Sample
 						mpoPeople.Select (p => p.ToPerson ())
 					);
 
-					group.People.Clear ();
-					group.People.AddRange (people);
+					personGroup.People.Clear ();
+					personGroup.People.AddRange (people);
 
 					tcs.SetResult (people);
 				}).Resume ();
