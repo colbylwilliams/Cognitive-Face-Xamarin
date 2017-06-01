@@ -9,14 +9,14 @@ using Xamarin.Cognitive.Face.Droid.Contract;
 
 namespace Xamarin.Cognitive.Face.Sample.Droid
 {
-	public class ImageHelper
+	public static class ImageHelper
 	{
 		// The maximum side length of the image to detect, to keep the size of image less than 4MB.
 		// Resize the image if its side length is larger than the maximum.
-		private static int IMAGE_MAX_SIDE_LENGTH = 1280;
+		static int IMAGE_MAX_SIDE_LENGTH = 1280;
 
 		// Ratio to scale a detected face rectangle, the face rectangle scaled up looks more natural.
-		private static double FACE_RECT_SCALE_RATIO = 1.3;
+		static double FACE_RECT_SCALE_RATIO = 1.3;
 
 		// Decode image from imageUri, and resize according to the expectedMaxImageSideLength
 		// If expectedMaxImageSideLength is
@@ -29,20 +29,23 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			try
 			{
 				// Load the image into InputStream.
-				System.IO.Stream imageInputStream = contentResolver.OpenInputStream (imageUri);
+				var imageInputStream = contentResolver.OpenInputStream (imageUri);
 
 				// For saving memory, only decode the image meta and get the side length.
-				BitmapFactory.Options options = new BitmapFactory.Options ();
-				options.InJustDecodeBounds = true;
-				Rect outPadding = new Rect ();
+				var options = new BitmapFactory.Options
+				{
+					InJustDecodeBounds = true
+				};
+
+				var outPadding = new Rect ();
 				BitmapFactory.DecodeStream (imageInputStream, outPadding, options);
 
 				// Calculate shrink rate when loading the image into memory.
-				int maxSideLength =
-						options.OutWidth > options.OutHeight ? options.OutWidth : options.OutHeight;
+				int maxSideLength = options.OutWidth > options.OutHeight ? options.OutWidth : options.OutHeight;
 				options.InSampleSize = 1;
 				options.InSampleSize = calculateSampleSize (maxSideLength, IMAGE_MAX_SIDE_LENGTH);
 				options.InJustDecodeBounds = false;
+
 				if (imageInputStream != null)
 				{
 					imageInputStream.Close ();
@@ -50,10 +53,12 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 				// Load the bitmap and resize it to the expected size length
 				imageInputStream = contentResolver.OpenInputStream (imageUri);
-				Bitmap bitmap = BitmapFactory.DecodeStream (imageInputStream, outPadding, options);
+				var bitmap = BitmapFactory.DecodeStream (imageInputStream, outPadding, options);
+
 				maxSideLength = bitmap.Width > bitmap.Height
 						? bitmap.Width : bitmap.Height;
 				double ratio = IMAGE_MAX_SIDE_LENGTH / (double) maxSideLength;
+
 				if (ratio < 1)
 				{
 					bitmap = Bitmap.CreateScaledBitmap (
@@ -71,22 +76,29 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			}
 		}
 
+
 		// Draw detected face rectangles in the original image. And return the image drawn.
 		// If drawLandmarks is set to be true, draw the five main landmarks of each face.
 		public static Bitmap DrawFaceRectanglesOnBitmap (Bitmap originalBitmap, Face.Droid.Contract.Face [] faces, bool drawLandmarks)
 		{
-			Bitmap bitmap = originalBitmap.Copy (Bitmap.Config.Argb8888, true);
-			Canvas canvas = new Canvas (bitmap);
+			var bitmap = originalBitmap.Copy (Bitmap.Config.Argb8888, true);
+			var canvas = new Canvas (bitmap);
 
-			Paint paint = new Paint ();
-			paint.AntiAlias = true;
+			var paint = new Paint
+			{
+				AntiAlias = true,
+				Color = Color.Green
+			};
+
 			paint.SetStyle (Paint.Style.Stroke);
-			paint.Color = Color.Green;
+
 			int stokeWidth = Math.Max (originalBitmap.Width, originalBitmap.Height) / 100;
+
 			if (stokeWidth == 0)
 			{
 				stokeWidth = 1;
 			}
+
 			paint.StrokeWidth = stokeWidth;
 
 			if (faces != null)
@@ -105,10 +117,12 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 					if (drawLandmarks)
 					{
 						int radius = face.FaceRectangle.Width / 30;
+
 						if (radius == 0)
 						{
 							radius = 1;
 						}
+
 						paint.SetStyle (Paint.Style.Fill);
 						paint.StrokeWidth = radius;
 
@@ -151,21 +165,28 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			return bitmap;
 		}
 
+
 		// Highlight the selected face thumbnail in face list.
 		public static Bitmap HighlightSelectedFaceThumbnail (Bitmap originalBitmap)
 		{
-			Bitmap bitmap = originalBitmap.Copy (Bitmap.Config.Argb8888, true);
-			Canvas canvas = new Canvas (bitmap);
-			Paint paint = new Paint ();
-			paint.AntiAlias = true;
+			var bitmap = originalBitmap.Copy (Bitmap.Config.Argb8888, true);
+			var canvas = new Canvas (bitmap);
+
+			var paint = new Paint
+			{
+				AntiAlias = true,
+				Color = Color.ParseColor ("#3399FF")
+			};
+
 			paint.SetStyle (Paint.Style.Stroke);
-			paint.Color = Color.ParseColor ("#3399FF");
+
 			int stokeWidth = Math.Max (originalBitmap.Width, originalBitmap.Height) / 10;
+
 			if (stokeWidth == 0)
 			{
 				stokeWidth = 1;
 			}
-			//bitmap.getWidth;
+
 			paint.StrokeWidth = stokeWidth;
 			canvas.DrawRect (
 					0,
@@ -177,6 +198,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			return bitmap;
 		}
 
+
 		// Crop the face thumbnail out from the original image.
 		// For better view for human, face rectangles are resized to the rate faceRectEnlargeRatio.
 		public static Bitmap GenerateFaceThumbnail (Bitmap originalBitmap, FaceRectangle faceRectangle)
@@ -186,9 +208,10 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			return Bitmap.CreateBitmap (originalBitmap, faceRect.Left, faceRect.Top, faceRect.Width, faceRect.Height);
 		}
 
+
 		// Return the number of times for the image to shrink when loading it into memory.
 		// The SampleSize can only be a final value based on powers of 2.
-		private static int calculateSampleSize (int maxSideLength, int expectedMaxImageSideLength)
+		static int calculateSampleSize (int maxSideLength, int expectedMaxImageSideLength)
 		{
 			int inSampleSize = 1;
 
@@ -201,11 +224,13 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			return inSampleSize;
 		}
 
+
 		// Get the rotation angle of the image taken.
-		private static int GetImageRotationAngle (Uri imageUri, ContentResolver contentResolver)
+		static int GetImageRotationAngle (Uri imageUri, ContentResolver contentResolver)
 		{
 			int angle = 0;
 			ICursor cursor = contentResolver.Query (imageUri, new [] { MediaStore.Images.ImageColumns.Orientation }, null, null, null);
+
 			if (cursor != null)
 			{
 				if (cursor.Count == 1)
@@ -213,11 +238,12 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 					cursor.MoveToFirst ();
 					angle = cursor.GetInt (0);
 				}
+
 				cursor.Close ();
 			}
 			else
 			{
-				ExifInterface exif = new ExifInterface (imageUri.Path);
+				var exif = new ExifInterface (imageUri.Path);
 				int orientation = exif.GetAttributeInt (ExifInterface.TagOrientation, (int) Orientation.Normal);
 
 				switch (orientation)
@@ -231,34 +257,32 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 					case (int) Orientation.Rotate90:
 						angle = 90;
 						break;
-					default:
-						break;
 				}
 			}
 			return angle;
 		}
 
+
 		// Rotate the original bitmap according to the given orientation angle
-		private static Bitmap RotateBitmap (Bitmap bitmap, int angle)
+		static Bitmap RotateBitmap (Bitmap bitmap, int angle)
 		{
 			// If the rotate angle is 0, then return the original image, else return the rotated image
 			if (angle != 0)
 			{
-				Matrix matrix = new Matrix ();
+				var matrix = new Matrix ();
 				matrix.PostRotate (angle);
+
 				return Bitmap.CreateBitmap (
 						bitmap, 0, 0, bitmap.Width, bitmap.Height, matrix, true);
 			}
-			else
-			{
-				return bitmap;
-			}
+
+			return bitmap;
 		}
+
 
 		// Resize face rectangle, for better view for human
 		// To make the rectangle larger, faceRectEnlargeRatio should be larger than 1, recommend 1.3
-		private static FaceRectangle CalculateFaceRectangle (
-						Bitmap bitmap, FaceRectangle faceRectangle, double faceRectEnlargeRatio)
+		static FaceRectangle CalculateFaceRectangle (Bitmap bitmap, FaceRectangle faceRectangle, double faceRectEnlargeRatio)
 		{
 			// Get the resized side length of the face rectangle
 			double sideLength = faceRectangle.Width * faceRectEnlargeRatio;
@@ -284,13 +308,13 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			top -= 0.15 * shiftTop * faceRectangle.Height;
 			top = Math.Max (top, 0.0);
 
-			// Set the result.
-			FaceRectangle result = new FaceRectangle ();
-			result.Left = (int) left;
-			result.Top = (int) top;
-			result.Width = (int) sideLength;
-			result.Height = (int) sideLength;
-			return result;
+			return new FaceRectangle
+			{
+				Left = (int) left,
+				Top = (int) top,
+				Width = (int) sideLength,
+				Height = (int) sideLength
+			};
 		}
 	}
 }
