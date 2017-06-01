@@ -280,7 +280,7 @@ namespace Xamarin.Cognitive.Face.Sample
 			{
 				try
 				{
-					Client.UpdatePerson (personGroup.Id, UUID.FromString (person.Id), personName, userData);
+					Client.UpdatePerson (personGroup.Id, person.Id.ToUUID (), personName, userData);
 
 					person.Name = personName;
 					person.UserData = userData;
@@ -300,9 +300,7 @@ namespace Xamarin.Cognitive.Face.Sample
 			{
 				try
 				{
-					var personUUID = UUID.FromString (person.Id);
-
-					Client.DeletePerson (personGroup.Id, personUUID);
+					Client.DeletePerson (personGroup.Id, person.Id.ToUUID ());
 
 					if (personGroup.PeopleLoaded && personGroup.People.Contains (person))
 					{
@@ -335,9 +333,7 @@ namespace Xamarin.Cognitive.Face.Sample
 			{
 				try
 				{
-					var personUUID = UUID.FromString (personId);
-
-					var jPerson = Client.GetPerson (personGroup.Id, personUUID);
+					var jPerson = Client.GetPerson (personGroup.Id, personId.ToUUID ());
 					var person = jPerson.ToPerson ();
 
 					//add them to the group?
@@ -357,16 +353,40 @@ namespace Xamarin.Cognitive.Face.Sample
 		}
 
 
+		public Task AddFaceForPerson (Person person, PersonGroup personGroup, Shared.Face face, Stream photo, string userData = null)//, float quality = .8f)
+		{
+			return Task.Run (() =>
+			{
+				try
+				{
+					//using (var jpgData = photo.AsJPEG (quality))
+					//{
+					var result = Client.AddPersonFace (personGroup.Id, person.Id.ToUUID (), photo, userData, face.FaceRectangle.ToFaceRect ());
+
+					face.Id = result.PersistedFaceId.ToString ();
+					//face.UpdatePhotoPath ();
+
+					person.Faces.Add (face);
+
+					//face.SavePhotoFromSource (photo);
+					//}
+				}
+				catch (Exception ex)
+				{
+					Log.Error (ex);
+					throw;
+				}
+			});
+		}
+
+
 		public Task DeletePersonFace (Person person, PersonGroup personGroup, Shared.Face face)
 		{
 			return Task.Run (() =>
 			{
 				try
 				{
-					var personUUID = UUID.FromString (person.Id);
-					var faceUUID = UUID.FromString (face.Id);
-
-					Client.DeletePersonFace (personGroup.Id, personUUID, faceUUID);
+					Client.DeletePersonFace (personGroup.Id, person.Id.ToUUID (), face.Id.ToUUID ());
 
 					if (person.Faces.Contains (face))
 					{
@@ -420,13 +440,13 @@ namespace Xamarin.Cognitive.Face.Sample
 			 });
 		}
 
-		public Task<Face.Droid.Contract.AddPersistedFaceResult> AddPersonFace (string mPersonGroupId, UUID mPersonId, Stream mImageStream, string userData, Face.Droid.Contract.FaceRectangle targetFace)
-		{
-			return Task.Run (() =>
-			 {
-				 return Client.AddPersonFace (mPersonGroupId, mPersonId, mImageStream, userData, targetFace);
-			 });
-		}
+		//public Task<Face.Droid.Contract.AddPersistedFaceResult> AddPersonFace (string mPersonGroupId, UUID mPersonId, Stream mImageStream, string userData, Face.Droid.Contract.FaceRectangle targetFace)
+		//{
+		//	return Task.Run (() =>
+		//	 {
+		//		 return Client.AddPersonFace (mPersonGroupId, mPersonId, mImageStream, userData, targetFace);
+		//	 });
+		//}
 
 		public Task<Face.Droid.Contract.GroupResult> Group (UUID [] faceIds)
 		{

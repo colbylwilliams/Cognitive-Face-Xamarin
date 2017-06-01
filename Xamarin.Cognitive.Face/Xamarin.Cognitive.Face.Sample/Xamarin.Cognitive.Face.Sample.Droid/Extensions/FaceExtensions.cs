@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Drawing;
 using System.Linq;
+using Java.Util;
 using Xamarin.Cognitive.Face.Sample.Shared;
 
 namespace Xamarin.Cognitive.Face.Sample.Droid.Extensions
@@ -262,15 +264,21 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Extensions
 		//}
 
 
-		//public static MPOFaceRectangle ToMPOFaceRect (this RectangleF rect)
-		//{
-		//	return new MPOFaceRectangle
-		//	{
-		//		Left = rect.Left,
-		//		Top = rect.Top,
-		//		Width = rect.Width,
-		//		Height = rect.Height
-		//	};
-		//}
+		public static UUID ToUUID (this string Id)
+		{
+			return UUID.FromString (Id);
+		}
+
+
+		public static Face.Droid.Contract.FaceRectangle ToFaceRect (this RectangleF rect)
+		{
+			return new Face.Droid.Contract.FaceRectangle
+			{
+				Left = (int) rect.Left,
+				Top = (int) rect.Top,
+				Width = (int) rect.Width,
+				Height = (int) rect.Height
+			};
+		}
 	}
 }
