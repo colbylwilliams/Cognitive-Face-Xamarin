@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
@@ -7,8 +9,8 @@ using Android.OS;
 using Android.Support.V7.App;
 using Android.Views;
 using Android.Widget;
-using Java.Util;
-using Xamarin.Cognitive.Face.Droid.Contract;
+using Xamarin.Cognitive.Face.Sample.Shared;
+using Xamarin.Cognitive.Face.Sample.Shared.Extensions;
 
 namespace Xamarin.Cognitive.Face.Sample.Droid
 {
@@ -17,91 +19,68 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			  LaunchMode = LaunchMode.SingleTop,
 			  WindowSoftInputMode = SoftInput.AdjustNothing,
 			  ScreenOrientation = ScreenOrientation.Portrait)]
-	public class PersonActivity : AppCompatActivity
+	public class PersonActivity : AppCompatActivity, AbsListView.IMultiChoiceModeListener
 	{
-		private bool addNewPerson = false;
-		private String personId, personGroupId, oldPersonName = null;
-		private const int REQUEST_SELECT_IMAGE = 0;
-		private FaceGridViewAdapter faceGridViewAdapter;
-		private ProgressDialog mProgressDialog;
-		private GridView gridView = null;
-		private Button add_face, done_and_save = null;
+		const int REQUEST_SELECT_IMAGE = 0;
+
+		FaceGridViewAdapter faceGridViewAdapter;
+		ProgressDialog progressDialog;
+		GridView gridView;
+		Button add_face, done_and_save;
+
+		PersonGroup Group => FaceState.Current.CurrentGroup;
+		Person Person => FaceState.Current.CurrentPerson;
 
 		protected override void OnCreate (Bundle savedInstanceState)
 		{
 			base.OnCreate (savedInstanceState);
 
-			// Create your application here
 			SetContentView (Resource.Layout.activity_person);
 
-			Bundle bundle = Intent.Extras;
+			progressDialog = new ProgressDialog (this);
+			progressDialog.SetTitle (Application.Context.GetString (Resource.String.progress_dialog_title));
 
-			if (bundle != null)
-			{
-				addNewPerson = bundle.GetBoolean ("AddNewPerson");
-				personGroupId = bundle.GetString ("PersonGroupId");
-				oldPersonName = bundle.GetString ("PersonName");
-
-				if (!addNewPerson)
-				{
-					personId = bundle.GetString ("PersonId");
-				}
-			}
-
-			EditText editTextPersonName = (EditText) FindViewById (Resource.Id.edit_person_name);
-			editTextPersonName.Text = oldPersonName;
-
-			mProgressDialog = new ProgressDialog (this);
-			mProgressDialog.SetTitle (Application.Context.GetString (Resource.String.progress_dialog_title));
-
-			gridView = (GridView) FindViewById (Resource.Id.gridView_faces);
+			gridView = FindViewById<GridView> (Resource.Id.gridView_faces);
 			gridView.ChoiceMode = ChoiceMode.MultipleModal;
-			gridView.SetMultiChoiceModeListener (new MultiChoiceModeListener (this));
+			gridView.SetMultiChoiceModeListener (this);
 
-			add_face = (Button) FindViewById (Resource.Id.add_face);
-			done_and_save = (Button) FindViewById (Resource.Id.done_and_save);
+			add_face = FindViewById<Button> (Resource.Id.add_face);
+			done_and_save = FindViewById<Button> (Resource.Id.done_and_save);
 		}
+
 
 		protected override void OnResume ()
 		{
 			base.OnResume ();
+
 			add_face.Click += Add_Face_Click;
 			done_and_save.Click += Done_And_Save_Click;
 
-			faceGridViewAdapter = new FaceGridViewAdapter (this);
-			gridView.Adapter = faceGridViewAdapter;
+			if (Person != null)
+			{
+				var editTextPersonName = FindViewById<EditText> (Resource.Id.edit_person_name);
+				editTextPersonName.Text = Person.Name;
+
+				faceGridViewAdapter = new FaceGridViewAdapter (Person, this);
+				gridView.Adapter = faceGridViewAdapter;
+			}
 		}
+
 
 		protected override void OnPause ()
 		{
 			base.OnPause ();
+
 			add_face.Click -= Add_Face_Click;
 			done_and_save.Click -= Done_And_Save_Click;
 		}
 
-		protected override void OnSaveInstanceState (Bundle outState)
-		{
-			base.OnSaveInstanceState (outState);
-			outState.PutBoolean ("AddNewPerson", addNewPerson);
-			outState.PutString ("PersonId", personId);
-			outState.PutString ("PersonGroupId", personGroupId);
-			outState.PutString ("OldPersonName", oldPersonName);
-		}
 
-		protected override void OnRestoreInstanceState (Bundle savedInstanceState)
+		async void Add_Face_Click (object sender, EventArgs e)
 		{
-			base.OnRestoreInstanceState (savedInstanceState);
-			addNewPerson = savedInstanceState.GetBoolean ("AddNewPerson");
-			personId = savedInstanceState.GetString ("PersonId");
-			personGroupId = savedInstanceState.GetString ("PersonGroupId");
-			oldPersonName = savedInstanceState.GetString ("OldPersonName");
-		}
-
-		private void Add_Face_Click (object sender, EventArgs e)
-		{
-			if (personId == null)
+			if (Person == null)
 			{
-				ExecuteAddPerson (true, personGroupId);
+				await ExecuteAddPerson (true);
 			}
 			else
 			{
@@ -109,302 +88,284 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			}
 		}
 
-		private async void ExecuteAddPerson (bool mAddFace, string mPersonGroupId)
+
+		async Task ExecuteAddPerson (bool addFace)
 		{
-			string result = string.Empty;
+			var editTextPersonName = FindViewById<EditText> (Resource.Id.edit_person_name);
 
-			mProgressDialog.Show ();
-			AddLog ("Request: Creating Person in person group" + mPersonGroupId);
-
-			try
+			if (editTextPersonName.Text.Equals (string.Empty))
 			{
-				mProgressDialog.SetMessage ("Syncing with server to add person...");
-				SetInfo ("Syncing with server to add person...");
-				CreatePersonResult person = await FaceClient.Shared.CreatePerson (mPersonGroupId,
-											  Application.Context.GetString (Resource.String.user_provided_person_name),
-											  Application.Context.GetString (Resource.String.user_provided_description_data));
-
-				result = person.PersonId.ToString ();
-			}
-			catch (Java.Lang.Exception e)
-			{
-				result = null;
-				AddLog (e.Message);
-			}
-
-			RunOnUiThread (() =>
-			 {
-				 mProgressDialog.Dismiss ();
-
-				 if (result != null)
-				 {
-					 AddLog ("Response: Success. Person " + result + " created.");
-					 personId = result;
-					 SetInfo ("Successfully Synchronized!");
-
-					 if (mAddFace)
-					 {
-						 AddFace ();
-					 }
-					 else
-					 {
-						 DoneAndSave ();
-					 }
-				 }
-			 });
-		}
-
-		private void AddFace ()
-		{
-			SetInfo ("");
-			Intent intent = new Intent (this, typeof (SelectImageActivity));
-			StartActivityForResult (intent, REQUEST_SELECT_IMAGE);
-		}
-
-		private void Done_And_Save_Click (object sender, EventArgs e)
-		{
-			if (personId == null)
-			{
-				ExecuteAddPerson (false, personGroupId);
-			}
-			else
-			{
-				DoneAndSave ();
-			}
-		}
-
-		private void DoneAndSave ()
-		{
-			TextView textWarning = (TextView) FindViewById (Resource.Id.info);
-			EditText editTextPersonName = (EditText) FindViewById (Resource.Id.edit_person_name);
-			String newPersonName = editTextPersonName.Text;
-			if (newPersonName.Equals (""))
-			{
-				textWarning.Text = Application.Context.GetString (Resource.String.person_name_empty_warning_message);
+				SetInfo (Application.Context.GetString (Resource.String.person_name_empty_warning_message));
 				return;
 			}
 
-			StorageHelper.SetPersonName (personId, newPersonName, personGroupId, this);
+			progressDialog.Show ();
+			AddLog ("Request: Creating Person in person group " + Group.Id);
 
-			Finish ();
+			try
+			{
+				progressDialog.SetMessage ("Syncing with server to add person...");
+				SetInfo ("Syncing with server to add person...");
+
+				FaceState.Current.CurrentPerson = await FaceClient.Shared.CreatePerson (editTextPersonName.Text, Group);
+
+				AddLog ("Response: Success. Person " + FaceState.Current.CurrentPerson.Id + " created.");
+				SetInfo ("Successfully Synchronized!");
+
+				if (addFace)
+				{
+					AddFace ();
+				}
+				else
+				{
+					await DoneAndSave ();
+				}
+			}
+			catch (Exception e)
+			{
+				AddLog (e.Message);
+			}
+
+			progressDialog.Dismiss ();
 		}
+
+
+		void AddFace ()
+		{
+			SetInfo (string.Empty);
+
+			var intent = new Intent (this, typeof (SelectImageActivity));
+			StartActivityForResult (intent, REQUEST_SELECT_IMAGE);
+		}
+
+
+		async void Done_And_Save_Click (object sender, EventArgs e)
+		{
+			if (Person == null)
+			{
+				await ExecuteAddPerson (false);
+			}
+			else
+			{
+				await DoneAndSave (true);
+			}
+		}
+
+
+		async Task DoneAndSave (bool savePerson = false)
+		{
+			try
+			{
+				progressDialog.Show ();
+
+				var editTextPersonName = FindViewById<EditText> (Resource.Id.edit_person_name);
+
+				if (editTextPersonName.Text.Equals (string.Empty))
+				{
+					SetInfo (Application.Context.GetString (Resource.String.person_name_empty_warning_message));
+					return;
+				}
+
+				if (savePerson)
+				{
+					await FaceClient.Shared.UpdatePerson (Person, Group, editTextPersonName.Text);
+				}
+
+				StorageHelper.SetPersonName (Person.Id, editTextPersonName.Text, Group.Id, this);
+
+				FaceState.Current.CurrentPerson = null;
+
+				Finish ();
+			}
+			catch (Exception e)
+			{
+				AddLog (e.Message);
+				SetInfo ("Error updating person with Id " + Person.Id);
+			}
+			finally
+			{
+				progressDialog.Dismiss ();
+			}
+		}
+
 
 		protected override void OnActivityResult (int requestCode, Result resultCode, Intent data)
 		{
 			base.OnActivityResult (requestCode, resultCode, data);
+
 			switch (requestCode)
 			{
-				case (int) REQUEST_SELECT_IMAGE:
+				case REQUEST_SELECT_IMAGE:
 					if (resultCode == Result.Ok)
 					{
 						var uriImagePicked = data.Data;
-						Intent intent = new Intent (this, typeof (AddFaceToPersonActivity));
-						intent.PutExtra ("PersonId", personId);
-						intent.PutExtra ("PersonGroupId", personGroupId);
-						intent.PutExtra ("ImageUriStr", uriImagePicked.ToString ());
+
+						var intent = new Intent (this, typeof (AddFaceToPersonActivity));
+						intent.PutExtra ("ImageUri", uriImagePicked.ToString ());
+
 						StartActivity (intent);
 					}
 					break;
-				default:
-					break;
 			}
 		}
 
-		private void DeleteSelectedItems ()
+
+		async Task DeleteSelectedItems ()
 		{
-			List<String> newFaceIdList = new List<String> ();
-			List<Boolean> newFaceChecked = new List<Boolean> ();
-			List<String> faceIdsToDelete = new List<String> ();
-			for (int i = 0; i < faceGridViewAdapter.faceChecked.Count; ++i)
+			var checkedFaces = faceGridViewAdapter.GetCheckedItems ();
+
+			foreach (var face in checkedFaces)
 			{
-				bool bchecked = faceGridViewAdapter.faceChecked [i];
-				if (bchecked)
-				{
-					String faceId = faceGridViewAdapter.faceIdList [i];
-					faceIdsToDelete.Add (faceId);
-					ExecuteDeleteFace (personGroupId, personId, faceId);
-				}
-				else
-				{
-					newFaceIdList.Add (faceGridViewAdapter.faceIdList [i]);
-					newFaceChecked.Add (false);
-				}
+				await ExecuteDeleteFace (face);
 			}
 
-			StorageHelper.DeleteFaces (faceIdsToDelete, personId, this);
+			var faceIds = checkedFaces.Select (f => f.Id).ToList ();
 
-			faceGridViewAdapter.faceIdList = newFaceIdList;
-			faceGridViewAdapter.faceChecked = newFaceChecked;
+			StorageHelper.DeleteFaces (faceIds, Person.Id, this);
+
+			faceGridViewAdapter.ResetCheckedItems ();
 			faceGridViewAdapter.NotifyDataSetChanged ();
 		}
 
-		private async void ExecuteDeleteFace (string mPersonGroupId, string mPersonId, string mFaceId)
-		{
-			string result = string.Empty;
 
-			mProgressDialog.Show ();
-			AddLog ("Request: Deleting face " + mFaceId);
+		async Task ExecuteDeleteFace (Shared.Face face)
+		{
+			progressDialog.Show ();
+			AddLog ("Request: Deleting face " + face.Id);
 
 			try
 			{
-				mProgressDialog.SetMessage ("Deleting selected faces...");
+				progressDialog.SetMessage ("Deleting selected faces...");
 				SetInfo ("Deleting selected faces...");
-				UUID _personId = UUID.FromString (mPersonId);
-				UUID _faceId = UUID.FromString (mFaceId);
-				await FaceClient.Shared.DeletePersonFace (mPersonGroupId, _personId, _faceId);
 
-				result = mFaceId;
+				await FaceClient.Shared.DeletePersonFace (Person, Group, face);
+
+				SetInfo ("Face " + face.Id + " successfully deleted");
+				AddLog ("Response: Success. Deleting face " + face.Id + " succeed");
 			}
-			catch (Java.Lang.Exception e)
+			catch (Exception e)
 			{
-				result = null;
 				AddLog (e.Message);
+				SetInfo ("Error deleting face with Id " + face.Id);
 			}
 
-			RunOnUiThread (() =>
-			 {
-				 mProgressDialog.Dismiss ();
-
-				 if (result != null)
-				 {
-					 SetInfo ("Face " + result + " successfully deleted");
-					 AddLog ("Response: Success. Deleting face " + result + " succeed");
-				 }
-			 });
+			progressDialog.Dismiss ();
 		}
 
-		private void AddLog (String _log)
+
+		void AddLog (string log)
 		{
-			LogHelper.AddIdentificationLog (_log);
+			LogHelper.AddIdentificationLog (log);
 		}
 
-		private void SetInfo (String info)
+
+		void SetInfo (string info)
 		{
-			TextView textView = (TextView) FindViewById (Resource.Id.info);
+			var textView = FindViewById<TextView> (Resource.Id.info);
 			textView.Text = info;
 		}
 
-		private class MultiChoiceModeListener : Java.Lang.Object, AbsListView.IMultiChoiceModeListener
+
+		#region AbsListView.IMultiChoiceModeListener
+
+
+		public void OnItemCheckedStateChanged (ActionMode mode, int position, long id, bool @checked)
 		{
-			private PersonActivity activity;
+			faceGridViewAdapter.SetChecked (position, @checked);
+		}
 
-			public MultiChoiceModeListener (PersonActivity act)
+
+		public bool OnActionItemClicked (ActionMode mode, IMenuItem item)
+		{
+			switch (item.ItemId)
 			{
-				this.activity = act;
-			}
-
-			public bool OnActionItemClicked (ActionMode mode, IMenuItem item)
-			{
-				switch (item.ItemId)
-				{
-					case Resource.Id.menu_delete_items:
-						activity.DeleteSelectedItems ();
-						return true;
-					default:
-						return false;
-				}
-			}
-
-			public bool OnCreateActionMode (ActionMode mode, IMenu menu)
-			{
-				MenuInflater inflater = mode.MenuInflater;
-				inflater.Inflate (Resource.Menu.menu_delete_items, menu);
-
-				activity.faceGridViewAdapter.longPressed = true;
-
-				activity.gridView.Adapter = activity.faceGridViewAdapter;
-
-				Button addNewItem = (Button) activity.FindViewById (Resource.Id.add_face);
-				addNewItem.Enabled = false;
-
-				return true;
-			}
-
-			public void OnDestroyActionMode (ActionMode mode)
-			{
-				activity.faceGridViewAdapter.longPressed = false;
-
-				for (int i = 0; i < activity.faceGridViewAdapter.faceChecked.Count; ++i)
-				{
-					activity.faceGridViewAdapter.faceChecked [i] = false;
-				}
-
-				activity.gridView.Adapter = activity.faceGridViewAdapter;
-
-				Button addNewItem = (Button) activity.FindViewById (Resource.Id.add_face);
-				addNewItem.Enabled = true;
-			}
-
-			public void OnItemCheckedStateChanged (ActionMode mode, int position, long id, bool @checked)
-			{
-				activity.faceGridViewAdapter.faceChecked [position] = @checked;
-				activity.gridView.Adapter = activity.faceGridViewAdapter;
-			}
-
-			public bool OnPrepareActionMode (ActionMode mode, IMenu menu)
-			{
-				return false;
+				case Resource.Id.menu_delete_items:
+					DeleteSelectedItems ().Forget ();
+					return true;
+				default:
+					return false;
 			}
 		}
 
-		private class FaceGridViewAdapter : BaseAdapter
+
+		public bool OnCreateActionMode (ActionMode mode, IMenu menu)
 		{
-			public List<String> faceIdList;
-			public List<Boolean> faceChecked;
-			public bool longPressed;
-			private PersonActivity activity;
+			mode.MenuInflater.Inflate (Resource.Menu.menu_delete_items, menu);
 
-			public FaceGridViewAdapter (PersonActivity act)
+			faceGridViewAdapter.LongPressed = true;
+
+			var addNewItem = FindViewById<Button> (Resource.Id.add_person);
+			addNewItem.Enabled = false;
+
+			return true;
+		}
+
+
+		public void OnDestroyActionMode (ActionMode mode)
+		{
+			faceGridViewAdapter.LongPressed = false;
+			faceGridViewAdapter.ResetCheckedItems ();
+
+			var addNewItem = FindViewById<Button> (Resource.Id.add_person);
+			addNewItem.Enabled = true;
+		}
+
+
+		public bool OnPrepareActionMode (ActionMode mode, IMenu menu)
+		{
+			return false;
+		}
+
+
+		#endregion
+
+
+		class FaceGridViewAdapter : BaseAdapter<Shared.Face>, CompoundButton.IOnCheckedChangeListener
+		{
+			readonly Context context;
+			readonly Person person;
+			public List<bool> faceChecked;
+			public bool LongPressed;
+
+			public FaceGridViewAdapter (Person person, Context context)
 			{
-				longPressed = false;
-				faceIdList = new List<String> ();
-				faceChecked = new List<Boolean> ();
-				activity = act;
+				this.person = person;
+				this.context = context;
 
-				ICollection<String> faceIdSet = StorageHelper.GetAllFaceIds (activity.personId, activity);
-				foreach (String faceId in faceIdSet)
-				{
-					faceIdList.Add (faceId);
-					faceChecked.Add (false);
-				}
+				ResetCheckedItems ();
 			}
 
-			public override int Count
-			{
-				get
-				{
-					return faceIdList.Count;
-				}
-			}
 
-			public override Java.Lang.Object GetItem (int position)
-			{
-				return faceIdList [position];
-			}
+			public override int Count => person.Faces?.Count ?? 0;
 
-			public override long GetItemId (int position)
-			{
-				return position;
-			}
+
+			public override Shared.Face this [int position] => person.Faces? [position];
+
+
+			public override long GetItemId (int position) => position;
+
 
 			public override View GetView (int position, View convertView, ViewGroup parent)
 			{
 				if (convertView == null)
 				{
-					LayoutInflater layoutInflater = (LayoutInflater) Application.Context.GetSystemService (Context.LayoutInflaterService);
+					LayoutInflater layoutInflater = (LayoutInflater) Application.Context.GetSystemService (LayoutInflaterService);
 					convertView = layoutInflater.Inflate (Resource.Layout.item_face_with_checkbox, parent, false);
 				}
+
 				convertView.Id = position;
 
-				var uri = global::Android.Net.Uri.Parse (StorageHelper.GetFaceUri (faceIdList [position], activity));
-				((ImageView) convertView.FindViewById (Resource.Id.image_face)).SetImageURI (uri);
+				var face = GetFace (position);
 
-				// set the checked status of the item
-				CheckBox checkBox = (CheckBox) convertView.FindViewById (Resource.Id.checkbox_face);
-				if (longPressed)
+				var uri = global::Android.Net.Uri.Parse (StorageHelper.GetFaceUri (face.Id, context));
+				convertView.FindViewById<ImageView> (Resource.Id.image_face).SetImageURI (uri);
+
+				var checkBox = convertView.FindViewById<CheckBox> (Resource.Id.checkbox_face);
+
+				if (LongPressed)
 				{
 					checkBox.Visibility = ViewStates.Visible;
-					checkBox.SetOnCheckedChangeListener (new SetOnCheckedChangeListener (this, position));
+					checkBox.SetOnCheckedChangeListener (this);
 					checkBox.Checked = faceChecked [position];
 				}
 				else
@@ -414,24 +375,37 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 				return convertView;
 			}
-		}
 
-		private class SetOnCheckedChangeListener : Java.Lang.Object, CompoundButton.IOnCheckedChangeListener
-		{
-			private FaceGridViewAdapter adapter;
-			private int position;
-
-			public SetOnCheckedChangeListener (FaceGridViewAdapter adap, int pos)
-			{
-				this.adapter = adap;
-				this.position = pos;
-			}
 
 			public void OnCheckedChanged (CompoundButton buttonView, bool isChecked)
 			{
-				adapter.faceChecked [position] = isChecked;
+				var position = (int) buttonView.Tag;
+				faceChecked [position] = isChecked;
+			}
+
+
+			public Shared.Face GetFace (int position)
+			{
+				return this [position];
+			}
+
+
+			public void SetChecked (int position, bool @checked)
+			{
+				faceChecked [position] = @checked;
+			}
+
+
+			public Shared.Face [] GetCheckedItems ()
+			{
+				return person.Faces.Where ((f, index) => faceChecked [index]).ToArray ();
+			}
+
+
+			public void ResetCheckedItems ()
+			{
+				faceChecked = new List<bool> (person.Faces.Select (g => false));
 			}
 		}
-
 	}
 }

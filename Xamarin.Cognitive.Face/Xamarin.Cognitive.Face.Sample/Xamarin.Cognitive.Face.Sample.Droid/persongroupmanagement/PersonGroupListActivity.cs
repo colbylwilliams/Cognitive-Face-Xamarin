@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
@@ -7,7 +9,10 @@ using Android.OS;
 using Android.Support.V7.App;
 using Android.Views;
 using Android.Widget;
-using Java.Util;
+using Xamarin.Cognitive.Face.Sample.Droid.Extensions;
+using Xamarin.Cognitive.Face.Sample.Shared;
+using Xamarin.Cognitive.Face.Sample.Shared.Extensions;
+using Xamarin.Cognitive.Face.Sample.Shared.Utilities;
 
 namespace Xamarin.Cognitive.Face.Sample.Droid
 {
@@ -15,279 +20,260 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			  ParentActivity = typeof (IdentificationActivity),
 			  LaunchMode = LaunchMode.SingleTop,
 			  ScreenOrientation = ScreenOrientation.Portrait)]
-	public class PersonGroupListActivity : AppCompatActivity
+	public class PersonGroupListActivity : AppCompatActivity, AbsListView.IMultiChoiceModeListener
 	{
-		private PersonGroupsListAdapter personGroupsListAdapter = null;
-		private ProgressDialog mProgressDialog = null;
-		private ListView listView = null;
-		private Button add_person_group, done_and_save = null;
+		PersonGroupsListAdapter personGroupsListAdapter;
+		ProgressDialog progressDialog;
+		ListView listView;
+		Button add_person_group, done_and_save;
 
 		protected override void OnCreate (Bundle savedInstanceState)
 		{
 			base.OnCreate (savedInstanceState);
 
-			// Create your application here
 			SetContentView (Resource.Layout.activity_person_group_list);
 
-			mProgressDialog = new ProgressDialog (this);
-			mProgressDialog.SetTitle (Application.Context.GetString (Resource.String.progress_dialog_title));
+			progressDialog = new ProgressDialog (this);
+			progressDialog.SetTitle (Application.Context.GetString (Resource.String.progress_dialog_title));
 
-			listView = (ListView) FindViewById (Resource.Id.list_person_groups);
+			listView = FindViewById<ListView> (Resource.Id.list_person_groups);
 			listView.ChoiceMode = ChoiceMode.MultipleModal;
-			listView.SetMultiChoiceModeListener (new MultiChoiceModeListener (this));
+			listView.SetMultiChoiceModeListener (this);
 
-			add_person_group = (Button) FindViewById (Resource.Id.add_person_group);
-			done_and_save = (Button) FindViewById (Resource.Id.done_and_save);
+			add_person_group = FindViewById<Button> (Resource.Id.add_person_group);
+			done_and_save = FindViewById<Button> (Resource.Id.done_and_save);
 		}
 
-		protected override void OnResume ()
+
+		protected override async void OnResume ()
 		{
 			base.OnResume ();
+
 			listView.ItemClick += ListView_ItemClick;
 			add_person_group.Click += Add_Person_Group_Click;
 			done_and_save.Click += Done_And_Save_Click;
 
-			personGroupsListAdapter = new PersonGroupsListAdapter (this);
+			var groups = await FaceClient.Shared.GetPersonGroups ();
+			personGroupsListAdapter = new PersonGroupsListAdapter (groups);
 			listView.Adapter = personGroupsListAdapter;
+
+			//reset current group
+			FaceState.Current.CurrentGroup = null;
 		}
+
 
 		protected override void OnPause ()
 		{
 			base.OnPause ();
+
 			listView.ItemClick -= ListView_ItemClick;
 			add_person_group.Click -= Add_Person_Group_Click;
 			done_and_save.Click -= Done_And_Save_Click;
 		}
 
-		private void ListView_ItemClick (object sender, AdapterView.ItemClickEventArgs e)
+
+		void ListView_ItemClick (object sender, AdapterView.ItemClickEventArgs e)
 		{
-			if (!personGroupsListAdapter.longPressed)
+			if (!personGroupsListAdapter.LongPressed)
 			{
-				String personGroupId = personGroupsListAdapter.personGroupIdList [e.Position];
-				String personGroupName = StorageHelper.GetPersonGroupName (
-						personGroupId, this);
+				var personGroup = personGroupsListAdapter.GetGroup (e.Position);
+
+				FaceState.Current.CurrentGroup = personGroup;
 
 				Intent intent = new Intent (this, typeof (PersonGroupActivity));
-				intent.PutExtra ("AddNewPersonGroup", false);
-				intent.PutExtra ("PersonGroupName", personGroupName);
-				intent.PutExtra ("PersonGroupId", personGroupId);
+				//intent.PutExtra ("AddNewPersonGroup", false);
+				//intent.PutExtra ("PersonGroupName", personGroup.Name);
+				//intent.PutExtra ("PersonGroupId", personGroupId);
 
 				StartActivity (intent);
 			}
 		}
 
-		private void Add_Person_Group_Click (object sender, EventArgs e)
+
+		void Add_Person_Group_Click (object sender, EventArgs e)
 		{
-			String personGroupId = UUID.RandomUUID ().ToString ();
+			//var personGroupId = UUID.RandomUUID ().ToString ();
 
 			Intent intent = new Intent (this, typeof (PersonGroupActivity));
-			intent.PutExtra ("AddNewPersonGroup", true);
-			intent.PutExtra ("PersonGroupName", "");
-			intent.PutExtra ("PersonGroupId", personGroupId);
+			//intent.PutExtra ("AddNewPersonGroup", true);
+			//intent.PutExtra ("PersonGroupName", "");
+			//intent.PutExtra ("PersonGroupId", personGroupId);
 
 			StartActivity (intent);
 		}
 
-		private void Done_And_Save_Click (object sender, EventArgs e)
+
+		void Done_And_Save_Click (object sender, EventArgs e)
 		{
 			Finish ();
 		}
 
-		private void AddLog (String _log)
+
+		void AddLog (string log)
 		{
-			LogHelper.AddIdentificationLog (_log);
+			LogHelper.AddIdentificationLog (log);
 		}
 
-		private void SetInfo (String info)
+
+		void SetInfo (string info)
 		{
-			TextView textView = (TextView) FindViewById (Resource.Id.info);
+			var textView = FindViewById<TextView> (Resource.Id.info);
 			textView.Text = info;
 		}
 
-		private void DeleteSelectedItems ()
+
+		async Task DeleteSelectedItems ()
 		{
-			List<String> newPersonGroupIdList = new List<String> ();
-			List<Boolean> newPersonGroupChecked = new List<Boolean> ();
-			List<String> personGroupIdsToDelete = new List<String> ();
-			for (int i = 0; i < personGroupsListAdapter.personGroupChecked.Count; ++i)
+			var checkedGroups = personGroupsListAdapter.GetCheckedItems ();
+
+			foreach (var checkedGroup in checkedGroups)
 			{
-				if (personGroupsListAdapter.personGroupChecked [i])
-				{
-					String personGroupId = personGroupsListAdapter.personGroupIdList [i];
-					personGroupIdsToDelete.Add (personGroupId);
-					ExecuteDeletePersonGroup (personGroupId);
-				}
-				else
-				{
-					newPersonGroupIdList.Add (personGroupsListAdapter.personGroupIdList [i]);
-					newPersonGroupChecked.Add (false);
-				}
+				await ExecuteDeletePersonGroup (checkedGroup);
 			}
 
-			StorageHelper.DeletePersonGroups (personGroupIdsToDelete, this);
+			var groupIds = checkedGroups.Select (g => g.Id).ToList ();
 
-			personGroupsListAdapter.personGroupIdList = newPersonGroupIdList;
-			personGroupsListAdapter.personGroupChecked = newPersonGroupChecked;
+			StorageHelper.DeletePersonGroups (groupIds, this);
+
+			personGroupsListAdapter.ResetCheckedItems ();
 			personGroupsListAdapter.NotifyDataSetChanged ();
 		}
 
-		private async void ExecuteDeletePersonGroup (string mPersonGroupId)
-		{
-			string result = string.Empty;
 
-			mProgressDialog.Show ();
-			AddLog ("Request: Delete Group " + mPersonGroupId);
+		async Task ExecuteDeletePersonGroup (PersonGroup personGroup)
+		{
+			var result = string.Empty;
+
+			progressDialog.Show ();
+			AddLog ("Request: Delete Group " + personGroup.Id);
 
 			try
 			{
-				mProgressDialog.SetMessage ("Deleting selected person groups...");
+				progressDialog.SetMessage ("Deleting selected person groups...");
 				SetInfo ("Deleting selected person groups...");
-				await FaceClient.Shared.DeletePersonGroup (mPersonGroupId);
-				result = mPersonGroupId;
+
+				await FaceClient.Shared.DeletePersonGroup (personGroup);
+
+				SetInfo ("Person group " + personGroup.Id + " successfully deleted");
+				AddLog ("Response: Success. Deleting Group " + personGroup.Id + " succeed");
 			}
-			catch (Java.Lang.Exception e)
+			catch (Exception e)
 			{
-				result = null;
 				AddLog (e.Message);
 			}
 
-			RunOnUiThread (() =>
-			 {
-				 mProgressDialog.Dismiss ();
-				 if (result != null)
-				 {
-					 SetInfo ("Person group " + result + " successfully deleted");
-					 AddLog ("Response: Success. Deleting Group " + result + " succeed");
-				 }
-			 });
+			progressDialog.Dismiss ();
 		}
 
-		private class MultiChoiceModeListener : Java.Lang.Object, AbsListView.IMultiChoiceModeListener
+
+		#region AbsListView.IMultiChoiceModeListener
+
+
+		public void OnItemCheckedStateChanged (ActionMode mode, int position, long id, bool @checked)
 		{
-			private PersonGroupListActivity activity;
+			personGroupsListAdapter.SetChecked (position, @checked);
+		}
 
-			public MultiChoiceModeListener (PersonGroupListActivity act)
+
+		public bool OnActionItemClicked (ActionMode mode, IMenuItem item)
+		{
+			switch (item.ItemId)
 			{
-				this.activity = act;
-			}
-
-			public bool OnActionItemClicked (ActionMode mode, IMenuItem item)
-			{
-				switch (item.ItemId)
-				{
-					case Resource.Id.menu_delete_items:
-						activity.DeleteSelectedItems ();
-						return true;
-					default:
-						return false;
-				}
-			}
-
-			public bool OnCreateActionMode (ActionMode mode, IMenu menu)
-			{
-				MenuInflater inflater = mode.MenuInflater;
-				inflater.Inflate (Resource.Menu.menu_delete_items, menu);
-
-				activity.personGroupsListAdapter.longPressed = true;
-				activity.listView.Adapter = activity.personGroupsListAdapter;
-
-				Button addNewItem = (Button) activity.FindViewById (Resource.Id.add_person_group);
-				addNewItem.Enabled = false;
-
-				return true;
-			}
-
-			public void OnDestroyActionMode (ActionMode mode)
-			{
-				activity.personGroupsListAdapter.longPressed = false;
-
-				for (int i = 0; i < activity.personGroupsListAdapter.personGroupChecked.Count; ++i)
-				{
-					activity.personGroupsListAdapter.personGroupChecked [i] = false;
-				}
-
-				activity.listView.Adapter = activity.personGroupsListAdapter;
-
-				Button addNewItem = (Button) activity.FindViewById (Resource.Id.add_person_group);
-				addNewItem.Enabled = true;
-			}
-
-			public void OnItemCheckedStateChanged (ActionMode mode, int position, long id, bool @checked)
-			{
-				activity.personGroupsListAdapter.personGroupChecked [position] = @checked;
-				activity.listView.Adapter = activity.personGroupsListAdapter;
-			}
-
-			public bool OnPrepareActionMode (ActionMode mode, IMenu menu)
-			{
-				return false;
+				case Resource.Id.menu_delete_items:
+					DeleteSelectedItems ().Forget ();
+					return true;
+				default:
+					return false;
 			}
 		}
 
-		private class PersonGroupsListAdapter : BaseAdapter
+
+		public bool OnCreateActionMode (ActionMode mode, IMenu menu)
 		{
-			public List<String> personGroupIdList;
-			public List<bool> personGroupChecked;
-			public bool longPressed;
-			private PersonGroupListActivity activity;
+			mode.MenuInflater.Inflate (Resource.Menu.menu_delete_items, menu);
 
-			public PersonGroupsListAdapter (PersonGroupListActivity act)
+			personGroupsListAdapter.LongPressed = true;
+
+			var addNewItem = FindViewById<Button> (Resource.Id.add_person_group);
+			addNewItem.Enabled = false;
+
+			return true;
+		}
+
+
+		public void OnDestroyActionMode (ActionMode mode)
+		{
+			personGroupsListAdapter.LongPressed = false;
+			personGroupsListAdapter.ResetCheckedItems ();
+
+			var addNewItem = FindViewById<Button> (Resource.Id.add_person_group);
+			addNewItem.Enabled = true;
+		}
+
+
+		public bool OnPrepareActionMode (ActionMode mode, IMenu menu)
+		{
+			return false;
+		}
+
+
+		#endregion
+
+
+		class PersonGroupsListAdapter : BaseAdapter<PersonGroup>, CompoundButton.IOnCheckedChangeListener
+		{
+			public bool LongPressed;
+
+			readonly TaskQueue queue = new TaskQueue ();
+			readonly List<PersonGroup> personGroups;
+			List<bool> personGroupChecked;
+
+			public PersonGroupsListAdapter (List<PersonGroup> personGroups)
 			{
-				longPressed = false;
-				personGroupIdList = new List<String> ();
-				personGroupChecked = new List<bool> ();
-				activity = act;
+				this.personGroups = personGroups;
 
-				ICollection<String> personGroupIds = StorageHelper.GetAllPersonGroupIds (activity);
-
-				foreach (String personGroupId in personGroupIds)
-				{
-					personGroupIdList.Add (personGroupId);
-					personGroupChecked.Add (false);
-				}
+				ResetCheckedItems ();
 			}
 
-			public override int Count
-			{
-				get
-				{
-					return personGroupIdList.Count;
-				}
-			}
 
-			public override Java.Lang.Object GetItem (int position)
-			{
-				return personGroupIdList [position];
-			}
+			public override PersonGroup this [int position] => personGroups [position];
 
-			public override long GetItemId (int position)
-			{
-				return position;
-			}
+
+			public override int Count => personGroups.Count;
+
+
+			public override long GetItemId (int position) => position;
+
 
 			public override View GetView (int position, View convertView, ViewGroup parent)
 			{
 				if (convertView == null)
 				{
-					LayoutInflater layoutInflater = (LayoutInflater) Application.Context.GetSystemService (Context.LayoutInflaterService);
+					LayoutInflater layoutInflater = (LayoutInflater) Application.Context.GetSystemService (LayoutInflaterService);
 					convertView = layoutInflater.Inflate (Resource.Layout.item_person_group_with_checkbox, parent, false);
 				}
+
 				convertView.Id = position;
 
-				// set the text of the item
-				String personGroupName = StorageHelper.GetPersonGroupName (
-						personGroupIdList [position], activity);
-				int personNumberInGroup = StorageHelper.GetAllPersonIds (
-						personGroupIdList [position], activity).Count;
-				((TextView) convertView.FindViewById (Resource.Id.text_person_group)).Text =
-					String.Format ("{0} (Person count: {1})", personGroupName, personNumberInGroup);
+				var currentGroup = GetGroup (position);
 
-				// set the checked status of the item
-				CheckBox checkBox = (CheckBox) convertView.FindViewById (Resource.Id.checkbox_person_group);
-				if (longPressed)
+				//int personNumberInGroup = StorageHelper.GetAllPersonIds (currentGroup.Id, context).Count;
+
+				var nameTextView = convertView.FindViewById<TextView> (Resource.Id.text_person_group);
+
+				if (currentGroup.PeopleLoaded)
+				{
+					nameTextView.Text = currentGroup.GetFormattedGroupName ();
+				}
+				else nameTextView.Text = currentGroup.Name;
+
+				var checkBox = convertView.FindViewById<CheckBox> (Resource.Id.checkbox_person_group);
+
+				if (LongPressed)
 				{
 					checkBox.Visibility = ViewStates.Visible;
-					checkBox.SetOnCheckedChangeListener (new SetOnCheckedChangeListener (this, position));
+					checkBox.Tag = position;
+					checkBox.SetOnCheckedChangeListener (this);
 					checkBox.Checked = personGroupChecked [position];
 				}
 				else
@@ -295,24 +281,48 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 					checkBox.Visibility = ViewStates.Invisible;
 				}
 
+				//load the people from the server...
+				if (!currentGroup.PeopleLoaded)
+				{
+					queue.Enqueue (async () => await FaceClient.Shared.GetPeopleForGroup (currentGroup))
+						 .ContinueWith (t =>
+					{
+						nameTextView.Text = currentGroup.GetFormattedGroupName ();
+					}, TaskScheduler.FromCurrentSynchronizationContext ());
+				}
+
 				return convertView;
 			}
 
-			private class SetOnCheckedChangeListener : Java.Lang.Object, CompoundButton.IOnCheckedChangeListener
+
+			public void OnCheckedChanged (CompoundButton buttonView, bool isChecked)
 			{
-				private PersonGroupsListAdapter adapter;
-				private int position;
+				var position = (int) buttonView.Tag;
+				personGroupChecked [position] = isChecked;
+			}
 
-				public SetOnCheckedChangeListener (PersonGroupsListAdapter adap, int pos)
-				{
-					this.adapter = adap;
-					this.position = pos;
-				}
 
-				public void OnCheckedChanged (CompoundButton buttonView, bool isChecked)
-				{
-					adapter.personGroupChecked [position] = isChecked;
-				}
+			public PersonGroup GetGroup (int position)
+			{
+				return personGroups [position];
+			}
+
+
+			public void SetChecked (int position, bool @checked)
+			{
+				personGroupChecked [position] = @checked;
+			}
+
+
+			public PersonGroup [] GetCheckedItems ()
+			{
+				return personGroups.Where ((grp, index) => personGroupChecked [index]).ToArray ();
+			}
+
+
+			public void ResetCheckedItems ()
+			{
+				personGroupChecked = new List<bool> (personGroups.Select (g => false));
 			}
 		}
 	}
