@@ -124,7 +124,8 @@ namespace Xamarin.Cognitive.Face.Sample
 					{
 						Name = groupName,
 						Id = personGroupId,
-						UserData = userData
+						UserData = userData,
+						People = new List<Person> ()
 					};
 
 					Groups.Add (personGroup);
