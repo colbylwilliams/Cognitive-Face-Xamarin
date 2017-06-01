@@ -17,9 +17,7 @@ namespace Xamarin.Cognitive.Face.Sample
 		MPOFaceServiceClient client;
 		MPOFaceServiceClient Client => client ?? (client = new MPOFaceServiceClient (Endpoint, SubscriptionKey));
 
-		public FaceClient ()
-		{
-		}
+		FaceClient () { }
 
 
 		void ProcessError (Foundation.NSError error)
