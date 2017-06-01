@@ -13,7 +13,7 @@ namespace Xamarin.Cognitive.Face.Sample
 	public partial class FaceClient
 	{
 		FaceServiceRestClient client;
-		FaceServiceRestClient Client => client ?? (client = new FaceServiceRestClient (SubscriptionKey));
+		FaceServiceRestClient Client => client ?? (client = new FaceServiceRestClient (Endpoint, SubscriptionKey));
 
 		FaceClient () { }
 
