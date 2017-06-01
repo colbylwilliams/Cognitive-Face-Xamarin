@@ -271,16 +271,16 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 				mProgressDialog.SetMessage ("Getting person group status...");
 				SetInfo ("Getting person group status...");
 
-				Face.Droid.Contract.TrainingStatus trainingStatus = await FaceClient.Shared.GetPersonGroupTrainingStatus (
+				Shared.TrainingStatus trainingStatus = await FaceClient.Shared.GetGroupTrainingStatus (
 						this.mPersonGroupId);     /* personGroupId */
 
-				//if (trainingStatus.Status != Face.Droid.Contract.TrainingStatus.TrainingStatusType.Succeeded)
-				//{
-				//	mProgressDialog.SetMessage("Person group training status is " + trainingStatus.Status);
-				//	SetInfo("Person group training status is " + trainingStatus.Status);
+				if (trainingStatus.Status != Shared.TrainingStatus.TrainingStatusType.Succeeded)
+				{
+					mProgressDialog.SetMessage("Person group training status is " + trainingStatus.Status);
+					SetInfo("Person group training status is " + trainingStatus.Status);
 
-				//	mSucceed = false;
-				//}
+					mSucceed = false;
+				}
 
 				mProgressDialog.SetMessage ("Identifying...");
 				SetInfo ("Identifying...");
