@@ -10,31 +10,37 @@ using Android.Widget;
 
 namespace Xamarin.Cognitive.Face.Sample.Droid
 {
-	[Activity (Label = "@string/grouping_log",
-			  ParentActivity = typeof (GroupingActivity),
+	[Activity (Label = "@string/identification_log",
+			  ParentActivity = typeof (IdentificationActivity),
 			  ScreenOrientation = ScreenOrientation.Portrait)]
-	public class GroupingLogActivity : AppCompatActivity
+	public class IdentificationLogActivity : AppCompatActivity
 	{
+		private ListView logListView = null;
+
 		protected override void OnCreate (Bundle savedInstanceState)
 		{
 			base.OnCreate (savedInstanceState);
 
 			// Create your application here
-			SetContentView (Resource.Layout.activity_grouping_log);
+			SetContentView (Resource.Layout.activity_identification_log);
 
-			LogAdapter logAdapter = new LogAdapter (this);
-			ListView listView = (ListView) FindViewById (Resource.Id.log);
-			listView.Adapter = logAdapter;
+			logListView = FindViewById<ListView> (Resource.Id.log);
+			logListView.Adapter = new LogAdapter (this);
+		}
+
+		protected override void OnDestroy ()
+		{
+			base.OnDestroy ();
 		}
 
 		private class LogAdapter : BaseAdapter
 		{
 			private List<string> log;
-			private GroupingLogActivity activity;
+			private IdentificationLogActivity activity;
 
-			public LogAdapter (GroupingLogActivity act)
+			public LogAdapter (IdentificationLogActivity act)
 			{
-				this.log = LogHelper.GetGroupingLog ();
+				this.log = LogHelper.GetIdentificationLog();
 				this.activity = act;
 			}
 

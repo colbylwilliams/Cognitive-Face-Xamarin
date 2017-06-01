@@ -350,11 +350,6 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 				if (result != null)
 				{
-					//
-					// Issue: can't get content arrays from Groups always return null.
-					// Steps to repro: Select the same image twice, select a third different image and then group.
-					//
-
 					foreach (Java.Lang.Object o in result.Groups)
 					{
 						var arr = o.ToArray<UUID> ();
@@ -377,8 +372,6 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 			public override Java.Lang.Object GetItem (int position)
 			{
-				//return faceGroups [position].;
-
 				return null;
 			}
 
@@ -420,7 +413,6 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			public FacesAdapter (List<UUID> result, GroupingActivity act)
 			{
 				faces = new List<UUID> ();
-				//faces.AddAll (0, result);
 				faces.AddRange (result);
 				activity = act;
 			}

@@ -14,9 +14,6 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 		{
 			base.OnMeasure (widthMeasureSpec, heightMeasureSpec);
 			int newHeightMeasureSpec = MeasureSpec.MakeMeasureSpec (MeasuredSizeMask, MeasureSpecMode.AtMost);
-
-			//LayoutParameters.Height = this.SelectedView.MeasuredHeight;
 		}
-
 	}
 }

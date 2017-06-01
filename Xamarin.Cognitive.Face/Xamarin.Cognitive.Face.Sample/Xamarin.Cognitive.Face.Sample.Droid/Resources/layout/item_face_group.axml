@@ -10,8 +10,9 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
+        android:textColor="@android:color/black"
         android:layout_marginBottom="@dimen/view_margin" />
-    <com.rcervantes.xamarinfaceapi_droid.helpers.EmbeddedGridView
+    <Xamarin.Cognitive.Face.Sample.Droid.EmbeddedGridView
         android:id="@+id/faces"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

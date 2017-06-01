@@ -435,5 +435,37 @@ namespace Xamarin.Cognitive.Face.Sample
 				 return Client.Group (faceIds);
 			 });
 		}
+
+		public Task<Face.Droid.Contract.SimilarFace []> FindSimilar (UUID mFaceId, UUID [] mFaceIds, int mMaxNumOfCandidatesReturned)
+		{
+			return Task.Run (() =>
+			 {
+				 return Client.FindSimilar (mFaceId, mFaceIds, mMaxNumOfCandidatesReturned);
+			 });
+		}
+
+		public Task<Face.Droid.Contract.SimilarFace []> FindSimilar (UUID mFaceId, UUID [] mFaceIds, int mMaxNumOfCandidatesReturned, FaceServiceClientFindSimilarMatchMode mMode)
+		{
+			return Task.Run (() =>
+			 {
+				 return Client.FindSimilar (mFaceId, mFaceIds, mMaxNumOfCandidatesReturned, mMode);
+			 });
+		}
+
+		public Task<Face.Droid.Contract.TrainingStatus> GetPersonGroupTrainingStatus (string mPersonGroupId)
+		{
+			return Task.Run (() =>
+			 {
+				 return Client.GetPersonGroupTrainingStatus (mPersonGroupId);
+			 });
+		}
+
+		public Task<Face.Droid.Contract.IdentifyResult []> Identity (string mPersonGroupId, UUID [] mFaceIds, int maxNumOfCandidatesReturned)
+		{
+			return Task.Run (() =>
+			 {
+				 return Client.Identity (mPersonGroupId, mFaceIds, maxNumOfCandidatesReturned);
+			 });
+		}
 	}
 }

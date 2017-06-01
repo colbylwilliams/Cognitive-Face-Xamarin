@@ -3,7 +3,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.rcervantes.xamarinfaceapi_droid.persongroupmanagement.PersonGroupListActivity">
+    tools:context="Xamarin.Cognitive.Face.Sample.Droid.PersonGroupListActivity">
     <item android:id="@+id/menu_delete_items"
         app:showAsAction="ifRoom"
         android:title="@string/delete" />

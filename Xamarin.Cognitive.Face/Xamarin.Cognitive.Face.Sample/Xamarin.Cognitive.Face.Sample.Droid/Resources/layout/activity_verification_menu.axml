@@ -7,7 +7,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context="com.rcervantes.xamarinfaceapi_droid.ui.VerificationMenuActivity"
+    tools:context="Xamarin.Cognitive.Face.Sample.Droid.VerificationMenuActivity"
     android:layout_alignParentTop="true"
     android:orientation="vertical">
     <Button

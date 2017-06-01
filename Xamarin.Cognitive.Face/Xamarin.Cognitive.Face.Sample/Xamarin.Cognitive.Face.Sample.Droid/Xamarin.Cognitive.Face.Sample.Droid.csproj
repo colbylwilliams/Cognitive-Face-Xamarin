@@ -106,17 +106,19 @@
     <Compile Include="persongroupmanagement\PersonActivity.cs" />
     <Compile Include="persongroupmanagement\PersonGroupActivity.cs" />
     <Compile Include="persongroupmanagement\PersonGroupListActivity.cs" />
-    <Compile Include="UI\DetectionActivity.cs" />
-    <Compile Include="UI\FaceVerificationActivity.cs" />
-    <Compile Include="UI\FindSimilarFaceActivity.cs" />
-    <Compile Include="UI\GroupingActivity.cs" />
-    <Compile Include="UI\IdentificationActivity.cs" />
-    <Compile Include="UI\MainActivity.cs" />
-    <Compile Include="UI\PersonVerificationActivity.cs" />
-    <Compile Include="UI\SelectImageActivity.cs" />
-    <Compile Include="UI\VerificationMenuActivity.cs" />
+    <Compile Include="ui\DetectionActivity.cs" />
+    <Compile Include="ui\FaceVerificationActivity.cs" />
+    <Compile Include="ui\FindSimilarFaceActivity.cs" />
+    <Compile Include="ui\GroupingActivity.cs" />
+    <Compile Include="ui\IdentificationActivity.cs" />
+    <Compile Include="ui\MainActivity.cs" />
+    <Compile Include="ui\PersonVerificationActivity.cs" />
+    <Compile Include="ui\SelectImageActivity.cs" />
+    <Compile Include="ui\VerificationMenuActivity.cs" />
     <Compile Include="FaceDemoApp.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
+    <Compile Include="log\FindSimilarFaceLogActivity.cs" />
+    <Compile Include="log\IdentificationLogActivity.cs" />
     <Compile Include="Extensions\FaceExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -162,6 +164,9 @@
     <AndroidResource Include="Resources\values\dimens.xml" />
     <AndroidResource Include="Resources\values\styles.xml" />
     <AndroidResource Include="Resources\values-w820dp\dimens.xml" />
+    <AndroidResource Include="Resources\layout\activity_identification_log.axml" />
+    <AndroidResource Include="Resources\layout\activity_grouping_log.axml" />
+    <AndroidResource Include="Resources\layout\activity_find_similar_face_log.axml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\drawable\" />

@@ -7,7 +7,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context="com.rcervantes.xamarinfaceapi_droid.ui.FindSimilarFaceActivity">
+    tools:context="Xamarin.Cognitive.Face.Sample.Droid.FindSimilarFaceActivity">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -45,7 +45,6 @@
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentStart="true"
                     android:text="@string/add_faces"
-                    android:onClick="addFaces"
                     style="@style/ButtonStyle" />
             </RelativeLayout>
             <GridView
@@ -85,7 +84,6 @@
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentStart="true"
                     android:text="@string/select_image"
-                    android:onClick="selectImage"
                     style="@style/ButtonStyle" />
             </RelativeLayout>
             <ListView
@@ -157,7 +155,6 @@
             android:layout_marginRight="@dimen/view_margin"
             android:layout_marginEnd="@dimen/view_margin"
             android:text="@string/find_similar_faces"
-            android:onClick="findSimilarFaces"
             style="@style/ButtonStyle" />
         <Button
             android:id="@id/view_log"
@@ -165,7 +162,6 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="@string/view_log"
-            android:onClick="viewLog"
             style="@style/ButtonStyle" />
     </LinearLayout>
 </RelativeLayout>
