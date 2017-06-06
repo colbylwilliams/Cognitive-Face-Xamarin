@@ -1,17 +1,30 @@
-﻿namespace Xamarin.Cognitive.Face.Sample.Shared.Extensions
+﻿using System;
+
+namespace Xamarin.Cognitive.Face.Sample.Shared.Extensions
 {
 	public static class StringExtensions
 	{
 		#region Fmt
 
-		public static string Fmt(this string text, params object[] args) => string.Format(text, args);
 
-		public static string Fmt(this string text, object arg1) => string.Format(text, arg1);
+		public static string Fmt (this string text, params object [] args) => string.Format (text, args);
 
-		public static string Fmt(this string text, object arg1, object arg2) => string.Format(text, arg1, arg2);
 
-		public static string Fmt(this string text, object arg1, object arg2, object arg3) => string.Format(text, arg1, arg2, arg3);
+		public static string Fmt (this string text, object arg1) => string.Format (text, arg1);
+
+
+		public static string Fmt (this string text, object arg1, object arg2) => string.Format (text, arg1, arg2);
+
+
+		public static string Fmt (this string text, object arg1, object arg2, object arg3) => string.Format (text, arg1, arg2, arg3);
+
 
 		#endregion
+
+
+		public static TEnum AsEnum<TEnum> (this string str, bool caseInsensitive = true)
+		{
+			return (TEnum) Enum.Parse (typeof (TEnum), str, caseInsensitive);
+		}
 	}
 }
