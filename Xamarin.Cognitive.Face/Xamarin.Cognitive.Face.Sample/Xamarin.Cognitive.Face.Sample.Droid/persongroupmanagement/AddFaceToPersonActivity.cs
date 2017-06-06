@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Android.App;
@@ -11,8 +10,8 @@ using Android.OS;
 using Android.Support.V7.App;
 using Android.Views;
 using Android.Widget;
-using Java.IO;
-using Java.Util;
+using NomadCode.UIExtensions;
+using Xamarin.Cognitive.Face.Sample.Droid.Extensions;
 using Xamarin.Cognitive.Face.Sample.Shared;
 
 namespace Xamarin.Cognitive.Face.Sample.Droid
@@ -23,7 +22,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 	public class AddFaceToPersonActivity : AppCompatActivity
 	{
 		string imageUri;
-		Bitmap bitmap;
+		Bitmap sourceImage;
 		FaceGridViewAdapter faceGridViewAdapter;
 		ProgressDialog progressDialog;
 		Button done_and_save;
@@ -60,9 +59,10 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			done_and_save.Click += Done_And_Save_Click;
 
 			var uri = global::Android.Net.Uri.Parse (imageUri);
-			bitmap = ImageHelper.LoadSizeLimitedBitmapFromUri (uri, ContentResolver);
 
-			if (bitmap != null)
+			sourceImage = ContentResolver.LoadSizeLimitedBitmapFromUri (uri);
+
+			if (sourceImage != null)
 			{
 				await ExecuteDetection ();
 			}
@@ -77,79 +77,34 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 		}
 
 
-		//protected override void OnSaveInstanceState (Bundle outState)
-		//{
-		//	base.OnSaveInstanceState (outState);
-		//	outState.PutString ("PersonId", mPersonId);
-		//	outState.PutString ("PersonGroupId", mPersonGroupId);
-		//	outState.PutString ("ImageUriStr", mImageUriStr);
-		//}
-
-		//protected override void OnRestoreInstanceState (Bundle savedInstanceState)
-		//{
-		//	base.OnRestoreInstanceState (savedInstanceState);
-		//	mPersonId = savedInstanceState.GetString ("PersonId");
-		//	mPersonGroupId = savedInstanceState.GetString ("PersonGroupId");
-		//	mImageUriStr = savedInstanceState.GetString ("ImageUriStr");
-		//}
-
 		async Task ExecuteDetection ()
 		{
-			Face.Droid.Contract.Face [] faces = null;
-
 			progressDialog.Show ();
 			AddLog ("Request: Detecting " + imageUri);
 
 			try
 			{
-				using (MemoryStream pre_output = new MemoryStream ())
+				var faces = await FaceClient.Shared.DetectFacesInPhoto (sourceImage);
+
+				if (faces?.Count > 0)
 				{
-					bitmap.Compress (Bitmap.CompressFormat.Jpeg, 100, pre_output);
-
-					using (ByteArrayInputStream inputStream = new ByteArrayInputStream (pre_output.ToArray ()))
-					{
-						byte [] arr = new byte [inputStream.Available ()];
-						inputStream.Read (arr);
-						var output = new MemoryStream (arr);
-
-						progressDialog.SetMessage ("Detecting...");
-						SetInfo ("Detecting...");
-						faces = await FaceClient.Shared.Detect (output, true, false, null);
-					}
-
-					var faces_count = faces?.Length ?? 0;
-					AddLog ($"Response: Success. Detected {faces_count} Face(s)");
-
-					SetUiAfterDetection (faces, true);
-				}
-			}
-			catch (Exception e)
-			{
-				AddLog (e.Message);
-				SetUiAfterDetection (faces, false);
-			}
-		}
-
-
-		void SetUiAfterDetection (Face.Droid.Contract.Face [] result, bool succeed)
-		{
-			progressDialog.Dismiss ();
-
-			if (succeed)
-			{
-				if (result != null)
-				{
-					SetInfo (result.Count ().ToString () + " face"
-							+ (result.Count () != 1 ? "s" : "") + " detected");
+					SetInfo (faces.Count.ToString () + " face"
+							+ (faces.Count != 1 ? "s" : "") + " detected");
 				}
 				else
 				{
 					SetInfo ("0 face detected");
 				}
 
-				//faceGridViewAdapter = new FaceGridViewAdapter (result, this);
-				//gridView.Adapter = faceGridViewAdapter;
+				faceGridViewAdapter = new FaceGridViewAdapter (faces, sourceImage);
+				gridView.Adapter = faceGridViewAdapter;
 			}
+			catch (Exception e)
+			{
+				AddLog (e.Message);
+			}
+
+			progressDialog.Dismiss ();
 		}
 
 
@@ -157,19 +112,11 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 		{
 			if (faceGridViewAdapter != null)
 			{
-				var faceIndices = new List<int> ();
+				var checkedFaces = faceGridViewAdapter.GetCheckedItems ();
 
-				for (int i = 0; i < faceGridViewAdapter.faceRectList.Count; ++i)
+				if (checkedFaces.Length > 0)
 				{
-					if (faceGridViewAdapter.faceChecked [i])
-					{
-						faceIndices.Add (i);
-					}
-				}
-
-				if (faceIndices.Count > 0)
-				{
-					await ExecuteFaceTask (faceIndices);
+					await ExecuteFaceTask (checkedFaces);
 				}
 				else
 				{
@@ -179,84 +126,36 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 		}
 
 
-		async Task ExecuteFaceTask (List<int> mFaceIndices)
+		async Task ExecuteFaceTask (Shared.Face [] faces)
 		{
-			Face.Droid.Contract.AddPersistedFaceResult result = null;
-			//bool mSucceed = true;
-
 			progressDialog.Show ();
 
 			try
 			{
-				using (MemoryStream pre_output = new MemoryStream ())
+				progressDialog.SetMessage ("Adding face...");
+				SetInfo ("Adding face...");
+
+				foreach (var face in faces)
 				{
-					if (!bitmap.Compress (Bitmap.CompressFormat.Jpeg, 100, pre_output))
-					{
+					AddLog ($"Request: Adding face to person {Person.Id}");
 
-					}
+					await FaceClient.Shared.AddFaceForPerson (Person, Group, face, sourceImage);
 
-					using (ByteArrayInputStream inputStream = new ByteArrayInputStream (pre_output.ToArray ()))
-					{
-						var bytes = new byte [inputStream.Available ()];
-						inputStream.Read (bytes);
-						var output = new MemoryStream (bytes);
-
-						progressDialog.SetMessage ("Adding face...");
-						SetInfo ("Adding face...");
-
-						foreach (int index in mFaceIndices)
-						{
-							Face.Droid.Contract.FaceRectangle faceRect = faceGridViewAdapter.faceRectList [index];
-							AddLog ($"Request: Adding face to person {Person.Id}");
-
-							//result = await FaceClient.Shared.AddFaceForPerson (Person, Group, face, output, "User data", faceRect);
-
-							faceGridViewAdapter.faceIdList [index] = result.PersistedFaceId;
-						}
-					}
+					var uri = global::Android.Net.Uri.Parse (face.PhotoPath);
+					StorageHelper.SetFaceUri (face.Id, uri.ToString (), Person.Id, this);
 				}
+
+				AddLog ("Response: Success. Face(s) " + string.Join (", ", faces.Select (f => f.Id)) + "added to person " + Person.Id);
+
+				Finish ();
 			}
 			catch (Exception e)
 			{
-				//mSucceed = false;
+				Log.Error (e);
 				AddLog (e.Message);
 			}
 
-			//RunOnUiThread (() =>
-			//{
-			//	progressDialog.Dismiss ();
-
-			//	if (mSucceed)
-			//	{
-			//		string faceIds = "";
-
-			//		foreach (int index in mFaceIndices)
-			//		{
-			//			string faceId = faceGridViewAdapter.faceIdList [index].ToString ();
-			//			faceIds += faceId + ", ";
-
-			//			try
-			//			{
-			//				var file = System.IO.Path.Combine (Application.Context.FilesDir.Path, faceId);
-
-			//				using (var fs = new FileStream (file, FileMode.OpenOrCreate))
-			//				{
-			//					faceGridViewAdapter.faceThumbnails [index].Compress (Bitmap.CompressFormat.Jpeg, 100, fs);
-			//				}
-
-			//				var uri = global::Android.Net.Uri.Parse (file);
-			//				StorageHelper.SetFaceUri (faceId, uri.ToString (), mPersonId, this);
-			//			}
-			//			catch (Java.IO.IOException e)
-			//			{
-			//				SetInfo (e.Message);
-			//			}
-			//		}
-
-			//		AddLog ("Response: Success. Face(s) " + faceIds + "added to person " + mPersonId);
-			//		Finish ();
-			//	}
-			//});
+			progressDialog.Dismiss ();
 		}
 
 
@@ -273,71 +172,52 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 		}
 
 
-		class FaceGridViewAdapter : BaseAdapter, CompoundButton.IOnCheckedChangeListener
+		class FaceGridViewAdapter : BaseAdapter<Shared.Face>, CompoundButton.IOnCheckedChangeListener
 		{
-			public List<UUID> faceIdList;
-			public List<Face.Droid.Contract.FaceRectangle> faceRectList;
-			public List<Bitmap> faceThumbnails;
-			public List<bool> faceChecked;
+			List<Shared.Face> detectedFaces;
+			List<Bitmap> faceThumbnails;
+			List<bool> faceChecked;
+			Bitmap photo;
 
-			public FaceGridViewAdapter (Face.Droid.Contract.Face [] detectionResult)
+			public FaceGridViewAdapter (List<Shared.Face> detectedFaces, Bitmap photo)
 			{
-				faceIdList = new List<UUID> ();
-				faceRectList = new List<Face.Droid.Contract.FaceRectangle> ();
+				this.detectedFaces = detectedFaces;
+				this.photo = photo;
+
 				faceThumbnails = new List<Bitmap> ();
-				faceChecked = new List<bool> ();
-				//activity = act;
 
-				if (detectionResult != null)
+				if (detectedFaces != null)
 				{
-					List<Face.Droid.Contract.Face> faces = detectionResult.ToList ();
+					foreach (var face in detectedFaces)
+					{
+						try
+						{
+							faceThumbnails.Add (photo.Crop (face.FaceRectangleLarge ?? face.FaceRectangle));
+						}
+						catch (Exception ex)
+						{
+							Log.Error (ex);
+						}
+					}
 
-					//foreach (Face.Droid.Contract.Face face in faces)
-					//{
-					//	try
-					//	{
-					//		faceThumbnails.Add (ImageHelper.GenerateFaceThumbnail (activity.mBitmap, face.FaceRectangle));
-
-					//		faceIdList.Add (null);
-					//		faceRectList.Add (face.FaceRectangle);
-
-					//		faceChecked.Add (false);
-					//	}
-					//	catch (Java.IO.IOException e)
-					//	{
-					//		activity.SetInfo (e.Message);
-					//	}
-					//}
+					ResetCheckedItems ();
 				}
 			}
 
-
-			public override int Count
-			{
-				get
-				{
-					return faceRectList.Count;
-				}
-			}
+			public override Shared.Face this [int position] => detectedFaces [position];
 
 
-			public override Java.Lang.Object GetItem (int position)
-			{
-				return faceRectList [position];
-			}
+			public override int Count => detectedFaces.Count;
 
 
-			public override long GetItemId (int position)
-			{
-				return position;
-			}
+			public override long GetItemId (int position) => position;
 
 
 			public override View GetView (int position, View convertView, ViewGroup parent)
 			{
 				if (convertView == null)
 				{
-					LayoutInflater layoutInflater = (LayoutInflater) Application.Context.GetSystemService (Context.LayoutInflaterService);
+					LayoutInflater layoutInflater = (LayoutInflater) Application.Context.GetSystemService (LayoutInflaterService);
 					convertView = layoutInflater.Inflate (Resource.Layout.item_face_with_checkbox, parent, false);
 				}
 
@@ -345,7 +225,8 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 				convertView.FindViewById<ImageView> (Resource.Id.image_face).SetImageBitmap (faceThumbnails [position]);
 
-				CheckBox checkBox = convertView.FindViewById<CheckBox> (Resource.Id.checkbox_face);
+				var checkBox = convertView.FindViewById<CheckBox> (Resource.Id.checkbox_face);
+				checkBox.Tag = position;
 				checkBox.Checked = faceChecked [position];
 				checkBox.SetOnCheckedChangeListener (this);
 
@@ -355,7 +236,20 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 			public void OnCheckedChanged (CompoundButton buttonView, bool isChecked)
 			{
-				//adapter.faceChecked [position] = isChecked;
+				var position = (int) buttonView.Tag;
+				faceChecked [position] = isChecked;
+			}
+
+
+			public Shared.Face [] GetCheckedItems ()
+			{
+				return detectedFaces.Where ((f, index) => faceChecked [index]).ToArray ();
+			}
+
+
+			public void ResetCheckedItems ()
+			{
+				faceChecked = new List<bool> (detectedFaces.Select (g => false));
 			}
 		}
 	}

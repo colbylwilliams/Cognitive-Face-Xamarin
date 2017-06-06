@@ -80,10 +80,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 				FaceState.Current.CurrentGroup = personGroup;
 
-				Intent intent = new Intent (this, typeof (PersonGroupActivity));
-				//intent.PutExtra ("AddNewPersonGroup", false);
-				//intent.PutExtra ("PersonGroupName", personGroup.Name);
-				//intent.PutExtra ("PersonGroupId", personGroupId);
+				var intent = new Intent (this, typeof (PersonGroupActivity));
 
 				StartActivity (intent);
 			}
@@ -92,12 +89,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 		void Add_Person_Group_Click (object sender, EventArgs e)
 		{
-			//var personGroupId = UUID.RandomUUID ().ToString ();
-
-			Intent intent = new Intent (this, typeof (PersonGroupActivity));
-			//intent.PutExtra ("AddNewPersonGroup", true);
-			//intent.PutExtra ("PersonGroupName", "");
-			//intent.PutExtra ("PersonGroupId", personGroupId);
+			var intent = new Intent (this, typeof (PersonGroupActivity));
 
 			StartActivity (intent);
 		}
@@ -249,7 +241,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			{
 				if (convertView == null)
 				{
-					LayoutInflater layoutInflater = (LayoutInflater) Application.Context.GetSystemService (LayoutInflaterService);
+					var layoutInflater = (LayoutInflater) Application.Context.GetSystemService (LayoutInflaterService);
 					convertView = layoutInflater.Inflate (Resource.Layout.item_person_group_with_checkbox, parent, false);
 				}
 

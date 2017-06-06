@@ -55,20 +55,35 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			add_person.Click += Add_Person_Click;
 			done_and_save.Click += Done_And_Save_Click;
 
-			if (Group != null)
+			try
 			{
-				var editTextPersonGroupName = FindViewById<EditText> (Resource.Id.edit_person_group_name);
-				editTextPersonGroupName.Text = Group.Name;
-
-				if (!Group.PeopleLoaded)
+				if (Group != null)
 				{
-					await FaceClient.Shared.GetPeopleForGroup (Group);
+					var editTextPersonGroupName = FindViewById<EditText> (Resource.Id.edit_person_group_name);
+					editTextPersonGroupName.Text = Group.Name;
+
+					if (!Group.PeopleLoaded)
+					{
+						await FaceClient.Shared.GetPeopleForGroup (Group);
+					}
+
+					foreach (var person in Group.People)
+					{
+						if (person.Faces?.Count == 0)
+						{
+							await FaceClient.Shared.GetFacesForPerson (person, Group);
+						}
+					}
+
+					personGridViewAdapter = new PersonGridViewAdapter (Group, this);
+					gridView.Adapter = personGridViewAdapter;
+
+					await CheckTrainingStatus ();
 				}
-
-				personGridViewAdapter = new PersonGridViewAdapter (Group, this);
-				gridView.Adapter = personGridViewAdapter;
-
-				await CheckTrainingStatus ();
+			}
+			catch (Exception ex)
+			{
+				Log.Error ($"Error getting people/faces for group :: {ex.Message}");
 			}
 		}
 
@@ -164,7 +179,6 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			}
 			catch (Exception e)
 			{
-				//result = null;
 				AddLog (e.Message);
 			}
 
@@ -179,7 +193,6 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			var intent = new Intent (this, typeof (PersonActivity));
 			intent.PutExtra ("AddNewPerson", true);
 			intent.PutExtra ("PersonName", "");
-			//intent.PutExtra ("PersonGroupId", personGroupId);
 
 			StartActivity (intent);
 		}
