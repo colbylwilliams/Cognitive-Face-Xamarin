@@ -12,6 +12,7 @@ using Android.Views;
 using Android.Widget;
 using Java.IO;
 using Java.Util;
+using Xamarin.Cognitive.Face.Sample.Droid.Extensions;
 
 namespace Xamarin.Cognitive.Face.Sample.Droid
 {
@@ -370,8 +371,8 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 					 SetInfo (resultString);
 				 }
 
-				// Show the result on screen when verification is done.
-				SetUiAfterFindPersonalSimilarFaces (faces);
+				 // Show the result on screen when verification is done.
+				 SetUiAfterFindPersonalSimilarFaces (faces);
 			 });
 		}
 
@@ -416,8 +417,8 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 							 + " matchFace similar face" + ((faces != null && faces.Length != 1) ? "s" : ""));
 				 }
 
-				// Show the result on screen when verification is done.
-				SetUiAfterFindFacialSimilarFaces (faces);
+				 // Show the result on screen when verification is done.
+				 SetUiAfterFindFacialSimilarFaces (faces);
 			 });
 		}
 
@@ -497,11 +498,11 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 				activity = act;
 			}
 
-			public void AddFaces (Face.Droid.Contract.Face[] detectionResult, Bitmap mBitmap)
+			public void AddFaces (Face.Droid.Contract.Face [] detectionResult, Bitmap mBitmap)
 			{
 				if (detectionResult != null)
 				{
-					List<Face.Droid.Contract.Face> detectedFaces = detectionResult.ToList();
+					List<Face.Droid.Contract.Face> detectedFaces = detectionResult.ToList ();
 					foreach (Face.Droid.Contract.Face face in detectedFaces)
 					{
 						faces.Add (face);
@@ -566,15 +567,15 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			private List<Face.Droid.Contract.SimilarFace> similarFaces;
 			private FindSimilarFaceActivity activity;
 
-			public SimilarFaceListAdapter (Face.Droid.Contract.SimilarFace[] findSimilarFaceResult, FindSimilarFaceActivity act)
+			public SimilarFaceListAdapter (Face.Droid.Contract.SimilarFace [] findSimilarFaceResult, FindSimilarFaceActivity act)
 			{
 				if (findSimilarFaceResult != null)
 				{
-					similarFaces = findSimilarFaceResult.ToList();
+					similarFaces = findSimilarFaceResult.ToList ();
 				}
 				else
 				{
-					similarFaces = new List<Face.Droid.Contract.SimilarFace>();
+					similarFaces = new List<Face.Droid.Contract.SimilarFace> ();
 				}
 				activity = act;
 			}

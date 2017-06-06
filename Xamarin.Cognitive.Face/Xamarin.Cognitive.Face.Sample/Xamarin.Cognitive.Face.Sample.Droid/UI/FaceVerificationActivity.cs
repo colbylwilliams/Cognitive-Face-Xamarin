@@ -15,6 +15,7 @@ using Java.Text;
 using Java.Util;
 using Xamarin.Cognitive.Face.Droid;
 using Xamarin.Cognitive.Face.Droid.Contract;
+using Xamarin.Cognitive.Face.Sample.Droid.Extensions;
 
 namespace Xamarin.Cognitive.Face.Sample.Droid
 {

@@ -13,6 +13,7 @@ using Android.Widget;
 using Java.IO;
 using Java.Util;
 using Java.Text;
+using Xamarin.Cognitive.Face.Sample.Droid.Extensions;
 
 namespace Xamarin.Cognitive.Face.Sample.Droid
 {
@@ -307,8 +308,8 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 				 if (mSucceed)
 				 {
-					// Set the information about the detection result.
-					SetInfo ("Identification is done");
+					 // Set the information about the detection result.
+					 SetInfo ("Identification is done");
 
 					 if (result != null)
 					 {
@@ -325,8 +326,8 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 						 }
 						 AddLog (logString);
 
-						// Show the detailed list of detected faces.
-						ListView listView = (ListView) FindViewById (Resource.Id.list_identified_faces);
+						 // Show the detailed list of detected faces.
+						 ListView listView = (ListView) FindViewById (Resource.Id.list_identified_faces);
 						 listView.Adapter = mFaceListAdapter;
 					 }
 				 }
@@ -372,8 +373,8 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 				 if (faces != null)
 				 {
-					// Set the adapter of the ListView which contains the details of detected faces.
-					mFaceListAdapter = new FaceListAdapter (faces, this);
+					 // Set the adapter of the ListView which contains the details of detected faces.
+					 mFaceListAdapter = new FaceListAdapter (faces, this);
 					 ListView listView = (ListView) FindViewById (Resource.Id.list_identified_faces);
 					 listView.Adapter = mFaceListAdapter;
 
@@ -429,7 +430,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 				if (detectionResult != null)
 				{
-					faces = detectionResult.ToList();
+					faces = detectionResult.ToList ();
 					foreach (Face.Droid.Contract.Face face in faces)
 					{
 						try
