@@ -179,6 +179,7 @@
       <Name>Cognitive.Face.Droid</Name>
     </ProjectReference>
   </ItemGroup>
+  <Import Project="..\Modules\NomadCode.UIExtensions\NomadCode.UIExtensions\NomadCode.UIExtensions\NomadCode.UIExtensions.projitems" Label="Shared" Condition="Exists('..\Modules\NomadCode.UIExtensions\NomadCode.UIExtensions\NomadCode.UIExtensions\NomadCode.UIExtensions.projitems')" />
   <Import Project="..\Xamarin.Cognitive.Face.Sample.Shared\Xamarin.Cognitive.Face.Sample.Shared.projitems" Label="Shared" Condition="Exists('..\Xamarin.Cognitive.Face.Sample.Shared\Xamarin.Cognitive.Face.Sample.Shared.projitems')" />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <Import Project="..\..\packages\Xamarin.Build.Download.0.4.3\build\Xamarin.Build.Download.targets" Condition="Exists('..\..\packages\Xamarin.Build.Download.0.4.3\build\Xamarin.Build.Download.targets')" />
