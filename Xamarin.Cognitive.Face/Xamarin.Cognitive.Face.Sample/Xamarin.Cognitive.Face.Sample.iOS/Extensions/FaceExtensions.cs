@@ -7,6 +7,7 @@ using Foundation;
 using NomadCode.UIExtensions;
 using UIKit;
 using Xamarin.Cognitive.Face.iOS;
+using Xamarin.Cognitive.Face.Sample.Shared.Extensions;
 
 namespace Xamarin.Cognitive.Face.Sample.iOS.Extensions
 {
@@ -91,6 +92,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS.Extensions
 			{
 				Id = mpoFace.FaceId,
 				FaceRectangle = rect,
+				Landmarks = mpoFace.FaceLandmarks?.ToFaceLandmarks (),
 				Attributes = mpoFace.Attributes?.ToFaceAttributes ()
 			};
 
@@ -114,6 +116,53 @@ namespace Xamarin.Cognitive.Face.Sample.iOS.Extensions
 		}
 
 
+		public static FaceLandmarks ToFaceLandmarks (this MPOFaceLandmarks landmarks)
+		{
+			return new FaceLandmarks
+			{
+				EyebrowLeftInner = landmarks.EyebrowLeftInner.ToFeatureCoordinate (),
+				EyebrowLeftOuter = landmarks.EyebrowLeftOuter.ToFeatureCoordinate (),
+				EyebrowRightInner = landmarks.EyebrowLeftInner.ToFeatureCoordinate (),
+				//EyebrowRightOuter = landmarks.EyebrowRightOuter.ToFeatureCoordinate (),
+				EyebrowRightOuter = null,
+				EyeLeftBottom = landmarks.EyeLeftBottom.ToFeatureCoordinate (),
+				EyeLeftInner = landmarks.EyeLeftInner.ToFeatureCoordinate (),
+				EyeLeftOuter = landmarks.EyeLeftOuter.ToFeatureCoordinate (),
+				EyeRightBottom = landmarks.EyeRightBottom.ToFeatureCoordinate (),
+				EyeRightInner = landmarks.EyeRightInner.ToFeatureCoordinate (),
+				EyeRightOuter = landmarks.EyeRightOuter.ToFeatureCoordinate (),
+				MouthLeft = landmarks.MouthLeft.ToFeatureCoordinate (),
+				MouthRight = landmarks.MouthRight.ToFeatureCoordinate (),
+				NoseLeftAlarOutTip = landmarks.NoseLeftAlarOutTip.ToFeatureCoordinate (),
+				NoseLeftAlarTop = landmarks.NoseLeftAlarTop.ToFeatureCoordinate (),
+				NoseRightAlarOutTip = landmarks.NoseRightAlarOutTip.ToFeatureCoordinate (),
+				//NoseRightAlarTop = landmarks.NoseRightAlarTop.ToFeatureCoordinate (),
+				NoseRightAlarTop = null,
+				NoseRootLeft = landmarks.NoseRootLeft.ToFeatureCoordinate (),
+				EyeLeftTop = landmarks.EyeLeftTop.ToFeatureCoordinate (),
+				EyeRightTop = landmarks.EyeRightTop.ToFeatureCoordinate (),
+				NoseRootRight = landmarks.NoseRootRight.ToFeatureCoordinate (),
+				NoseTip = landmarks.NoseTip.ToFeatureCoordinate (),
+				PupilLeft = landmarks.PupilLeft.ToFeatureCoordinate (),
+				PupilRight = landmarks.PupilRight.ToFeatureCoordinate (),
+				UnderLipBottom = landmarks.UnderLipBottom.ToFeatureCoordinate (),
+				UnderLipTop = landmarks.UnderLipTop.ToFeatureCoordinate (),
+				UpperLipBottom = landmarks.UpperLipBottom.ToFeatureCoordinate (),
+				UpperLipTop = landmarks.UpperLipTop.ToFeatureCoordinate ()
+			};
+		}
+
+
+		public static FeatureCoordinate ToFeatureCoordinate (this MPOFaceFeatureCoordinate feature)
+		{
+			return new FeatureCoordinate
+			{
+				X = feature.X,
+				Y = feature.Y
+			};
+		}
+
+
 		public static FaceAttributes ToFaceAttributes (this MPOFaceAttributes attrs)
 		{
 			return new FaceAttributes
@@ -121,7 +170,8 @@ namespace Xamarin.Cognitive.Face.Sample.iOS.Extensions
 				Age = attrs.Age.AsFloatSafe (),
 				SmileIntensity = attrs.Smile.AsFloatSafe (),
 				Gender = attrs.Gender,
-				Glasses = attrs.Glasses,
+				Glasses = attrs.Glasses.AsEnum<Glasses> (),
+				FacialHair = attrs.FacialHair.ToFacialHair (),
 				HeadPose = attrs.HeadPose.ToFaceHeadPose (),
 				Emotion = attrs.Emotion.ToFaceEmotion (),
 				Hair = attrs.Hair.ToHair (),
@@ -178,13 +228,22 @@ namespace Xamarin.Cognitive.Face.Sample.iOS.Extensions
 
 		public static Hair ToHair (this MPOHair mpoHair)
 		{
-			return new Hair
+			var hair = new Hair
 			{
 				Bald = mpoHair.Bald.AsFloatSafe (),
-				Invisible = mpoHair.Invisible.AsFloatSafe (),
-				//HairColor = mpoHair.HairColor,
+				Invisible = mpoHair.Invisible.AsBoolSafe (),
 				HairString = mpoHair.Hair
 			};
+
+			foreach (var dict in mpoHair.HairColor)
+			{
+				var color = dict ["color"].ToString ();
+				var confidence = dict ["confidence"] as NSNumber;
+
+				hair.HairColor.Add (color.AsEnum<HairColorType> (), confidence.AsFloatSafe ());
+			}
+
+			return hair;
 		}
 
 
@@ -211,11 +270,23 @@ namespace Xamarin.Cognitive.Face.Sample.iOS.Extensions
 
 		public static Accessories ToAccessories (this MPOAccessories mpoAccessories)
 		{
-			return new Accessories
+			var accessories = new Accessories
 			{
-				AccessoriesString = mpoAccessories.AccessoriesString,
-				//LipMakeup = mpoAccessories.LipMakeup
+				AccessoriesString = mpoAccessories.AccessoriesString
 			};
+
+			if (mpoAccessories.Accessories.Length > 0)
+			{
+				foreach (var dict in mpoAccessories.Accessories)
+				{
+					var type = dict ["type"].ToString ();
+					var confidence = dict ["confidence"] as NSNumber;
+
+					accessories.AccessoriesList.Add (type.AsEnum<AccessoryType> (), confidence.AsFloatSafe ());
+				}
+			}
+
+			return accessories;
 		}
 
 
@@ -223,7 +294,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS.Extensions
 		{
 			return new Blur
 			{
-				BlurLevel = mpoBlur.BlurLevel,
+				BlurLevel = mpoBlur.BlurLevel.AsEnum<BlurLevel> (),
 				Value = mpoBlur.Value.AsFloatSafe ()
 			};
 		}
@@ -233,7 +304,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS.Extensions
 		{
 			return new Exposure
 			{
-				ExposureLevel = mpoExposure.ExposureLevel,
+				ExposureLevel = mpoExposure.ExposureLevel.AsEnum<ExposureLevel> (),
 				Value = mpoExposure.Value.AsFloatSafe ()
 			};
 		}
@@ -243,7 +314,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS.Extensions
 		{
 			return new Noise
 			{
-				NoiseLevel = mpoNoise.NoiseLevel,
+				NoiseLevel = mpoNoise.NoiseLevel.AsEnum<NoiseLevel> (),
 				Value = mpoNoise.Value.AsFloatSafe ()
 			};
 		}

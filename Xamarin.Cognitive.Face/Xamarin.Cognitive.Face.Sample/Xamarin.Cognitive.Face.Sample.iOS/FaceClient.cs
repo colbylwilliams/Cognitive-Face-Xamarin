@@ -436,11 +436,9 @@ namespace Xamarin.Cognitive.Face.Sample
 
 			try
 			{
-				var faceRect = face.FaceRectangle.ToMPOFaceRect ();
-
 				using (var jpgData = photo.AsJPEG (quality))
 				{
-					Client.AddPersonFaceWithPersonGroupId (personGroup.Id, person.Id, jpgData, userData, faceRect, (result, error) =>
+					Client.AddPersonFaceWithPersonGroupId (personGroup.Id, person.Id, jpgData, userData, face.FaceRectangle.ToMPOFaceRect (), (result, error) =>
 					{
 						try
 						{
@@ -563,24 +561,31 @@ namespace Xamarin.Cognitive.Face.Sample
 
 		public Task<List<Shared.Face>> DetectFacesInPhoto (UIImage photo, params MPOFaceAttributeType [] attributes)
 		{
-			return DetectFacesInPhoto (photo, .8f, attributes);
+			return DetectFacesInPhoto (photo, .8f, false, attributes);
 		}
 
 
-		public Task<List<Shared.Face>> DetectFacesInPhoto (UIImage photo, float quality = .8f, params MPOFaceAttributeType [] attributes)
+		public Task<List<Shared.Face>> DetectFacesInPhoto (UIImage photo, bool returnLandmarks = true, params MPOFaceAttributeType [] attributes)
+		{
+			return DetectFacesInPhoto (photo, .8f, returnLandmarks, attributes);
+		}
+
+
+		public Task<List<Shared.Face>> DetectFacesInPhoto (UIImage photo, float quality, bool returnLandmarks = true, params MPOFaceAttributeType [] attributes)
 		{
 			try
 			{
-				List<Shared.Face> faces = new List<Shared.Face> ();
 				var tcs = new TaskCompletionSource<List<Shared.Face>> ();
 
 				using (var jpgData = photo.AsJPEG (quality))
 				{
-					Client.DetectWithData (jpgData, true, true, attributes, (detectedFaces, error) =>
+					Client.DetectWithData (jpgData, true, returnLandmarks, attributes, (detectedFaces, error) =>
 					{
 						try
 						{
 							ProcessError (error);
+
+							var faces = new List<Shared.Face> (detectedFaces.Length);
 
 							foreach (var detectedFace in detectedFaces)
 							{
