@@ -17,7 +17,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 		const int REQUEST_TAKE_PHOTO = 0;
 		const int REQUEST_SELECT_IMAGE_IN_ALBUM = 1;
 
-		global::Android.Net.Uri mUriPhotoTaken;
+		global::Android.Net.Uri uriPhotoTaken;
 		Button button_take_a_photo, button_select_a_photo_in_album;
 		TextView info;
 
@@ -50,14 +50,14 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 		{
 			base.OnSaveInstanceState (outState);
 
-			outState.PutParcelable ("ImageUri", mUriPhotoTaken);
+			outState.PutParcelable ("ImageUri", uriPhotoTaken);
 		}
 
 
 		protected override void OnRestoreInstanceState (Bundle savedInstanceState)
 		{
 			base.OnRestoreInstanceState (savedInstanceState);
-			mUriPhotoTaken = (global::Android.Net.Uri) savedInstanceState.GetParcelable ("ImageUri");
+			uriPhotoTaken = (global::Android.Net.Uri) savedInstanceState.GetParcelable ("ImageUri");
 		}
 
 
@@ -72,8 +72,8 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 				try
 				{
 					var file = File.CreateTempFile ("IMG_", ".jpg", storageDir);
-					mUriPhotoTaken = global::Android.Net.Uri.FromFile (file);
-					intent.PutExtra (MediaStore.ExtraOutput, mUriPhotoTaken);
+					uriPhotoTaken = global::Android.Net.Uri.FromFile (file);
+					intent.PutExtra (MediaStore.ExtraOutput, uriPhotoTaken);
 
 					StartActivityForResult (intent, REQUEST_TAKE_PHOTO);
 				}
@@ -135,7 +135,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 			if (data == null || data.Data == null)
 			{
-				imageUri = mUriPhotoTaken;
+				imageUri = uriPhotoTaken;
 			}
 			else
 			{

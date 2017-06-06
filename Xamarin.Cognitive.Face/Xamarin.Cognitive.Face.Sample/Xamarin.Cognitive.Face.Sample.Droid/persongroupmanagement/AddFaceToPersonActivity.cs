@@ -93,7 +93,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 				}
 				else
 				{
-					SetInfo ("0 face detected");
+					SetInfo ("0 faces detected");
 				}
 
 				faceGridViewAdapter = new FaceGridViewAdapter (faces, sourceImage);
@@ -167,7 +167,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 		void SetInfo (string info)
 		{
-			TextView textView = FindViewById<TextView> (Resource.Id.info);
+			var textView = FindViewById<TextView> (Resource.Id.info);
 			textView.Text = info;
 		}
 
@@ -177,12 +177,10 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			List<Shared.Face> detectedFaces;
 			List<Bitmap> faceThumbnails;
 			List<bool> faceChecked;
-			Bitmap photo;
 
 			public FaceGridViewAdapter (List<Shared.Face> detectedFaces, Bitmap photo)
 			{
 				this.detectedFaces = detectedFaces;
-				this.photo = photo;
 
 				faceThumbnails = new List<Bitmap> ();
 
@@ -217,13 +215,14 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			{
 				if (convertView == null)
 				{
-					LayoutInflater layoutInflater = (LayoutInflater) Application.Context.GetSystemService (LayoutInflaterService);
+					var layoutInflater = (LayoutInflater) Application.Context.GetSystemService (LayoutInflaterService);
 					convertView = layoutInflater.Inflate (Resource.Layout.item_face_with_checkbox, parent, false);
 				}
 
 				convertView.Id = position;
 
-				convertView.FindViewById<ImageView> (Resource.Id.image_face).SetImageBitmap (faceThumbnails [position]);
+				var imageView = convertView.FindViewById<ImageView> (Resource.Id.image_face);
+				imageView.SetImageBitmap (faceThumbnails [position]);
 
 				var checkBox = convertView.FindViewById<CheckBox> (Resource.Id.checkbox_face);
 				checkBox.Tag = position;
