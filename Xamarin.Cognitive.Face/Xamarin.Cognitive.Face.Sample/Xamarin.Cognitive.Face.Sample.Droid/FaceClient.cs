@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Android.Graphics;
+using Java.IO;
 using Java.Util;
+using NomadCode.UIExtensions;
 using Xamarin.Cognitive.Face.Droid;
 using Xamarin.Cognitive.Face.Sample.Droid.Extensions;
 using Xamarin.Cognitive.Face.Sample.Shared;
@@ -12,6 +15,9 @@ namespace Xamarin.Cognitive.Face.Sample
 {
 	public partial class FaceClient
 	{
+		// Ratio to scale a detected face rectangle, the face rectangle scaled up looks more natural.
+		const double FACE_RECT_SCALE_RATIO = 1.3;
+
 		FaceServiceRestClient client;
 		FaceServiceRestClient Client => client ?? (client = new FaceServiceRestClient (Endpoint, SubscriptionKey));
 
@@ -353,23 +359,23 @@ namespace Xamarin.Cognitive.Face.Sample
 		}
 
 
-		public Task AddFaceForPerson (Person person, PersonGroup personGroup, Shared.Face face, Stream photo, string userData = null)//, float quality = .8f)
+		public Task AddFaceForPerson (Person person, PersonGroup personGroup, Shared.Face face, Bitmap photo, string userData = null, float quality = .8f)
 		{
 			return Task.Run (() =>
 			{
 				try
 				{
-					//using (var jpgData = photo.AsJPEG (quality))
-					//{
-					var result = Client.AddPersonFace (personGroup.Id, person.Id.ToUUID (), photo, userData, face.FaceRectangle.ToFaceRect ());
+					using (var jpgStream = photo.AsJpeg ())
+					{
+						var result = Client.AddPersonFace (personGroup.Id, person.Id.ToUUID (), jpgStream, userData, face.FaceRectangle.ToFaceRect ());
 
-					face.Id = result.PersistedFaceId.ToString ();
-					//face.UpdatePhotoPath ();
+						face.Id = result.PersistedFaceId.ToString ();
+					}
 
+					face.UpdatePhotoPath ();
 					person.Faces.Add (face);
 
-					//face.SavePhotoFromSource (photo);
-					//}
+					face.SavePhotoFromSource (photo);
 				}
 				catch (Exception ex)
 				{
@@ -391,6 +397,106 @@ namespace Xamarin.Cognitive.Face.Sample
 					if (person.Faces.Contains (face))
 					{
 						person.Faces.Remove (face);
+					}
+				}
+				catch (Exception ex)
+				{
+					Log.Error (ex);
+					throw;
+				}
+			});
+		}
+
+
+		public async Task<List<Shared.Face>> GetFacesForPerson (Person person, PersonGroup personGroup)
+		{
+			try
+			{
+				person.Faces.Clear ();
+
+				if (person.FaceIds?.Count > 0)
+				{
+					foreach (var faceId in person.FaceIds)
+					{
+						var face = await GetFaceForPerson (person, personGroup, faceId);
+
+						person.Faces.Add (face);
+					}
+
+					return person.Faces;
+				}
+
+				return default (List<Shared.Face>);
+			}
+			catch (Exception ex)
+			{
+				Log.Error (ex);
+				throw;
+			}
+		}
+
+
+		public Task<Shared.Face> GetFaceForPerson (Person person, PersonGroup personGroup, string persistedFaceId)
+		{
+			return Task.Run (() =>
+			{
+				try
+				{
+					var persistedFace = Client.GetPersonFace (personGroup.Id, person.Id.ToUUID (), persistedFaceId.ToUUID ());
+
+					return persistedFace.ToFace ();
+				}
+				catch (Exception ex)
+				{
+					Log.Error (ex);
+					throw;
+				}
+			});
+		}
+
+
+		#endregion
+
+
+		#region Face
+
+
+		public Task<List<Shared.Face>> DetectFacesInPhoto (Bitmap photo, bool returnLandmarks = false, params FaceServiceClientFaceAttributeType [] attributes)
+		{
+			return DetectFacesInPhoto (photo, .8f, returnLandmarks, attributes);
+		}
+
+
+		public Task<List<Shared.Face>> DetectFacesInPhoto (Bitmap photo, float quality, bool returnLandmarks = false, params FaceServiceClientFaceAttributeType [] attributes)
+		{
+			return Task.Run (() =>
+			{
+				try
+				{
+					using (MemoryStream compressedStream = new MemoryStream ())
+					{
+						if (!photo.Compress (Bitmap.CompressFormat.Jpeg, (int) (quality * 100), compressedStream))
+						{
+							throw new Exception ("Unable to compress photo to memory stream");
+						}
+
+						compressedStream.Position = 0;
+
+						var detectedFaces = Client.Detect (compressedStream, true, returnLandmarks, attributes);
+
+						var faces = new List<Shared.Face> (detectedFaces.Length);
+
+						foreach (var detectedFace in detectedFaces)
+						{
+							var face = detectedFace.ToFace ();
+							//calculate enlarged face rect
+							face.FaceRectangleLarge = detectedFace.FaceRectangle.CalculateFaceRectangle (photo, FACE_RECT_SCALE_RATIO);
+							faces.Add (face);
+
+							//face.SavePhotoFromSource (photo);
+						}
+
+						return faces;
 					}
 				}
 				catch (Exception ex)
@@ -439,14 +545,6 @@ namespace Xamarin.Cognitive.Face.Sample
 				 Client.TrainPersonGroup (mPersonGroupId);
 			 });
 		}
-
-		//public Task<Face.Droid.Contract.AddPersistedFaceResult> AddPersonFace (string mPersonGroupId, UUID mPersonId, Stream mImageStream, string userData, Face.Droid.Contract.FaceRectangle targetFace)
-		//{
-		//	return Task.Run (() =>
-		//	 {
-		//		 return Client.AddPersonFace (mPersonGroupId, mPersonId, mImageStream, userData, targetFace);
-		//	 });
-		//}
 
 		public Task<Face.Droid.Contract.GroupResult> Group (UUID [] faceIds)
 		{
