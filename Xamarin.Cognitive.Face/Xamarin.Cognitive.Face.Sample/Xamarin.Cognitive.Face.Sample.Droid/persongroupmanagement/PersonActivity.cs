@@ -294,7 +294,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 			faceGridViewAdapter.LongPressed = true;
 
-			var addNewItem = FindViewById<Button> (Resource.Id.add_person);
+			var addNewItem = FindViewById<Button> (Resource.Id.add_face);
 			addNewItem.Enabled = false;
 
 			return true;
@@ -306,7 +306,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			faceGridViewAdapter.LongPressed = false;
 			faceGridViewAdapter.ResetCheckedItems ();
 
-			var addNewItem = FindViewById<Button> (Resource.Id.add_person);
+			var addNewItem = FindViewById<Button> (Resource.Id.add_face);
 			addNewItem.Enabled = true;
 		}
 
