@@ -22,6 +22,12 @@ namespace Xamarin.Cognitive.Face.Sample.Shared
 		public RectangleF FaceRectangle { get; set; }
 
 
+		public RectangleF? FaceRectangleLarge { get; set; }
+
+
+		public FaceLandmarks Landmarks { get; set; }
+
+
 		public FaceAttributes Attributes { get; set; }
 
 

@@ -37,5 +37,13 @@
     <Compile Include="$(MSBuildThisFileDirectory)Model\TrainingStatus.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\FaceState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\TaskQueue.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\Glasses.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\HairColorType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\AccessoryType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\BlurLevel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\NoiseLevel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\ExposureLevel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\FaceLandmarks.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\FeatureCoordinate.cs" />
   </ItemGroup>
 </Project>
