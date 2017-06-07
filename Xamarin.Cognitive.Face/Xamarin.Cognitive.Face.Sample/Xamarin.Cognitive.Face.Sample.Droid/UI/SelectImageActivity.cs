@@ -46,21 +46,6 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 		}
 
 
-		protected override void OnSaveInstanceState (Bundle outState)
-		{
-			base.OnSaveInstanceState (outState);
-
-			outState.PutParcelable ("ImageUri", uriPhotoTaken);
-		}
-
-
-		protected override void OnRestoreInstanceState (Bundle savedInstanceState)
-		{
-			base.OnRestoreInstanceState (savedInstanceState);
-			uriPhotoTaken = (global::Android.Net.Uri) savedInstanceState.GetParcelable ("ImageUri");
-		}
-
-
 		void Button_Take_A_Photo_Click (object sender, EventArgs e)
 		{
 			var intent = new Intent (MediaStore.ActionImageCapture);

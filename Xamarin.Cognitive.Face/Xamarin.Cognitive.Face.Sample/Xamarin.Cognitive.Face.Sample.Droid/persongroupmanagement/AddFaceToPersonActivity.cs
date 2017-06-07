@@ -21,7 +21,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			  ScreenOrientation = ScreenOrientation.Portrait)]
 	public class AddFaceToPersonActivity : AppCompatActivity
 	{
-		string imageUri;
+		global::Android.Net.Uri imageUri;
 		Bitmap sourceImage;
 		FaceGridViewAdapter faceGridViewAdapter;
 		ProgressDialog progressDialog;
@@ -37,12 +37,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 			SetContentView (Resource.Layout.activity_add_face_to_person);
 
-			Bundle bundle = Intent.Extras;
-
-			if (bundle != null)
-			{
-				imageUri = bundle.GetString ("ImageUri");
-			}
+			imageUri = Intent.Data;
 
 			progressDialog = new ProgressDialog (this);
 			progressDialog.SetTitle (Application.Context.GetString (Resource.String.progress_dialog_title));
@@ -58,9 +53,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 			done_and_save.Click += Done_And_Save_Click;
 
-			var uri = global::Android.Net.Uri.Parse (imageUri);
-
-			sourceImage = ContentResolver.LoadSizeLimitedBitmapFromUri (uri);
+			sourceImage = ContentResolver.LoadSizeLimitedBitmapFromUri (imageUri);
 
 			if (sourceImage != null)
 			{
@@ -174,8 +167,8 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 		class FaceGridViewAdapter : BaseAdapter<Shared.Face>, CompoundButton.IOnCheckedChangeListener
 		{
-			List<Shared.Face> detectedFaces;
-			List<Bitmap> faceThumbnails;
+			readonly List<Shared.Face> detectedFaces;
+			readonly List<Bitmap> faceThumbnails;
 			List<bool> faceChecked;
 
 			public FaceGridViewAdapter (List<Shared.Face> detectedFaces, Bitmap photo)

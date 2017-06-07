@@ -201,7 +201,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 						var uriImagePicked = data.Data;
 
 						var intent = new Intent (this, typeof (AddFaceToPersonActivity));
-						intent.PutExtra ("ImageUri", uriImagePicked.ToString ());
+						intent.SetData (uriImagePicked);
 
 						StartActivity (intent);
 					}
