@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Xamarin.Cognitive.Face.Sample.Shared
+namespace Xamarin.Cognitive.Face.Shared
 {
     public abstract class Attribute
     {

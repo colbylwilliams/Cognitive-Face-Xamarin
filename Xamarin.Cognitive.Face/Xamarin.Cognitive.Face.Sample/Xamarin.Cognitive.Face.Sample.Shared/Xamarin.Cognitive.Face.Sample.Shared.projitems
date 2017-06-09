@@ -45,5 +45,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\ExposureLevel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\FaceLandmarks.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\FeatureCoordinate.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\FaceAttributeType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\CandidateResult.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\GroupResult.cs" />
   </ItemGroup>
 </Project>

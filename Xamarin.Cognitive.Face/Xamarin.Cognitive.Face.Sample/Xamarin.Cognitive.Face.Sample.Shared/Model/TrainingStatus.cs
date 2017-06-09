@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Xamarin.Cognitive.Face.Sample.Shared
+namespace Xamarin.Cognitive.Face.Shared
 {
 	public class TrainingStatus
 	{

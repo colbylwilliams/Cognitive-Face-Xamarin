@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Xamarin.Cognitive.Face.Sample.Shared.Utilities
+namespace Xamarin.Cognitive.Face.Shared.Utilities
 {
 	public class TaskQueue
 	{

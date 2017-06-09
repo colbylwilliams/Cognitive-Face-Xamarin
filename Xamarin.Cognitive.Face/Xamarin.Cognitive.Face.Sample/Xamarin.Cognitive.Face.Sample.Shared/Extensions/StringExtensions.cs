@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Xamarin.Cognitive.Face.Sample.Shared.Extensions
+namespace Xamarin.Cognitive.Face.Shared.Extensions
 {
 	public static class StringExtensions
 	{
@@ -24,6 +24,11 @@ namespace Xamarin.Cognitive.Face.Sample.Shared.Extensions
 
 		public static TEnum AsEnum<TEnum> (this string str, bool caseInsensitive = true)
 		{
+			if (string.IsNullOrEmpty (str))
+			{
+				return default (TEnum);
+			}
+
 			return (TEnum) Enum.Parse (typeof (TEnum), str, caseInsensitive);
 		}
 	}

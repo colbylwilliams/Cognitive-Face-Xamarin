@@ -1,10 +1,11 @@
-﻿using System;
-namespace Xamarin.Cognitive.Face.Sample.Shared.Model
+﻿namespace Xamarin.Cognitive.Face.Shared
 {
 	public class CandidateResult
 	{
-		public CandidateResult ()
-		{
-		}
+		public Person Person { get; set; }
+
+		public string PersonId { get; set; }
+
+		public float Confidence { get; set; }
 	}
 }

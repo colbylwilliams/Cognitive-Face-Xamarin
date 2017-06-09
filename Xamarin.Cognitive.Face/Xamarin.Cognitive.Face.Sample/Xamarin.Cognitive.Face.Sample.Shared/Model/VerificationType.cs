@@ -1,9 +1,9 @@
-﻿namespace Xamarin.Cognitive.Face.Sample.Shared
+﻿namespace Xamarin.Cognitive.Face.Shared
 {
-    public enum VerificationType
-    {
-        None,
-        FaceAndFace,
-        FaceAndPerson
-    }
+	public enum VerificationType
+	{
+		None,
+		FaceAndFace,
+		FaceAndPerson
+	}
 }

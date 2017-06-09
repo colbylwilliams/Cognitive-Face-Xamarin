@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Xamarin.Cognitive.Face.Sample.Shared.Extensions
+namespace Xamarin.Cognitive.Face.Shared.Extensions
 {
 	public static class TaskExtensions
 	{

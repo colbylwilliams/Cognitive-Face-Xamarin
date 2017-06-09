@@ -5,7 +5,7 @@ using System.Linq;
 
 using System;
 
-namespace Xamarin.Cognitive.Face.Sample.Shared
+namespace Xamarin.Cognitive.Face.Shared
 {
 	public static class Log
 	{

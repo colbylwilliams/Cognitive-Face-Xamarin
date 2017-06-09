@@ -1,4 +1,4 @@
-﻿namespace Xamarin.Cognitive.Face.Sample
+﻿namespace Xamarin.Cognitive.Face.Shared
 {
 	public class FaceLandmarks
 	{

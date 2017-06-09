@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace Xamarin.Cognitive.Face.Sample.Shared
+namespace Xamarin.Cognitive.Face.Shared
 {
 	public class Face : FaceModel
 	{
@@ -14,9 +14,6 @@ namespace Xamarin.Cognitive.Face.Sample.Shared
 
 
 		public RectangleF FaceRectangle { get; set; }
-
-
-		public RectangleF? FaceRectangleLarge { get; set; }
 
 
 		public FaceLandmarks Landmarks { get; set; }

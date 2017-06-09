@@ -1,4 +1,4 @@
-﻿namespace Xamarin.Cognitive.Face.Sample.Shared
+﻿namespace Xamarin.Cognitive.Face.Shared
 {
 	public class FaceAttributes
 	{
@@ -8,7 +8,7 @@
 
 		public string Gender { get; set; }
 
-		public Glasses Glasses { get; set; }
+		public Glasses? Glasses { get; set; }
 
 		public FacialHair FacialHair { get; set; }
 
