@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using NomadCode.UIExtensions;
 using Xamarin.Cognitive.Face.Shared;
 using Xamarin.Cognitive.Face.Shared.Extensions;
+using Xamarin.Cognitive.Face.Sample.iOS.Extensions;
 
 namespace Xamarin.Cognitive.Face.Sample.iOS
 {

@@ -1,11 +1,9 @@
-﻿using System;
-using System.Threading.Tasks;
-using Foundation;
+﻿using System.Threading.Tasks;
 using MBProgressHUD;
 using NomadCode.UIExtensions;
 using UIKit;
 
-namespace Xamarin.Cognitive.Face.Sample.iOS
+namespace Xamarin.Cognitive.Face.Sample.iOS.Extensions
 {
 	public static class UIExtensions
 	{
