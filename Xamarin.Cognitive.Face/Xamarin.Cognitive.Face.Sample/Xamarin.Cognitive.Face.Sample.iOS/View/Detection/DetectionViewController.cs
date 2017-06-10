@@ -4,9 +4,8 @@ using System.Threading.Tasks;
 using Foundation;
 using NomadCode.UIExtensions;
 using UIKit;
-using Xamarin.Cognitive.Face.iOS;
-using Xamarin.Cognitive.Face.Sample.Shared;
-using Xamarin.Cognitive.Face.Sample.Shared.Extensions;
+using Xamarin.Cognitive.Face.Shared;
+using Xamarin.Cognitive.Face.Shared.Extensions;
 
 namespace Xamarin.Cognitive.Face.Sample.iOS
 {
@@ -85,21 +84,22 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 			{
 				this.ShowHUD ("Detecting faces");
 
-				DetectedFaces = await FaceClient.Shared.DetectFacesInPhoto (SourceImage,
-																			MPOFaceAttributeType.Age,
-																			MPOFaceAttributeType.Gender,
-																			MPOFaceAttributeType.Hair,
-																			MPOFaceAttributeType.FacialHair,
-																			MPOFaceAttributeType.Makeup,
-																			MPOFaceAttributeType.Emotion,
-																			MPOFaceAttributeType.Occlusion,
-																			MPOFaceAttributeType.Smile,
-																			MPOFaceAttributeType.Exposure,
-																			MPOFaceAttributeType.Noise,
-																			MPOFaceAttributeType.Blur,
-																			MPOFaceAttributeType.Glasses,
-																			MPOFaceAttributeType.HeadPose,
-																			MPOFaceAttributeType.Accessories);
+				DetectedFaces = await FaceClient.Shared.DetectFacesInPhoto (SourceImage.AsStream,
+																			true, //return landmarks
+																			FaceAttributeType.Age,
+																			FaceAttributeType.Gender,
+																			FaceAttributeType.Hair,
+																			FaceAttributeType.FacialHair,
+																			FaceAttributeType.Makeup,
+																			FaceAttributeType.Emotion,
+																			FaceAttributeType.Occlusion,
+																			FaceAttributeType.Smile,
+																			FaceAttributeType.Exposure,
+																			FaceAttributeType.Noise,
+																			FaceAttributeType.Blur,
+																			FaceAttributeType.Glasses,
+																			FaceAttributeType.HeadPose,
+																			FaceAttributeType.Accessories);
 
 				if (DetectedFaces.Count == 0)
 				{
@@ -109,7 +109,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 				{
 					this.HideHUD ();
 
-					DetectionResultsController.SetResults (DetectedFaces);
+					DetectionResultsController.SetResults (DetectedFaces, SourceImage);
 				}
 			}
 			catch (Exception ex)

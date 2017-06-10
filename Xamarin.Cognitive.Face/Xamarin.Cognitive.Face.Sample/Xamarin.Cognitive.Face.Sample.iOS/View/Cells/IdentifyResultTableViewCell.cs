@@ -1,7 +1,7 @@
 ﻿using System;
-using Xamarin.Cognitive.Face.Sample.iOS.Extensions;
+using Xamarin.Cognitive.Face.Extensions;
 using UIKit;
-using Xamarin.Cognitive.Face.Sample.Shared;
+using Xamarin.Cognitive.Face.Shared;
 
 namespace Xamarin.Cognitive.Face.Sample.iOS
 {
@@ -12,11 +12,11 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 		}
 
 
-		public void SetResult (IdentificationResult result)
+		public void SetResult (IdentificationResult identifyResult)
 		{
-			FaceImageView.Image = result.Face?.GetImage ();
-			PersonNameLabel.Text = result.Person?.Name;
-			ConfidenceLabel.Text = $"Confidence: {result.Confidence.ToString ()}";
+			FaceImageView.Image = identifyResult.Face?.GetImage ();
+			PersonNameLabel.Text = identifyResult.CandidateResult?.Person?.Name;
+			ConfidenceLabel.Text = $"Confidence: {identifyResult.CandidateResult?.Confidence.ToString ()}";
 		}
 	}
 }

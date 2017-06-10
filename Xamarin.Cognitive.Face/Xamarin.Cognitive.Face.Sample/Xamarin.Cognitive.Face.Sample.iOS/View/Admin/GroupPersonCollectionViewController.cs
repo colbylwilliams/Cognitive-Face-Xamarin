@@ -3,8 +3,8 @@ using System.Threading.Tasks;
 using Foundation;
 using NomadCode.UIExtensions;
 using UIKit;
-using Xamarin.Cognitive.Face.Sample.Shared;
-using Xamarin.Cognitive.Face.Sample.Shared.Extensions;
+using Xamarin.Cognitive.Face.Shared;
+using Xamarin.Cognitive.Face.Shared.Extensions;
 
 namespace Xamarin.Cognitive.Face.Sample.iOS
 {
@@ -28,7 +28,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 			{
 				if (Group != null)
 				{
-					loadPeople ().Forget ();
+					LoadPeople ().Forget ();
 					return;
 				}
 			}
@@ -37,7 +37,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 		}
 
 
-		async Task loadPeople ()
+		async Task LoadPeople ()
 		{
 			try
 			{
@@ -108,11 +108,11 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 
 		protected override Action<NSObject> GetGestureActionForCell (UICollectionViewCell cell)
 		{
-			return longPressAction;
+			return LongPressAction;
 		}
 
 
-		async void longPressAction (NSObject nsObj)
+		async void LongPressAction (NSObject nsObj)
 		{
 			var gestureRecognizer = (UIGestureRecognizer) nsObj;
 

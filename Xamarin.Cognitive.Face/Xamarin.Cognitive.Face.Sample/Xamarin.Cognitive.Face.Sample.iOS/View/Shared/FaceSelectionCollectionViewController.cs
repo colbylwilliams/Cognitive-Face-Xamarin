@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Foundation;
 using NomadCode.UIExtensions;
 using UIKit;
+using Xamarin.Cognitive.Face.Extensions;
 
 namespace Xamarin.Cognitive.Face.Sample.iOS
 {
@@ -98,7 +99,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 
 			foreach (var face in detectedFaces)
 			{
-				croppedImages.Add (SourceImage.Crop (face.FaceRectangle));
+				croppedImages.Add (face.CreateThumbnail (SourceImage));
 			}
 		}
 

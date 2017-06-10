@@ -1,5 +1,4 @@
 ﻿using System;
-using Xamarin.Cognitive.Face.Sample.iOS.Extensions;
 using UIKit;
 
 namespace Xamarin.Cognitive.Face.Sample.iOS
@@ -11,11 +10,21 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 		}
 
 
-		public void SetFace (Shared.Face face)
+		protected override void Dispose (bool disposing)
 		{
-			ImageView.Image = face.GetImage ();
+			if (disposing)
+			{
+				FaceImageView.Image = null;
+			}
+
+			base.Dispose (disposing);
+		}
+
+
+		public void SetFace (Shared.Face face, UIImage thumbnail)
+		{
 			TitleLabel.Text = face.Id;
-			SizeLabel.Text = $"Position: {face.FaceRectangle.Left},{face.FaceRectangle.Top}; Size: {face.FaceRectangle.Width}x{face.FaceRectangle.Height}";
+			SizeLabel.Text = $"Position: {face.FaceRectangle.Left}, {face.FaceRectangle.Top}; Size: {face.FaceRectangle.Width}x{face.FaceRectangle.Height}";
 
 			var attrs = face.Attributes;
 
@@ -37,6 +46,9 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 				NoiseLabel.Text = attrs.Noise?.ToString ();
 				ExposureLabel.Text = attrs.Exposure?.ToString ();
 			}
+
+			FaceImageView.ContentMode = UIViewContentMode.ScaleAspectFit;
+			FaceImageView.Image = thumbnail;
 		}
 	}
 }

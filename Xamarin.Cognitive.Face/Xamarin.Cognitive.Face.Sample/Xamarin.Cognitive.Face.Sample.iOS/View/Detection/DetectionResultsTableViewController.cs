@@ -3,22 +3,70 @@ using System.Collections.Generic;
 using Foundation;
 using NomadCode.UIExtensions;
 using UIKit;
+using Xamarin.Cognitive.Face.Extensions;
 
 namespace Xamarin.Cognitive.Face.Sample.iOS
 {
 	public partial class DetectionResultsTableViewController : BaseTableViewController
 	{
-		public List<Shared.Face> DetectedFaces { get; set; }
+		List<Shared.Face> DetectedFaces;
+		UIImage SourceImage;
+		List<UIImage> thumbnails;
 
 		public DetectionResultsTableViewController (IntPtr handle) : base (handle)
 		{
 		}
 
 
-		public void SetResults (List<Shared.Face> detectedFaces)
+		protected override void Dispose (bool disposing)
 		{
+			cleanup ();
+
+			base.Dispose (disposing);
+		}
+
+
+		void cleanup (bool disposeCurrentImage = false, bool clearImages = true)
+		{
+			if (clearImages && thumbnails != null)
+			{
+				thumbnails.ForEach (i => i.Dispose ());
+				thumbnails.Clear ();
+			}
+
+			if (SourceImage != null)
+			{
+				if (disposeCurrentImage)
+				{
+					SourceImage.Dispose ();
+				}
+
+				SourceImage = null;
+			}
+		}
+
+
+		public void SetResults (List<Shared.Face> detectedFaces, UIImage sourceImage)
+		{
+			cleanup ();
+
 			DetectedFaces = detectedFaces;
+			SourceImage = sourceImage;
+
+			addThumbnails (detectedFaces);
+
 			TableView.ReloadData ();
+		}
+
+
+		void addThumbnails (List<Shared.Face> detectedFaces)
+		{
+			thumbnails = new List<UIImage> ();
+
+			foreach (var face in detectedFaces)
+			{
+				thumbnails.Add (face.CreateThumbnail (SourceImage));
+			}
 		}
 
 
@@ -34,7 +82,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 
 			var face = DetectedFaces [indexPath.Row];
 
-			cell.SetFace (face);
+			cell.SetFace (face, thumbnails [indexPath.Row]);
 
 			return cell;
 		}

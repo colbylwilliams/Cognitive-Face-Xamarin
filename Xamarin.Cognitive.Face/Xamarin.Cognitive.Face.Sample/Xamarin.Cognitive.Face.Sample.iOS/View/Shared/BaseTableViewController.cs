@@ -1,6 +1,6 @@
 ﻿using System;
 using UIKit;
-using Xamarin.Cognitive.Face.Sample.Shared;
+using Xamarin.Cognitive.Face.Shared;
 
 namespace Xamarin.Cognitive.Face.Sample.iOS
 {

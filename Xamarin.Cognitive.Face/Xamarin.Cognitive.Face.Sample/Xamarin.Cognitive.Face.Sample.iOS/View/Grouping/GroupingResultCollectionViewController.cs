@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using Xamarin.Cognitive.Face.Sample.iOS.Extensions;
+using System.Linq;
+using Xamarin.Cognitive.Face.Extensions;
 using Foundation;
 using NomadCode.UIExtensions;
 using UIKit;
-using Xamarin.Cognitive.Face.Sample.Shared;
+using Xamarin.Cognitive.Face.Shared;
 
 namespace Xamarin.Cognitive.Face.Sample.iOS
 {
@@ -17,9 +18,16 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 		}
 
 
-		public void SetFaceGroupResults (List<FaceGroup> groups)
+		public void SetFaceGroupResults (GroupResult groupResult)
 		{
-			Results = groups;
+			if (groupResult.MessyGroup != null)
+			{
+				Results = groupResult.Groups.Union (new [] { groupResult.MessyGroup }).ToList ();
+			}
+			else
+			{
+				Results = groupResult.Groups;
+			}
 
 			CollectionView.ReloadData ();
 		}

@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 using Foundation;
 using NomadCode.UIExtensions;
 using UIKit;
-using Xamarin.Cognitive.Face.Sample.Shared;
-using Xamarin.Cognitive.Face.Sample.Shared.Extensions;
+using Xamarin.Cognitive.Face.Shared;
+using Xamarin.Cognitive.Face.Shared.Extensions;
 
 namespace Xamarin.Cognitive.Face.Sample.iOS
 {
@@ -31,7 +31,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 
 			if (IsInitialLoad && Groups == null)
 			{
-				loadGroups ().Forget ();
+				LoadGroups ().Forget ();
 			}
 			else
 			{
@@ -40,13 +40,13 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 		}
 
 
-		async Task loadGroups ()
+		async Task LoadGroups ()
 		{
 			try
 			{
 				this.ShowHUD ("Loading groups");
 
-				Groups = await FaceClient.Shared.GetGroups ();
+				Groups = await FaceClient.Shared.GetPersonGroups ();
 
 				ReloadData ();
 
@@ -63,12 +63,24 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 		{
 			TableView.ReloadData ();
 
-			if (AutoSelect)
+			if (IsInitialLoad)
 			{
-				if (Groups.Count == 1)
+				if (AutoSelect)
 				{
-					TableView.SelectRow (TableView.IndexPathsForVisibleRows [0], true, UITableViewScrollPosition.Top);
-					SelectedPersonGroup = Groups [TableView.IndexPathForSelectedRow.Row];
+					if (Groups.Count == 1)
+					{
+						TableView.SelectRow (TableView.IndexPathsForVisibleRows [0], true, UITableViewScrollPosition.Top);
+						SelectedPersonGroup = Groups [TableView.IndexPathForSelectedRow.Row];
+					}
+				}
+			}
+			else if (SelectedPersonGroup != null)
+			{
+				var selectedIndex = Groups.IndexOf (SelectedPersonGroup);
+
+				if (selectedIndex > -1)
+				{
+					TableView.SelectRow (NSIndexPath.FromRowSection (selectedIndex, 0), true, UITableViewScrollPosition.Top);
 				}
 			}
 		}
@@ -110,7 +122,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 
 				var group = Groups [indexPath.Row];
 				Groups.Remove (group);
-				deleteGroup (group).Forget ();
+				DeleteGroup (group).Forget ();
 
 				tableView.DeleteRows (new NSIndexPath [] { indexPath }, UITableViewRowAnimation.Automatic);
 				tableView.EndUpdates ();
@@ -118,7 +130,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 		}
 
 
-		async Task deleteGroup (PersonGroup personGroup)
+		async Task DeleteGroup (PersonGroup personGroup)
 		{
 			try
 			{

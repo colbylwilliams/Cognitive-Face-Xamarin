@@ -3,8 +3,8 @@ using System.Threading.Tasks;
 using Foundation;
 using NomadCode.UIExtensions;
 using UIKit;
-using Xamarin.Cognitive.Face.Sample.Shared;
-using Xamarin.Cognitive.Face.Sample.Shared.Extensions;
+using Xamarin.Cognitive.Face.Shared;
+using Xamarin.Cognitive.Face.Shared.Extensions;
 
 namespace Xamarin.Cognitive.Face.Sample.iOS
 {
@@ -74,7 +74,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 
 					this.ShowHUD ("Detecting faces");
 
-					var detectedFaces = await FaceClient.Shared.DetectFacesInPhoto (image);
+					var detectedFaces = await FaceClient.Shared.DetectFacesInPhoto (image.AsStream);
 
 					if (detectedFaces.Count == 0)
 					{
@@ -105,13 +105,13 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 			{
 				this.ShowHUD ("Grouping similar faces");
 
-				var results = await FaceClient.Shared.GroupFaces (FaceSelectionController.Faces);
+				var groupResult = await FaceClient.Shared.GroupFaces (FaceSelectionController.Faces);
 
 				this.HideHUD ();
 
-				if (results.Count > 0)
+				if (groupResult.HasGroups)
 				{
-					GroupResultCVC.SetFaceGroupResults (results);
+					GroupResultCVC.SetFaceGroupResults (groupResult);
 				}
 				else
 				{

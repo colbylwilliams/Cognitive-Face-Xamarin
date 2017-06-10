@@ -2,8 +2,8 @@
 using Foundation;
 using System.Threading.Tasks;
 using NomadCode.UIExtensions;
-using Xamarin.Cognitive.Face.Sample.Shared;
-using Xamarin.Cognitive.Face.Sample.Shared.Extensions;
+using Xamarin.Cognitive.Face.Shared;
+using Xamarin.Cognitive.Face.Shared.Extensions;
 
 namespace Xamarin.Cognitive.Face.Sample.iOS
 {
@@ -32,7 +32,10 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 			{
 				GroupName.Text = Group.Name;
 
-				CheckTrainingStatus ().Forget ();
+				if (IsInitialLoad)
+				{
+					CheckTrainingStatus ().Forget ();
+				}
 			}
 		}
 
@@ -84,6 +87,8 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 
 			if (Group != null) //just to make sure we succeeded in the case we created a new group above
 			{
+				FaceState.Current.CurrentPerson = null;
+
 				PerformSegue (Segues.PersonDetail, this);
 			}
 		}
@@ -132,7 +137,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 		{
 			try
 			{
-				await FaceClient.Shared.TrainGroup (Group);
+				await FaceClient.Shared.TrainPersonGroup (Group);
 
 				//if (_shouldExit)
 				//{

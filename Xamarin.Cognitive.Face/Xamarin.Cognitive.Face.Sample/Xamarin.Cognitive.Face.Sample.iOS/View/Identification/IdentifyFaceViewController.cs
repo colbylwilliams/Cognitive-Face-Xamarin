@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Foundation;
 using NomadCode.UIExtensions;
 using UIKit;
-using Xamarin.Cognitive.Face.Sample.Shared;
-using Xamarin.Cognitive.Face.Sample.Shared.Extensions;
+using Xamarin.Cognitive.Face.Shared;
+using Xamarin.Cognitive.Face.Shared.Extensions;
 
 namespace Xamarin.Cognitive.Face.Sample.iOS
 {
@@ -20,17 +21,17 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 
 		List<IdentificationResult> Results;
 
-		FaceSelectionCollectionViewController FaceSelectionController => ChildViewControllers[0] as FaceSelectionCollectionViewController;
-		GroupsTableViewController GroupsTableController => ChildViewControllers[1] as GroupsTableViewController;
+		FaceSelectionCollectionViewController FaceSelectionController => ChildViewControllers [0] as FaceSelectionCollectionViewController;
+		GroupsTableViewController GroupsTableController => ChildViewControllers [1] as GroupsTableViewController;
 
-		public IdentifyFaceViewController(IntPtr handle) : base(handle)
+		public IdentifyFaceViewController (IntPtr handle) : base (handle)
 		{
 		}
 
 
-		public override void PrepareForSegue(UIStoryboardSegue segue, NSObject sender)
+		public override void PrepareForSegue (UIStoryboardSegue segue, NSObject sender)
 		{
-			base.PrepareForSegue(segue, sender);
+			base.PrepareForSegue (segue, sender);
 
 			if (segue.Identifier == Segues.Embed && segue.DestinationViewController is GroupsTableViewController groupsTVC)
 			{
@@ -46,9 +47,9 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 		}
 
 
-		public override void ViewWillAppear(bool animated)
+		public override void ViewWillAppear (bool animated)
 		{
-			base.ViewWillAppear(animated);
+			base.ViewWillAppear (animated);
 
 			FaceSelectionController.FaceSelectionChanged += OnFaceSelectionChanged;
 			GroupsTableController.GroupSelectionChanged += OnGroupSelectionChanged;
@@ -56,106 +57,106 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 		}
 
 
-		public override void ViewWillDisappear(bool animated)
+		public override void ViewWillDisappear (bool animated)
 		{
 			FaceSelectionController.FaceSelectionChanged -= OnFaceSelectionChanged;
 			GroupsTableController.GroupSelectionChanged -= OnGroupSelectionChanged;
 			GoButton.TouchUpInside -= Identify;
 
-			base.ViewWillDisappear(animated);
+			base.ViewWillDisappear (animated);
 		}
 
 
-		void OnFaceSelectionChanged(object sender, EventArgs e)
+		void OnFaceSelectionChanged (object sender, EventArgs e)
 		{
-			checkInputs();
+			checkInputs ();
 		}
 
 
-		void OnGroupSelectionChanged(object sender, PersonGroup selection)
+		void OnGroupSelectionChanged (object sender, PersonGroup selection)
 		{
-			checkInputs();
+			checkInputs ();
 		}
 
 
-		partial void ChooseImageAction(NSObject sender)
+		partial void ChooseImageAction (NSObject sender)
 		{
-			ChooseImage().Forget();
+			ChooseImage ().Forget ();
 		}
 
 
-		async Task ChooseImage()
+		async Task ChooseImage ()
 		{
 			try
 			{
-				var sourceImage = await this.ShowImageSelectionDialog();
+				var sourceImage = await this.ShowImageSelectionDialog ();
 
 				if (sourceImage != null)
 				{
 					//make sure the image is in the .Up position
-					sourceImage.FixOrientation();
+					sourceImage.FixOrientation ();
 
-					this.ShowHUD("Detecting faces");
+					this.ShowHUD ("Detecting faces");
 
-					var detectedFaces = await FaceClient.Shared.DetectFacesInPhoto(sourceImage);
+					var detectedFaces = await FaceClient.Shared.DetectFacesInPhoto (sourceImage.AsStream);
 
 					if (detectedFaces.Count == 0)
 					{
-						this.ShowSimpleHUD("No faces detected");
+						this.ShowSimpleHUD ("No faces detected");
 					}
 					else
 					{
-						this.HideHUD();
+						this.HideHUD ();
 
-						FaceSelectionController.SetDetectedFaces(sourceImage, detectedFaces);
+						FaceSelectionController.SetDetectedFaces (sourceImage, detectedFaces);
 					}
 				}
 			}
 			catch (Exception ex)
 			{
-				Log.Error(ex);
-				this.HideHUD().ShowSimpleAlert("Error detecting faces in the provided image");
+				Log.Error (ex);
+				this.HideHUD ().ShowSimpleAlert ("Error detecting faces in the provided image");
 			}
 		}
 
 
-		void checkInputs()
+		void checkInputs ()
 		{
 			GoButton.Enabled = FaceSelectionController.SelectedFace != null &&
 				GroupsTableController.SelectedPersonGroup != null;
 		}
 
 
-		async void Identify(object sender, EventArgs e)
+		async void Identify (object sender, EventArgs e)
 		{
 			try
 			{
 				var group = GroupsTableController.SelectedPersonGroup;
 
-				this.ShowHUD("Identifying faces");
+				this.ShowHUD ("Identifying faces");
 
-				Results = await FaceClient.Shared.Identify(group, FaceSelectionController.SelectedFace);
+				Results = await FaceClient.Shared.Identify (group, FaceSelectionController.SelectedFace);
 
-				if (Results.Count == 0)
+				if (Results.Any (r => r.HasCandidates))
 				{
-					this.ShowSimpleHUD("Not able to identify this face");
+					this.HideHUD ();
+
+					PerformSegue (Segues.ShowResults, this);
 				}
 				else
 				{
-					this.HideHUD();
-
-					PerformSegue(Segues.ShowResults, this);
+					this.ShowSimpleHUD ("Not able to identify this face");
 				}
 			}
 			catch (Exception ex)
 			{
-				Log.Error(ex);
-				this.HideHUD().ShowSimpleAlert("Error identifying face");
+				Log.Error (ex);
+				this.HideHUD ().ShowSimpleAlert ("Error identifying face");
 			}
 		}
 
 
-		protected override string GetPopoverCloseText(UIViewController presentedViewController)
+		protected override string GetPopoverCloseText (UIViewController presentedViewController)
 		{
 			return "Done";
 		}

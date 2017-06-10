@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Xamarin.Cognitive.Face.Sample.iOS.Extensions;
+using Xamarin.Cognitive.Face.Extensions;
 using Foundation;
 using NomadCode.UIExtensions;
 using UIKit;
-using Xamarin.Cognitive.Face.Sample.Shared;
-using Xamarin.Cognitive.Face.Sample.Shared.Extensions;
+using Xamarin.Cognitive.Face.Shared;
+using Xamarin.Cognitive.Face.Shared.Extensions;
 
 namespace Xamarin.Cognitive.Face.Sample.iOS
 {
@@ -132,7 +132,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 
 					this.ShowHUD ("Detecting faces");
 
-					var detectedFaces = await FaceClient.Shared.DetectFacesInPhoto (image);
+					var detectedFaces = await FaceClient.Shared.DetectFacesInPhoto (image.AsStream);
 
 					if (detectedFaces.Count == 0)
 					{

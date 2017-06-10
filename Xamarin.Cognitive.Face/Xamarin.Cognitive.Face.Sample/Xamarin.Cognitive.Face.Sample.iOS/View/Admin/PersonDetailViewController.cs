@@ -4,8 +4,9 @@ using System.Threading.Tasks;
 using Foundation;
 using NomadCode.UIExtensions;
 using UIKit;
-using Xamarin.Cognitive.Face.Sample.Shared;
-using Xamarin.Cognitive.Face.Sample.Shared.Extensions;
+using Xamarin.Cognitive.Face.Extensions;
+using Xamarin.Cognitive.Face.Shared;
+using Xamarin.Cognitive.Face.Shared.Extensions;
 
 namespace Xamarin.Cognitive.Face.Sample.iOS
 {
@@ -53,8 +54,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 
 			if (faceSelection.SelectedFace != null)
 			{
-				await addFace (faceSelection.SelectedFace, SourceImage);
-				FaceState.Current.NeedsTraining = true;
+				await AddFace (faceSelection.SelectedFace, SourceImage);
 			}
 		}
 
@@ -80,16 +80,16 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 
 			if (Person == null)
 			{
-				createNewPerson ().Forget ();
+				CreateNewPerson ().Forget ();
 			}
 			else
 			{
-				updatePerson ().Forget ();
+				UpdatePerson ().Forget ();
 			}
 		}
 
 
-		async Task createNewPerson ()
+		async Task CreateNewPerson ()
 		{
 			try
 			{
@@ -108,7 +108,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 		}
 
 
-		async Task updatePerson ()
+		async Task UpdatePerson ()
 		{
 			try
 			{
@@ -129,7 +129,6 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 
 		partial void AddFaceAction (NSObject sender)
 		{
-
 			if (PersonName.Text.Length == 0)
 			{
 				this.ShowSimpleAlert ("Please input the person's name");
@@ -151,7 +150,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 					return;
 				}
 
-				await createNewPerson ();
+				await CreateNewPerson ();
 			}
 
 			if (Person != null) //just to make sure we succeeded in the case we created a new person above
@@ -161,19 +160,19 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 				if (image != null)
 				{
 					SourceImage = image;
-					await detectFaces ();
+					await DetectFaces ();
 				}
 			}
 		}
 
 
-		async Task detectFaces ()
+		async Task DetectFaces ()
 		{
 			try
 			{
 				this.ShowHUD ("Detecting faces");
 
-				DetectedFaces = await FaceClient.Shared.DetectFacesInPhoto (SourceImage);
+				DetectedFaces = await FaceClient.Shared.DetectFacesInPhoto (SourceImage.AsStream);
 
 				if (DetectedFaces.Count == 0)
 				{
@@ -181,7 +180,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 				}
 				else if (DetectedFaces.Count == 1)
 				{
-					await addFace (DetectedFaces [0], SourceImage);
+					await AddFace (DetectedFaces [0], SourceImage);
 				}
 				else // > 1 face
 				{
@@ -197,15 +196,15 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 		}
 
 
-		async Task addFace (Shared.Face face, UIImage image)
+		async Task AddFace (Shared.Face face, UIImage sourceImage)
 		{
 			try
 			{
 				this.ShowHUD ("Adding face");
 
-				await FaceClient.Shared.AddFaceForPerson (Person, Group, face, image);
+				await FaceClient.Shared.AddFaceForPerson (Person, Group, face, sourceImage.AsStream);
 
-				//var index = DetectedFaces.IndexOf (face);
+				face.SavePhotoFromSource (sourceImage);
 
 				this.ShowSimpleHUD ("Face added for this person");
 
