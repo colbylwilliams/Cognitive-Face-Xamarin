@@ -13,7 +13,7 @@ using Android.Widget;
 using Java.IO;
 using Java.Util;
 using Xamarin.Cognitive.Face.Droid.Contract;
-using Xamarin.Cognitive.Face.Sample.Droid.Extensions;
+using Xamarin.Cognitive.Face.Droid.Extensions;
 
 namespace Xamarin.Cognitive.Face.Sample.Droid
 {

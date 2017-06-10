@@ -1,13 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
 using Android.Content;
 using Android.Database;
 using Android.Graphics;
 using Android.Media;
 using Android.Provider;
+using NomadCode.UIExtensions;
 using Xamarin.Cognitive.Face.Droid.Contract;
-using Xamarin.Cognitive.Face.Sample.Shared;
+using Xamarin.Cognitive.Face.Shared;
 
-namespace Xamarin.Cognitive.Face.Sample.Droid.Extensions
+namespace Xamarin.Cognitive.Face.Droid.Extensions
 {
 	public static class ImageHelper
 	{
@@ -95,7 +98,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Extensions
 		/// <param name="originalBitmap">Original bitmap.</param>
 		/// <param name="faces">Faces.</param>
 		/// <param name="drawLandmarks">If set to <c>true</c> draw landmarks.</param>
-		public static Bitmap DrawFaceRectanglesOnBitmap (Bitmap originalBitmap, Shared.Face [] faces, bool drawLandmarks)
+		public static Bitmap DrawFaceRectanglesOnBitmap (Bitmap originalBitmap, Shared.Face [] faces, bool drawLandmarks, double faceRectEnlargeRatio = FACE_RECT_SCALE_RATIO)
 		{
 			var bitmap = originalBitmap.Copy (Bitmap.Config.Argb8888, true);
 
@@ -103,7 +106,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Extensions
 			using (var paint = new Paint ())
 			{
 				paint.AntiAlias = true;
-				paint.Color = Color.Green;
+				paint.Color = global::Android.Graphics.Color.Green;
 				paint.SetStyle (Paint.Style.Stroke);
 
 				int stokeWidth = Math.Max (originalBitmap.Width, originalBitmap.Height) / 100;
@@ -119,7 +122,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Extensions
 				{
 					foreach (var face in faces)
 					{
-						var rect = face.FaceRectangleLarge ?? face.FaceRectangle;
+						var rect = face.FaceRectangle.CalculateLargeFaceRectangle (originalBitmap, faceRectEnlargeRatio);
 
 						canvas.DrawRect (
 							rect.Left,
@@ -194,7 +197,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Extensions
 			using (var paint = new Paint ())
 			{
 				paint.AntiAlias = true;
-				paint.Color = Color.ParseColor ("#3399FF");
+				paint.Color = global::Android.Graphics.Color.ParseColor ("#3399FF");
 				paint.SetStyle (Paint.Style.Stroke);
 
 				int stokeWidth = Math.Max (originalBitmap.Width, originalBitmap.Height) / 10;
@@ -305,15 +308,19 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Extensions
 		}
 
 
+		// Ratio to scale a detected face rectangle, the face rectangle scaled up looks more natural.
+		const double FACE_RECT_SCALE_RATIO = 1.3;
+
+
 		/// <summary>
 		/// Resize face rectangle, for better view for human.
 		/// To make the rectangle larger, faceRectEnlargeRatio should be larger than 1, recommend 1.3
 		/// </summary>
 		/// <returns>The face rectangle.</returns>
 		/// <param name="faceRectangle">Face rectangle.</param>
-		/// <param name="bitmap">Bitmap.</param>
+		/// <param name="bitmap">the source Bitmap.</param>
 		/// <param name="faceRectEnlargeRatio">Face rect enlarge ratio.</param>
-		public static System.Drawing.RectangleF CalculateFaceRectangle (this FaceRectangle faceRectangle, Bitmap bitmap, double faceRectEnlargeRatio)
+		public static RectangleF CalculateLargeFaceRectangle (this RectangleF faceRectangle, Bitmap bitmap, double faceRectEnlargeRatio = FACE_RECT_SCALE_RATIO)
 		{
 			// Get the resized side length of the face rectangle
 			double sideLength = faceRectangle.Width * faceRectEnlargeRatio;
@@ -339,7 +346,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Extensions
 			top -= 0.15 * shiftTop * faceRectangle.Height;
 			top = Math.Max (top, 0.0);
 
-			return new System.Drawing.RectangleF
+			return new RectangleF
 			{
 				X = (int) left,
 				Y = (int) top,
@@ -349,12 +356,37 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Extensions
 		}
 
 
+		public static List<Bitmap> GenerateThumbnails (this List<Shared.Face> faces, Bitmap photo)
+		{
+			var faceThumbnails = new List<Bitmap> ();
+
+			if (faces != null)
+			{
+				foreach (var face in faces)
+				{
+					try
+					{
+						var largeFaceRect = face.FaceRectangle.CalculateLargeFaceRectangle (photo);
+
+						faceThumbnails.Add (photo.Crop (largeFaceRect));
+					}
+					catch (Exception ex)
+					{
+						Log.Error (ex);
+					}
+				}
+			}
+
+			return faceThumbnails;
+		}
+
+
 		#region Legacy
 
 
 		// Draw detected face rectangles in the original image. And return the image drawn.
 		// If drawLandmarks is set to be true, draw the five main landmarks of each face.
-		public static Bitmap DrawFaceRectanglesOnBitmap (Bitmap originalBitmap, Face.Droid.Contract.Face [] faces, bool drawLandmarks)
+		public static Bitmap DrawFaceRectanglesOnBitmap (Bitmap originalBitmap, Contract.Face [] faces, bool drawLandmarks)
 		{
 			Bitmap bitmap = originalBitmap.Copy (Bitmap.Config.Argb8888, true);
 			Canvas canvas = new Canvas (bitmap);
@@ -362,7 +394,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Extensions
 			Paint paint = new Paint ();
 			paint.AntiAlias = true;
 			paint.SetStyle (Paint.Style.Stroke);
-			paint.Color = Color.Green;
+			paint.Color = global::Android.Graphics.Color.Green;
 			int stokeWidth = Math.Max (originalBitmap.Width, originalBitmap.Height) / 100;
 			if (stokeWidth == 0)
 			{

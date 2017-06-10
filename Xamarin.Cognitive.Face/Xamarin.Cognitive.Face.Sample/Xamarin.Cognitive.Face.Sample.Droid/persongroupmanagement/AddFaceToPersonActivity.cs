@@ -11,8 +11,9 @@ using Android.Support.V7.App;
 using Android.Views;
 using Android.Widget;
 using NomadCode.UIExtensions;
-using Xamarin.Cognitive.Face.Sample.Droid.Extensions;
-using Xamarin.Cognitive.Face.Sample.Shared;
+using Xamarin.Cognitive.Face.Droid.Extensions;
+using Xamarin.Cognitive.Face.Extensions;
+using Xamarin.Cognitive.Face.Shared;
 
 namespace Xamarin.Cognitive.Face.Sample.Droid
 {
@@ -77,7 +78,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 			try
 			{
-				var faces = await FaceClient.Shared.DetectFacesInPhoto (sourceImage);
+				var faces = await FaceClient.Shared.DetectFacesInPhoto (() => sourceImage.AsJpeg ());
 
 				if (faces?.Count > 0)
 				{
@@ -128,14 +129,21 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 				progressDialog.SetMessage ("Adding face...");
 				SetInfo ("Adding face...");
 
-				foreach (var face in faces)
+				using (var stream = sourceImage.AsJpeg ())
 				{
-					AddLog ($"Request: Adding face to person {Person.Id}");
+					foreach (var face in faces)
+					{
+						AddLog ($"Request: Adding face to person {Person.Id}");
 
-					await FaceClient.Shared.AddFaceForPerson (Person, Group, face, sourceImage);
+						await FaceClient.Shared.AddFaceForPerson (Person, Group, face, stream);
 
-					var uri = global::Android.Net.Uri.Parse (face.PhotoPath);
-					StorageHelper.SetFaceUri (face.Id, uri.ToString (), Person.Id, this);
+						var thumbnail = faceGridViewAdapter.GetThumbnail (face);
+						face.SavePhotoFromCropped (thumbnail);
+
+						//legacy
+						var uri = global::Android.Net.Uri.Parse (face.PhotoPath);
+						StorageHelper.SetFaceUri (face.Id, uri.ToString (), Person.Id, this);
+					}
 				}
 
 				AddLog ("Response: Success. Face(s) " + string.Join (", ", faces.Select (f => f.Id)) + "added to person " + Person.Id);
@@ -175,25 +183,11 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			{
 				this.detectedFaces = detectedFaces;
 
-				faceThumbnails = new List<Bitmap> ();
+				faceThumbnails = detectedFaces.GenerateThumbnails (photo);
 
-				if (detectedFaces != null)
-				{
-					foreach (var face in detectedFaces)
-					{
-						try
-						{
-							faceThumbnails.Add (photo.Crop (face.FaceRectangleLarge ?? face.FaceRectangle));
-						}
-						catch (Exception ex)
-						{
-							Log.Error (ex);
-						}
-					}
-
-					ResetCheckedItems ();
-				}
+				ResetCheckedItems ();
 			}
+
 
 			public override Shared.Face this [int position] => detectedFaces [position];
 
@@ -223,6 +217,19 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 				checkBox.SetOnCheckedChangeListener (this);
 
 				return convertView;
+			}
+
+
+			public Bitmap GetThumbnail (Shared.Face face)
+			{
+				var position = detectedFaces.IndexOf (face);
+
+				if (position > -1)
+				{
+					return faceThumbnails [position];
+				}
+
+				return null;
 			}
 
 

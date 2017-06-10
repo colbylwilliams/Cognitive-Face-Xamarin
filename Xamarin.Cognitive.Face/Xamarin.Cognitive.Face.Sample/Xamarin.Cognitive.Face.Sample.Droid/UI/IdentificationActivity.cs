@@ -13,7 +13,7 @@ using Android.Widget;
 using Java.IO;
 using Java.Util;
 using Java.Text;
-using Xamarin.Cognitive.Face.Sample.Droid.Extensions;
+using Xamarin.Cognitive.Face.Droid.Extensions;
 
 namespace Xamarin.Cognitive.Face.Sample.Droid
 {
@@ -277,8 +277,8 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 				if (trainingStatus.Status != Shared.TrainingStatus.TrainingStatusType.Succeeded)
 				{
-					mProgressDialog.SetMessage("Person group training status is " + trainingStatus.Status);
-					SetInfo("Person group training status is " + trainingStatus.Status);
+					mProgressDialog.SetMessage ("Person group training status is " + trainingStatus.Status);
+					SetInfo ("Person group training status is " + trainingStatus.Status);
 
 					mSucceed = false;
 				}
