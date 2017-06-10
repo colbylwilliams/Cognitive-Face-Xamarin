@@ -9,6 +9,6 @@
     <Import_RootNamespace>Xamarin.Cognitive.Face</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)MyClass.cs" />
+    <Folder Include="$(MSBuildThisFileDirectory)Extensions\" />
   </ItemGroup>
 </Project>
