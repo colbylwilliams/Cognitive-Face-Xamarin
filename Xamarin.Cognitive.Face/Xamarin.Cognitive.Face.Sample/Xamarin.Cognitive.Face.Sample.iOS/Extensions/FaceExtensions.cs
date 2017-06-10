@@ -2,14 +2,14 @@
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using Xamarin.Cognitive.Face.Sample.Shared;
+using Xamarin.Cognitive.Face.Shared;
 using Foundation;
 using NomadCode.UIExtensions;
 using UIKit;
 using Xamarin.Cognitive.Face.iOS;
-using Xamarin.Cognitive.Face.Sample.Shared.Extensions;
+using Xamarin.Cognitive.Face.Shared.Extensions;
 
-namespace Xamarin.Cognitive.Face.Sample.iOS.Extensions
+namespace Xamarin.Cognitive.Face.Extensions
 {
 	public static class FaceExtensions
 	{
@@ -81,7 +81,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS.Extensions
 		}
 
 
-		public static Shared.Face ToFace (this MPOFace mpoFace)
+		public static Shared.Face ToFace (this MPOFace mpoFace, bool adaptLandmarks = false, FaceAttributeType [] attributes = null)
 		{
 			var rect = new RectangleF (mpoFace.FaceRectangle.Left,
 									   mpoFace.FaceRectangle.Top,
@@ -91,10 +91,15 @@ namespace Xamarin.Cognitive.Face.Sample.iOS.Extensions
 			var face = new Shared.Face
 			{
 				Id = mpoFace.FaceId,
-				FaceRectangle = rect,
-				Landmarks = mpoFace.FaceLandmarks?.ToFaceLandmarks (),
-				Attributes = mpoFace.Attributes?.ToFaceAttributes ()
+				FaceRectangle = rect
 			};
+
+			face.Attributes = mpoFace.Attributes?.ToFaceAttributes (attributes);
+
+			if (adaptLandmarks)
+			{
+				face.Landmarks = mpoFace.FaceLandmarks?.ToFaceLandmarks ();
+			}
 
 			face.UpdatePhotoPath ();
 
@@ -157,31 +162,71 @@ namespace Xamarin.Cognitive.Face.Sample.iOS.Extensions
 		{
 			return new FeatureCoordinate
 			{
-				X = feature.X,
-				Y = feature.Y
+				X = feature.X.AsFloatSafe (),
+				Y = feature.Y.AsFloatSafe ()
 			};
 		}
 
 
-		public static FaceAttributes ToFaceAttributes (this MPOFaceAttributes attrs)
+		public static FaceAttributes ToFaceAttributes (this MPOFaceAttributes attrs, FaceAttributeType [] attributes = null)
 		{
-			return new FaceAttributes
+			if (attributes?.Length > 0)
 			{
-				Age = attrs.Age.AsFloatSafe (),
-				SmileIntensity = attrs.Smile.AsFloatSafe (),
-				Gender = attrs.Gender,
-				Glasses = attrs.Glasses.AsEnum<Glasses> (),
-				FacialHair = attrs.FacialHair.ToFacialHair (),
-				HeadPose = attrs.HeadPose.ToFaceHeadPose (),
-				Emotion = attrs.Emotion.ToFaceEmotion (),
-				Hair = attrs.Hair.ToHair (),
-				Makeup = attrs.Makeup.ToMakeup (),
-				Occlusion = attrs.Occlusion.ToOcclusion (),
-				Accessories = attrs.Accessories.ToAccessories (),
-				Blur = attrs.Blur.ToBlur (),
-				Exposure = attrs.Exposure.ToExposure (),
-				Noise = attrs.Noise.ToNoise ()
-			};
+				var faceAttributes = new FaceAttributes ();
+
+				foreach (var attr in attributes)
+				{
+					switch (attr)
+					{
+						case FaceAttributeType.Age:
+							faceAttributes.Age = attrs.Age.AsFloatSafe ();
+							break;
+						case FaceAttributeType.Smile:
+							faceAttributes.SmileIntensity = attrs.Smile.AsFloatSafe ();
+							break;
+						case FaceAttributeType.Gender:
+							faceAttributes.Gender = attrs.Gender;
+							break;
+						case FaceAttributeType.Glasses:
+							faceAttributes.Glasses = attrs.Glasses.AsEnum<Glasses> ();
+							break;
+						case FaceAttributeType.FacialHair:
+							faceAttributes.FacialHair = attrs.FacialHair.ToFacialHair ();
+							break;
+						case FaceAttributeType.HeadPose:
+							faceAttributes.HeadPose = attrs.HeadPose.ToFaceHeadPose ();
+							break;
+						case FaceAttributeType.Emotion:
+							faceAttributes.Emotion = attrs.Emotion.ToFaceEmotion ();
+							break;
+						case FaceAttributeType.Hair:
+							faceAttributes.Hair = attrs.Hair.ToHair ();
+							break;
+						case FaceAttributeType.Makeup:
+							faceAttributes.Makeup = attrs.Makeup.ToMakeup ();
+							break;
+						case FaceAttributeType.Occlusion:
+							faceAttributes.Occlusion = attrs.Occlusion.ToOcclusion ();
+							break;
+						case FaceAttributeType.Accessories:
+							faceAttributes.Accessories = attrs.Accessories.ToAccessories ();
+							break;
+						case FaceAttributeType.Blur:
+							faceAttributes.Blur = attrs.Blur.ToBlur ();
+							break;
+						case FaceAttributeType.Exposure:
+							faceAttributes.Exposure = attrs.Exposure.ToExposure ();
+							break;
+						case FaceAttributeType.Noise:
+							faceAttributes.Noise = attrs.Noise.ToNoise ();
+							break;
+					}
+				}
+
+				return faceAttributes;
+			}
+
+			return null;
 		}
 
 
@@ -210,40 +255,50 @@ namespace Xamarin.Cognitive.Face.Sample.iOS.Extensions
 
 		public static FaceEmotion ToFaceEmotion (this MPOFaceEmotion mpoEmotion)
 		{
-			return new FaceEmotion
+			if (mpoEmotion.MostEmotionValue != null)
 			{
-				Anger = mpoEmotion.Anger.AsFloatSafe (),
-				Contempt = mpoEmotion.Contempt.AsFloatSafe (),
-				Disgust = mpoEmotion.Disgust.AsFloatSafe (),
-				Fear = mpoEmotion.Fear.AsFloatSafe (),
-				Happiness = mpoEmotion.Happiness.AsFloatSafe (),
-				Neutral = mpoEmotion.Neutral.AsFloatSafe (),
-				Sadness = mpoEmotion.Sadness.AsFloatSafe (),
-				Surprise = mpoEmotion.Surprise.AsFloatSafe (),
-				MostEmotionValue = mpoEmotion.MostEmotionValue.AsFloatSafe (),
-				MostEmotion = mpoEmotion.MostEmotion
-			};
+				return new FaceEmotion
+				{
+					Anger = mpoEmotion.Anger.AsFloatSafe (),
+					Contempt = mpoEmotion.Contempt.AsFloatSafe (),
+					Disgust = mpoEmotion.Disgust.AsFloatSafe (),
+					Fear = mpoEmotion.Fear.AsFloatSafe (),
+					Happiness = mpoEmotion.Happiness.AsFloatSafe (),
+					Neutral = mpoEmotion.Neutral.AsFloatSafe (),
+					Sadness = mpoEmotion.Sadness.AsFloatSafe (),
+					Surprise = mpoEmotion.Surprise.AsFloatSafe (),
+					MostEmotionValue = mpoEmotion.MostEmotionValue.AsFloatSafe (),
+					MostEmotion = mpoEmotion.MostEmotion
+				};
+			}
+
+			return null;
 		}
 
 
 		public static Hair ToHair (this MPOHair mpoHair)
 		{
-			var hair = new Hair
+			if (mpoHair.HairColor?.Length > 0)
 			{
-				Bald = mpoHair.Bald.AsFloatSafe (),
-				Invisible = mpoHair.Invisible.AsBoolSafe (),
-				HairString = mpoHair.Hair
-			};
+				var hair = new Hair
+				{
+					Bald = mpoHair.Bald.AsFloatSafe (),
+					Invisible = mpoHair.Invisible.AsBoolSafe (),
+					HairString = mpoHair.Hair
+				};
 
-			foreach (var dict in mpoHair.HairColor)
-			{
-				var color = dict ["color"].ToString ();
-				var confidence = dict ["confidence"] as NSNumber;
+				foreach (var dict in mpoHair.HairColor)
+				{
+					var color = dict ["color"].ToString ();
+					var confidence = dict ["confidence"] as NSNumber;
 
-				hair.HairColor.Add (color.AsEnum<HairColorType> (), confidence.AsFloatSafe ());
+					hair.HairColor.Add (color.AsEnum<HairColorType> (), confidence.AsFloatSafe ());
+				}
+
+				return hair;
 			}
 
-			return hair;
+			return null;
 		}
 
 
@@ -275,7 +330,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS.Extensions
 				AccessoriesString = mpoAccessories.AccessoriesString
 			};
 
-			if (mpoAccessories.Accessories.Length > 0)
+			if (mpoAccessories.Accessories?.Length > 0)
 			{
 				foreach (var dict in mpoAccessories.Accessories)
 				{
@@ -292,30 +347,112 @@ namespace Xamarin.Cognitive.Face.Sample.iOS.Extensions
 
 		public static Blur ToBlur (this MPOBlur mpoBlur)
 		{
-			return new Blur
+			if (mpoBlur.Value != null)
 			{
-				BlurLevel = mpoBlur.BlurLevel.AsEnum<BlurLevel> (),
-				Value = mpoBlur.Value.AsFloatSafe ()
-			};
+				return new Blur
+				{
+					BlurLevel = mpoBlur.BlurLevel.AsEnum<BlurLevel> (),
+					Value = mpoBlur.Value.AsFloatSafe ()
+				};
+			}
+
+			return null;
 		}
 
 
 		public static Exposure ToExposure (this MPOExposure mpoExposure)
 		{
-			return new Exposure
+			if (mpoExposure.Value != null)
 			{
-				ExposureLevel = mpoExposure.ExposureLevel.AsEnum<ExposureLevel> (),
-				Value = mpoExposure.Value.AsFloatSafe ()
-			};
+				return new Exposure
+				{
+					ExposureLevel = mpoExposure.ExposureLevel.AsEnum<ExposureLevel> (),
+					Value = mpoExposure.Value.AsFloatSafe ()
+				};
+			}
+
+			return null;
 		}
 
 
 		public static Noise ToNoise (this MPONoise mpoNoise)
 		{
-			return new Noise
+			if (mpoNoise.Value != null)
 			{
-				NoiseLevel = mpoNoise.NoiseLevel.AsEnum<NoiseLevel> (),
-				Value = mpoNoise.Value.AsFloatSafe ()
+				return new Noise
+				{
+					NoiseLevel = mpoNoise.NoiseLevel.AsEnum<NoiseLevel> (),
+					Value = mpoNoise.Value.AsFloatSafe ()
+				};
+			}
+
+			return null;
+		}
+
+
+		public static MPOFaceAttributeType ToNativeFaceAttributeType (this FaceAttributeType type)
+		{
+			return (MPOFaceAttributeType) ((int) type + 1);
+		}
+
+
+		public static SimilarFaceResult ToSimilarFaceResult (this MPOSimilarFace similarFace)
+		{
+			return new SimilarFaceResult
+			{
+				FaceId = similarFace.FaceId,
+				Confidence = similarFace.Confidence
+			};
+		}
+
+
+		public static GroupResult ToGroupResult (this MPOGroupResult groupResult)
+		{
+			var groupingResult = new GroupResult
+			{
+				Groups = groupResult.Groups.Select ((grp, index) => new FaceGroup
+				{
+					Title = $"Face Group #{index + 1}",
+					FaceIds = grp.ToList ()
+				}).ToList ()
+			};
+
+			if (groupResult.MesseyGroup?.Length > 0)
+			{
+				groupingResult.MessyGroup = new FaceGroup
+				{
+					Title = "Messy Group",
+					FaceIds = groupResult.MesseyGroup.ToList ()
+				};
+			}
+
+			return groupingResult;
+		}
+
+
+		public static IdentificationResult ToIdentificationResult (this MPOIdentifyResult result)
+		{
+			return new IdentificationResult
+			{
+				FaceId = result.FaceId,
+				CandidateResults =
+					result.Candidates
+						  .Select (c => new CandidateResult
+						  {
+							  PersonId = c.PersonId,
+							  Confidence = c.Confidence
+						  })
+						  .ToList ()
+			};
+		}
+
+
+		public static VerifyResult ToVerifyResult (this MPOVerifyResult result)
+		{
+			return new VerifyResult
+			{
+				IsIdentical = result.IsIdentical,
+				Confidence = result.Confidence
 			};
 		}
 
@@ -340,6 +477,12 @@ namespace Xamarin.Cognitive.Face.Sample.iOS.Extensions
 			{
 				face.SavePhotoFromCropped (croppedFaceImg);
 			}
+		}
+
+
+		public static UIImage CreateThumbnail (this Shared.Face face, UIImage sourceImage)
+		{
+			return sourceImage.Crop (face.FaceRectangle);
 		}
 
 

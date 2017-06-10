@@ -4,20 +4,17 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Android.Graphics;
-using Java.IO;
 using Java.Util;
 using NomadCode.UIExtensions;
 using Xamarin.Cognitive.Face.Droid;
-using Xamarin.Cognitive.Face.Sample.Droid.Extensions;
-using Xamarin.Cognitive.Face.Sample.Shared;
+using Xamarin.Cognitive.Face.Droid.Extensions;
+using Xamarin.Cognitive.Face.Shared;
+using Xamarin.Cognitive.Face.Extensions;
 
 namespace Xamarin.Cognitive.Face.Sample
 {
 	public partial class FaceClient
 	{
-		// Ratio to scale a detected face rectangle, the face rectangle scaled up looks more natural.
-		const double FACE_RECT_SCALE_RATIO = 1.3;
-
 		FaceServiceRestClient client;
 		FaceServiceRestClient Client => client ?? (client = new FaceServiceRestClient (Endpoint, SubscriptionKey));
 
@@ -27,149 +24,65 @@ namespace Xamarin.Cognitive.Face.Sample
 		#region Person Group
 
 
-		public Task<List<PersonGroup>> GetPersonGroups (bool forceRefresh = false)
+		internal Task<List<PersonGroup>> GetGroups ()
 		{
 			return Task.Run (() =>
 			{
-				try
-				{
-					if (Groups.Count == 0 || forceRefresh)
-					{
-						var groups = Client.ListPersonGroups ();
+				var groups = Client.ListPersonGroups ();
 
-						Groups = new List<PersonGroup> (
-							groups.Select (g => new PersonGroup
-							{
-								Id = g.PersonGroupId,
-								Name = g.Name,
-								UserData = g.UserData
-							})
-						);
-					}
-
-					return Groups;
-				}
-				catch (Exception ex)
-				{
-					Log.Error (ex);
-					throw;
-				}
+				return groups.Select (g => g.ToPersonGroup ()).ToList ();
 			});
 		}
 
 
-		public Task<PersonGroup> GetPersonGroup (string personGroupId)
+		internal Task<PersonGroup> GetGroup (string personGroupId)
 		{
 			return Task.Run (() =>
 			{
-				try
-				{
-					var personGroup = Client.GetPersonGroup (personGroupId);
+				var personGroup = Client.GetPersonGroup (personGroupId);
 
-					return personGroup.ToPersonGroup ();
-				}
-				catch (Exception ex)
-				{
-					Log.Error (ex);
-					throw;
-				}
+				return personGroup.ToPersonGroup ();
 			});
 		}
 
 
-		public Task<PersonGroup> CreatePersonGroup (string groupName, string userData = null)
+		internal Task CreatePersonGroup (string personGroupId, string groupName, string userData)
 		{
 			return Task.Run (() =>
 			{
-				try
-				{
-					var personGroupId = Guid.NewGuid ().ToString ();
-
-					Client.CreatePersonGroup (personGroupId, groupName, userData);
-
-					var personGroup = new PersonGroup
-					{
-						Name = groupName,
-						Id = personGroupId,
-						UserData = userData,
-						People = new List<Person> ()
-					};
-
-					Groups.Add (personGroup);
-
-					return personGroup;
-				}
-				catch (Exception ex)
-				{
-					Log.Error (ex);
-					throw;
-				}
+				Client.CreatePersonGroup (personGroupId, groupName, userData);
 			});
 		}
 
 
-		public Task UpdatePersonGroup (PersonGroup personGroup, string groupName, string userData = null)
+		internal Task UpdatePersonGroup (string personGroupId, string groupName, string userData)
 		{
 			return Task.Run (() =>
 			{
-				try
-				{
-					Client.UpdatePersonGroup (personGroup.Id, groupName, userData);
-
-					personGroup.Name = groupName;
-					personGroup.UserData = userData;
-				}
-				catch (Exception ex)
-				{
-					Log.Error (ex);
-					throw;
-				}
+				Client.UpdatePersonGroup (personGroupId, groupName, userData);
 			});
 		}
 
 
-		public Task DeletePersonGroup (string personGroupId)
+		internal Task DeletePersonGroup (string personGroupId)
 		{
 			return Task.Run (() =>
 			{
-				try
-				{
-					Client.DeletePersonGroup (personGroupId);
-
-					RemoveGroup (personGroupId);
-				}
-				catch (Exception ex)
-				{
-					Log.Error (ex);
-					throw;
-				}
+				Client.DeletePersonGroup (personGroupId);
 			});
 		}
 
 
-		public Task TrainPersonGroup (PersonGroup personGroup)
+		internal Task TrainPersonGroup (string personGroupId)
 		{
 			return Task.Run (() =>
 			{
-				try
-				{
-					Client.TrainPersonGroup (personGroup.Id);
-				}
-				catch (Exception ex)
-				{
-					Log.Error (ex);
-					throw;
-				}
+				Client.TrainPersonGroup (personGroupId);
 			});
 		}
 
 
-		/// <summary>
-		/// Gets the group training status: notstarted, running, succeeded, failed
-		/// </summary>
-		/// <returns>The group training status.</returns>
-		/// <param name="personGroupId">Person group Id.</param>
-		public Task<TrainingStatus> GetGroupTrainingStatus (string personGroupId)
+		internal Task<TrainingStatus> GetGroupTrainingStatus (string personGroupId)
 		{
 			return Task.Run (() =>
 			{
@@ -186,12 +99,6 @@ namespace Xamarin.Cognitive.Face.Sample
 						return TrainingStatus.FromStatus (TrainingStatus.TrainingStatusType.NotStarted);
 					}
 
-					Log.Error (cex);
-					throw;
-				}
-				catch (Exception ex)
-				{
-					Log.Error (ex);
 					throw;
 				}
 			});
@@ -204,253 +111,86 @@ namespace Xamarin.Cognitive.Face.Sample
 		#region Person
 
 
-		public Task<List<Person>> GetPeopleForGroup (PersonGroup personGroup, bool forceRefresh = false)
+		internal Task<List<Person>> GetPeopleForGroup (string personGroupId)
 		{
-			if (personGroup.People?.Count > 0 && !forceRefresh)
-			{
-				return Task.FromResult (personGroup.People);
-			}
-
 			return Task.Run (() =>
 			{
-				try
-				{
-					var arrPeople = Client.ListPersons (personGroup.Id);
+				var arrPeople = Client.ListPersons (personGroupId);
 
-					var people = new List<Person> (
-						arrPeople.Select (p => p.ToPerson ())
-					);
+				var people = new List<Person> (
+					arrPeople.Select (p => p.ToPerson ())
+				);
 
-					if (personGroup.PeopleLoaded)
-					{
-						personGroup.People.Clear ();
-						personGroup.People.AddRange (people);
-					}
-					else
-					{
-						personGroup.People = people;
-					}
-
-					return people;
-				}
-				catch (Exception ex)
-				{
-					Log.Error (ex);
-					throw;
-				}
+				return people;
 			});
 		}
 
 
-		public Task<Person> CreatePerson (string personName, PersonGroup personGroup, string userData = null)
+		internal Task<string> CreatePerson (string personName, string personGroupId, string userData)
 		{
 			return Task.Run (() =>
 			{
-				try
-				{
-					var result = Client.CreatePerson (personGroup.Id, personName, userData);
+				var result = Client.CreatePerson (personGroupId, personName, userData);
 
-					var id = result.PersonId.ToString ();
-
-					if (string.IsNullOrEmpty (id))
-					{
-						throw new Exception ("CreatePersonResult returned invalid person Id");
-					}
-
-					var person = new Person
-					{
-						Name = personName,
-						Id = id,
-						UserData = userData
-					};
-
-					if (personGroup.PeopleLoaded)
-					{
-						personGroup.People.Add (person);
-					}
-
-					return person;
-				}
-				catch (Exception ex)
-				{
-					Log.Error (ex);
-					throw;
-				}
+				return result.PersonId.ToString ();
 			});
 		}
 
 
-		public Task UpdatePerson (Person person, PersonGroup personGroup, string personName, string userData = null)
+		internal Task UpdatePerson (string personId, string personGroupId, string personName, string userData)
 		{
 			return Task.Run (() =>
 			{
-				try
-				{
-					Client.UpdatePerson (personGroup.Id, person.Id.ToUUID (), personName, userData);
-
-					person.Name = personName;
-					person.UserData = userData;
-				}
-				catch (Exception ex)
-				{
-					Log.Error (ex);
-					throw;
-				}
+				Client.UpdatePerson (personGroupId, personId.ToUUID (), personName, userData);
 			});
 		}
 
 
-		public Task DeletePerson (PersonGroup personGroup, Person person)
+		internal Task DeletePerson (string personGroupId, string personId)
 		{
 			return Task.Run (() =>
 			{
-				try
-				{
-					Client.DeletePerson (personGroup.Id, person.Id.ToUUID ());
-
-					if (personGroup.PeopleLoaded && personGroup.People.Contains (person))
-					{
-						personGroup.People.Remove (person);
-					}
-				}
-				catch (Exception ex)
-				{
-					Log.Error (ex);
-					throw;
-				}
+				Client.DeletePerson (personGroupId, personId.ToUUID ());
 			});
 		}
 
 
-		public Task<Person> GetPerson (PersonGroup personGroup, string personId)
+		internal Task<Person> GetPerson (string personGroupId, string personId)
 		{
-			//if people are already loaded for this group try to find it there...
-			if (personGroup.PeopleLoaded)
-			{
-				var person = personGroup.People.FirstOrDefault (p => p.Id == personId);
-
-				if (person != null)
-				{
-					return Task.FromResult (person);
-				}
-			}
-
 			return Task.Run (() =>
 			{
-				try
-				{
-					var jPerson = Client.GetPerson (personGroup.Id, personId.ToUUID ());
-					var person = jPerson.ToPerson ();
-
-					//add them to the group?
-					if (personGroup.PeopleLoaded)
-					{
-						personGroup.People.Add (person);
-					}
-
-					return person;
-				}
-				catch (Exception ex)
-				{
-					Log.Error (ex);
-					throw;
-				}
+				var jPerson = Client.GetPerson (personGroupId, personId.ToUUID ());
+				return jPerson.ToPerson ();
 			});
 		}
 
 
-		public Task AddFaceForPerson (Person person, PersonGroup personGroup, Shared.Face face, Bitmap photo, string userData = null, float quality = .8f)
+		internal Task<string> AddFaceForPerson (string personId, string personGroupId, Shared.Face face, Stream photoStream, string userData = null)
 		{
 			return Task.Run (() =>
 			{
-				try
-				{
-					using (var jpgStream = photo.AsJpeg ())
-					{
-						var result = Client.AddPersonFace (personGroup.Id, person.Id.ToUUID (), jpgStream, userData, face.FaceRectangle.ToFaceRect ());
+				var result = Client.AddPersonFace (personGroupId, personId.ToUUID (), photoStream, userData, face.FaceRectangle.ToFaceRect ());
 
-						face.Id = result.PersistedFaceId.ToString ();
-					}
-
-					face.UpdatePhotoPath ();
-					person.Faces.Add (face);
-
-					face.SavePhotoFromSource (photo);
-				}
-				catch (Exception ex)
-				{
-					Log.Error (ex);
-					throw;
-				}
+				return result?.PersistedFaceId?.ToString ();
 			});
 		}
 
 
-		public Task DeletePersonFace (Person person, PersonGroup personGroup, Shared.Face face)
+		internal Task DeletePersonFace (string personId, string personGroupId, string faceId)
 		{
 			return Task.Run (() =>
 			{
-				try
-				{
-					Client.DeletePersonFace (personGroup.Id, person.Id.ToUUID (), face.Id.ToUUID ());
-
-					if (person.Faces.Contains (face))
-					{
-						person.Faces.Remove (face);
-					}
-				}
-				catch (Exception ex)
-				{
-					Log.Error (ex);
-					throw;
-				}
+				Client.DeletePersonFace (personGroupId, personId.ToUUID (), faceId.ToUUID ());
 			});
 		}
 
 
-		public async Task<List<Shared.Face>> GetFacesForPerson (Person person, PersonGroup personGroup)
-		{
-			try
-			{
-				person.Faces.Clear ();
-
-				if (person.FaceIds?.Count > 0)
-				{
-					foreach (var faceId in person.FaceIds)
-					{
-						var face = await GetFaceForPerson (person, personGroup, faceId);
-
-						person.Faces.Add (face);
-					}
-
-					return person.Faces;
-				}
-
-				return default (List<Shared.Face>);
-			}
-			catch (Exception ex)
-			{
-				Log.Error (ex);
-				throw;
-			}
-		}
-
-
-		public Task<Shared.Face> GetFaceForPerson (Person person, PersonGroup personGroup, string persistedFaceId)
+		internal Task<Shared.Face> GetFaceForPerson (string personId, string personGroupId, string persistedFaceId)
 		{
 			return Task.Run (() =>
 			{
-				try
-				{
-					var persistedFace = Client.GetPersonFace (personGroup.Id, person.Id.ToUUID (), persistedFaceId.ToUUID ());
-
-					return persistedFace.ToFace ();
-				}
-				catch (Exception ex)
-				{
-					Log.Error (ex);
-					throw;
-				}
+				var persistedFace = Client.GetPersonFace (personGroupId, personId.ToUUID (), persistedFaceId.ToUUID ());
+				return persistedFace.ToFace ();
 			});
 		}
 
@@ -461,49 +201,70 @@ namespace Xamarin.Cognitive.Face.Sample
 		#region Face
 
 
-		public Task<List<Shared.Face>> DetectFacesInPhoto (Bitmap photo, bool returnLandmarks = false, params FaceServiceClientFaceAttributeType [] attributes)
-		{
-			return DetectFacesInPhoto (photo, .8f, returnLandmarks, attributes);
-		}
-
-
-		public Task<List<Shared.Face>> DetectFacesInPhoto (Bitmap photo, float quality, bool returnLandmarks = false, params FaceServiceClientFaceAttributeType [] attributes)
+		internal Task<List<Shared.Face>> DetectFacesInPhotoInternal (Stream photoStream, bool returnLandmarks, params FaceAttributeType [] attributes)
 		{
 			return Task.Run (() =>
 			{
-				try
-				{
-					using (MemoryStream compressedStream = new MemoryStream ())
-					{
-						if (!photo.Compress (Bitmap.CompressFormat.Jpeg, (int) (quality * 100), compressedStream))
-						{
-							throw new Exception ("Unable to compress photo to memory stream");
-						}
+				var types = attributes.Select (a => a.ToNativeFaceAttributeType ()).ToArray ();
 
-						compressedStream.Position = 0;
+				var detectedFaces = Client.Detect (photoStream, true, returnLandmarks, types);
 
-						var detectedFaces = Client.Detect (compressedStream, true, returnLandmarks, attributes);
+				return detectedFaces.Select (f => f.ToFace (returnLandmarks, attributes)).ToList ();
+			});
+		}
 
-						var faces = new List<Shared.Face> (detectedFaces.Length);
 
-						foreach (var detectedFace in detectedFaces)
-						{
-							var face = detectedFace.ToFace ();
-							//calculate enlarged face rect
-							face.FaceRectangleLarge = detectedFace.FaceRectangle.CalculateFaceRectangle (photo, FACE_RECT_SCALE_RATIO);
-							faces.Add (face);
+		internal Task<List<SimilarFaceResult>> FindSimilarInternal (string targetFaceId, string [] faceIds, int maxCandidatesReturned = 1)
+		{
+			return Task.Run (() =>
+			{
+				var results = Client.FindSimilar (targetFaceId.ToUUID (), faceIds.AsUUIDs (), maxCandidatesReturned);
 
-							//face.SavePhotoFromSource (photo);
-						}
+				return results.Select (res => res.ToSimilarFaceResult ()).ToList ();
+			});
+		}
 
-						return faces;
-					}
-				}
-				catch (Exception ex)
-				{
-					Log.Error (ex);
-					throw;
-				}
+
+		internal Task<GroupResult> GroupFaces (string [] targetFaceIds)
+		{
+			return Task.Run (() =>
+			{
+				var groupResult = Client.Group (targetFaceIds.AsUUIDs ());
+
+				return groupResult.ToGroupResult ();
+			});
+		}
+
+
+		internal Task<List<IdentificationResult>> Identify (string personGroupId, string [] detectedFaceIds, int maxNumberOfCandidates = 1)
+		{
+			return Task.Run (() =>
+			{
+				var results = Client.Identity (personGroupId, detectedFaceIds.AsUUIDs (), maxNumberOfCandidates);
+
+				return results.Select (r => r.ToIdentificationResult ()).ToList ();
+			});
+		}
+
+
+		internal Task<VerifyResult> Verify (string face1Id, string face2Id)
+		{
+			return Task.Run (() =>
+			{
+				var result = Client.Verify (face1Id.ToUUID (), face2Id.ToUUID ());
+
+				return result.ToVerifyResult ();
+			});
+		}
+
+
+		internal Task<VerifyResult> Verify (string faceId, string personId, string personGroupId)
+		{
+			return Task.Run (() =>
+			{
+				var result = Client.Verify (faceId.ToUUID (), personGroupId, personId.ToUUID ());
+
+				return result.ToVerifyResult ();
 			});
 		}
 
@@ -537,14 +298,6 @@ namespace Xamarin.Cognitive.Face.Sample
 			 });
 		}
 
-
-		public Task TrainPersonGroup (string mPersonGroupId)
-		{
-			return Task.Run (() =>
-			 {
-				 Client.TrainPersonGroup (mPersonGroupId);
-			 });
-		}
 
 		public Task<Face.Droid.Contract.GroupResult> Group (UUID [] faceIds)
 		{

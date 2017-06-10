@@ -5,9 +5,9 @@ using System.Linq;
 using Android.Graphics;
 using Java.Util;
 using NomadCode.UIExtensions;
-using Xamarin.Cognitive.Face.Sample.Shared;
+using Xamarin.Cognitive.Face.Shared;
 
-namespace Xamarin.Cognitive.Face.Sample.Droid.Extensions
+namespace Xamarin.Cognitive.Face.Extensions
 {
 	public static class FaceExtensions
 	{
@@ -22,13 +22,25 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Extensions
 		}
 
 
-		public static DateTime ToDateTime (this Java.Util.Date jDate)
+		public static DateTime ToDateTime (this Date jDate)
 		{
 			return epoch.AddMilliseconds (jDate.Time);
 		}
 
 
-		public static PersonGroup ToPersonGroup (this Face.Droid.Contract.PersonGroup personGroup)
+		public static UUID [] AsUUIDs (this IEnumerable<string> ids)
+		{
+			return ids.Select (id => id.ToUUID ()).ToArray ();
+		}
+
+
+		public static List<string> AsStrings (this IEnumerable<UUID> ids)
+		{
+			return ids.Select (id => id.ToString ()).ToList ();
+		}
+
+
+		public static PersonGroup ToPersonGroup (this Droid.Contract.PersonGroup personGroup)
 		{
 			return new PersonGroup
 			{
@@ -45,7 +57,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Extensions
 		}
 
 
-		public static Person ToPerson (this Face.Droid.Contract.Person person)
+		public static Person ToPerson (this Droid.Contract.Person person)
 		{
 			return new Person
 			{
@@ -58,7 +70,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Extensions
 		}
 
 
-		public static TrainingStatus ToTrainingStatus (this Face.Droid.Contract.TrainingStatus status)
+		public static TrainingStatus ToTrainingStatus (this Droid.Contract.TrainingStatus status)
 		{
 			return new TrainingStatus
 			{
@@ -70,7 +82,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Extensions
 		}
 
 
-		public static Shared.Face ToFace (this Face.Droid.Contract.Face thisFace)
+		public static Shared.Face ToFace (this Droid.Contract.Face thisFace, bool adaptLandmarks = false, FaceAttributeType [] attributes = null)
 		{
 			var rect = new RectangleF (thisFace.FaceRectangle.Left,
 									   thisFace.FaceRectangle.Top,
@@ -80,10 +92,15 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Extensions
 			var thatFace = new Shared.Face
 			{
 				Id = thisFace.FaceId.ToString (),
-				FaceRectangle = rect,
-				Landmarks = thisFace.FaceLandmarks?.ToFaceLandmarks (),
-				Attributes = thisFace.FaceAttributes?.ToFaceAttributes ()
+				FaceRectangle = rect
 			};
+
+			thatFace.Attributes = thisFace.FaceAttributes?.ToFaceAttributes (attributes);
+
+			if (adaptLandmarks)
+			{
+				thatFace.Landmarks = thisFace.FaceLandmarks?.ToFaceLandmarks ();
+			}
 
 			thatFace.UpdatePhotoPath ();
 
@@ -91,7 +108,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Extensions
 		}
 
 
-		public static Shared.Face ToFace (this Face.Droid.Contract.PersonFace personFace)
+		public static Shared.Face ToFace (this Droid.Contract.PersonFace personFace)
 		{
 			var face = new Shared.Face
 			{
@@ -105,7 +122,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Extensions
 		}
 
 
-		public static FaceLandmarks ToFaceLandmarks (this Face.Droid.Contract.FaceLandmarks landmarks)
+		public static FaceLandmarks ToFaceLandmarks (this Droid.Contract.FaceLandmarks landmarks)
 		{
 			return new FaceLandmarks
 			{
@@ -140,7 +157,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Extensions
 		}
 
 
-		public static FeatureCoordinate ToFeatureCoordinate (this Face.Droid.Contract.FeatureCoordinate feature)
+		public static FeatureCoordinate ToFeatureCoordinate (this Droid.Contract.FeatureCoordinate feature)
 		{
 			return new FeatureCoordinate
 			{
@@ -150,29 +167,69 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Extensions
 		}
 
 
-		public static FaceAttributes ToFaceAttributes (this Face.Droid.Contract.FaceAttribute attrs)
+		public static FaceAttributes ToFaceAttributes (this Droid.Contract.FaceAttribute attrs, FaceAttributeType [] attributes = null)
 		{
-			return new FaceAttributes
+			if (attributes?.Length > 0)
 			{
-				Age = (float) attrs.Age,
-				SmileIntensity = (float) attrs.Smile,
-				Gender = attrs.Gender,
-				Glasses = attrs.Glasses.AsEnum<Glasses> (),
-				FacialHair = attrs.FacialHair.ToFacialHair (),
-				HeadPose = attrs.HeadPose.ToFaceHeadPose (),
-				Emotion = attrs.Emotion.ToFaceEmotion (),
-				Hair = attrs.Hair.ToHair (),
-				Makeup = attrs.Makeup.ToMakeup (),
-				Occlusion = attrs.Occlusion.ToOcclusion (),
-				Accessories = attrs.Accessories.ToAccessories (),
-				Blur = attrs.Blur.ToBlur (),
-				Exposure = attrs.Exposure.ToExposure (),
-				Noise = attrs.Noise.ToNoise ()
-			};
+				var faceAttributes = new FaceAttributes ();
+
+				foreach (var attr in attributes)
+				{
+					switch (attr)
+					{
+						case FaceAttributeType.Age:
+							faceAttributes.Age = (float) attrs.Age;
+							break;
+						case FaceAttributeType.Smile:
+							faceAttributes.SmileIntensity = (float) attrs.Smile;
+							break;
+						case FaceAttributeType.Gender:
+							faceAttributes.Gender = attrs.Gender;
+							break;
+						case FaceAttributeType.Glasses:
+							faceAttributes.Glasses = attrs.Glasses.AsEnum<Glasses> ();
+							break;
+						case FaceAttributeType.FacialHair:
+							faceAttributes.FacialHair = attrs.FacialHair.ToFacialHair ();
+							break;
+						case FaceAttributeType.HeadPose:
+							faceAttributes.HeadPose = attrs.HeadPose.ToFaceHeadPose ();
+							break;
+						case FaceAttributeType.Emotion:
+							faceAttributes.Emotion = attrs.Emotion.ToFaceEmotion ();
+							break;
+						case FaceAttributeType.Hair:
+							faceAttributes.Hair = attrs.Hair.ToHair ();
+							break;
+						case FaceAttributeType.Makeup:
+							faceAttributes.Makeup = attrs.Makeup.ToMakeup ();
+							break;
+						case FaceAttributeType.Occlusion:
+							faceAttributes.Occlusion = attrs.Occlusion.ToOcclusion ();
+							break;
+						case FaceAttributeType.Accessories:
+							faceAttributes.Accessories = attrs.Accessories.ToAccessories ();
+							break;
+						case FaceAttributeType.Blur:
+							faceAttributes.Blur = attrs.Blur.ToBlur ();
+							break;
+						case FaceAttributeType.Exposure:
+							faceAttributes.Exposure = attrs.Exposure.ToExposure ();
+							break;
+						case FaceAttributeType.Noise:
+							faceAttributes.Noise = attrs.Noise.ToNoise ();
+							break;
+					}
+				}
+
+				return faceAttributes;
+			}
+
+			return null;
 		}
 
 
-		public static FacialHair ToFacialHair (this Face.Droid.Contract.FacialHair facialHair)
+		public static FacialHair ToFacialHair (this Droid.Contract.FacialHair facialHair)
 		{
 			return new FacialHair
 			{
@@ -183,7 +240,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Extensions
 		}
 
 
-		public static FaceHeadPose ToFaceHeadPose (this Face.Droid.Contract.HeadPose headPose)
+		public static FaceHeadPose ToFaceHeadPose (this Droid.Contract.HeadPose headPose)
 		{
 			return new FaceHeadPose
 			{
@@ -195,7 +252,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Extensions
 		}
 
 
-		public static FaceEmotion ToFaceEmotion (this Face.Droid.Contract.Emotion emotion)
+		public static FaceEmotion ToFaceEmotion (this Droid.Contract.Emotion emotion)
 		{
 			var faceEmotion = new FaceEmotion
 			{
@@ -257,7 +314,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Extensions
 		}
 
 
-		public static Hair ToHair (this Face.Droid.Contract.Hair hair)
+		public static Hair ToHair (this Droid.Contract.Hair hair)
 		{
 			var theHair = new Hair
 			{
@@ -297,7 +354,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Extensions
 		}
 
 
-		public static Makeup ToMakeup (this Face.Droid.Contract.Makeup makeup)
+		public static Makeup ToMakeup (this Droid.Contract.Makeup makeup)
 		{
 			return new Makeup
 			{
@@ -307,7 +364,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Extensions
 		}
 
 
-		public static Occlusion ToOcclusion (this Face.Droid.Contract.Occlusion occlusion)
+		public static Occlusion ToOcclusion (this Droid.Contract.Occlusion occlusion)
 		{
 			return new Occlusion
 			{
@@ -318,7 +375,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Extensions
 		}
 
 
-		public static Accessories ToAccessories (this IList<Face.Droid.Contract.Accessory> accessoryList)
+		public static Accessories ToAccessories (this IList<Droid.Contract.Accessory> accessoryList)
 		{
 			var accessories = new Accessories ();
 
@@ -340,7 +397,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Extensions
 		}
 
 
-		public static Blur ToBlur (this Face.Droid.Contract.Blur blur)
+		public static Blur ToBlur (this Droid.Contract.Blur blur)
 		{
 			return new Blur
 			{
@@ -350,7 +407,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Extensions
 		}
 
 
-		public static Exposure ToExposure (this Face.Droid.Contract.Exposure exposure)
+		public static Exposure ToExposure (this Droid.Contract.Exposure exposure)
 		{
 			return new Exposure
 			{
@@ -360,12 +417,79 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Extensions
 		}
 
 
-		public static Noise ToNoise (this Face.Droid.Contract.Noise noise)
+		public static Noise ToNoise (this Droid.Contract.Noise noise)
 		{
 			return new Noise
 			{
 				NoiseLevel = noise.NoiseLevel.AsEnum<NoiseLevel> (),
 				Value = (float) noise.Value
+			};
+		}
+
+
+		public static Droid.FaceServiceClientFaceAttributeType ToNativeFaceAttributeType (this FaceAttributeType type)
+		{
+			return Droid.FaceServiceClientFaceAttributeType.ValueOf (type.ToString ());
+		}
+
+
+		public static SimilarFaceResult ToSimilarFaceResult (this Droid.Contract.SimilarFace similarFace)
+		{
+			return new SimilarFaceResult
+			{
+				FaceId = similarFace.FaceId.ToString (),
+				Confidence = (float) similarFace.Confidence
+			};
+		}
+
+
+		public static GroupResult ToGroupResult (this Droid.Contract.GroupResult groupResult)
+		{
+			var groupingResult = new GroupResult
+			{
+				Groups = groupResult.Groups.Cast<UUID []> ().Select ((grp, index) => new FaceGroup
+				{
+					Title = $"Face Group #{index + 1}",
+					FaceIds = grp.AsStrings ()
+				}).ToList ()
+			};
+
+			if (groupResult.MessyGroup?.Count > 0)
+			{
+				groupingResult.MessyGroup = new FaceGroup
+				{
+					Title = "Messy Group",
+					FaceIds = groupResult.MessyGroup.Cast<UUID> ().AsStrings ()
+				};
+			}
+
+			return groupingResult;
+		}
+
+
+		public static IdentificationResult ToIdentificationResult (this Droid.Contract.IdentifyResult result)
+		{
+			return new IdentificationResult
+			{
+				FaceId = result.FaceId.ToString (),
+				CandidateResults =
+					result.Candidates.Cast<Droid.Contract.Candidate> ()
+						  .Select (c => new CandidateResult
+						  {
+							  PersonId = c.PersonId.ToString (),
+							  Confidence = (float) c.Confidence
+						  })
+						  .ToList ()
+			};
+		}
+
+
+		public static VerifyResult ToVerifyResult (this Droid.Contract.VerifyResult result)
+		{
+			return new VerifyResult
+			{
+				IsIdentical = result.IsIdentical,
+				Confidence = (float) result.Confidence
 			};
 		}
 
@@ -384,13 +508,13 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Extensions
 		}
 
 
-		public static void SavePhotoFromSource (this Shared.Face face, Bitmap sourceImage)
-		{
-			using (var croppedFaceImg = sourceImage.Crop (face.FaceRectangleLarge ?? face.FaceRectangle))
-			{
-				face.SavePhotoFromCropped (croppedFaceImg);
-			}
-		}
+		//public static void SavePhotoFromSource (this Shared.Face face, Bitmap sourceImage)
+		//{
+		//	using (var croppedFaceImg = sourceImage.Crop (face.FaceRectangleLarge ?? face.FaceRectangle))
+		//	{
+		//		face.SavePhotoFromCropped (croppedFaceImg);
+		//	}
+		//}
 
 
 		//public static UIImage GetImage (this Shared.Face face)
@@ -411,9 +535,9 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Extensions
 		}
 
 
-		public static Face.Droid.Contract.FaceRectangle ToFaceRect (this RectangleF rect)
+		public static Droid.Contract.FaceRectangle ToFaceRect (this RectangleF rect)
 		{
-			return new Face.Droid.Contract.FaceRectangle
+			return new Droid.Contract.FaceRectangle
 			{
 				Left = (int) rect.Left,
 				Top = (int) rect.Top,

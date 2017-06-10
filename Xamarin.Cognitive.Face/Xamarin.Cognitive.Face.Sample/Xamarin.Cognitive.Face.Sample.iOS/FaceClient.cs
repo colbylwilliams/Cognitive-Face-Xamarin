@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Foundation;
 using Newtonsoft.Json;
-using UIKit;
+using Xamarin.Cognitive.Face.Extensions;
 using Xamarin.Cognitive.Face.iOS;
 using Xamarin.Cognitive.Face.Sample.iOS.Domain;
-using Xamarin.Cognitive.Face.Sample.iOS.Extensions;
-using Xamarin.Cognitive.Face.Sample.Shared;
-using Xamarin.Cognitive.Face.Sample.Shared.Extensions;
+using Xamarin.Cognitive.Face.Shared;
 
 namespace Xamarin.Cognitive.Face.Sample
 {
@@ -20,7 +20,7 @@ namespace Xamarin.Cognitive.Face.Sample
 		FaceClient () { }
 
 
-		void ProcessError (Foundation.NSError error)
+		void ProcessError (NSError error)
 		{
 			if (error != null)
 			{
@@ -40,214 +40,216 @@ namespace Xamarin.Cognitive.Face.Sample
 		}
 
 
-		void ThrowConditionalError (bool failureCondition, string error)
+		#region Callback Plumbing
+
+
+		void NoopResultCallback (NSError error, TaskCompletionSource<bool> tcs)
 		{
-			if (failureCondition)
+			try
 			{
-				throw new Exception (error);
+				ProcessError (error);
+				tcs.SetResult (true);
+			}
+			catch (Exception ex)
+			{
+				tcs.TrySetException (ex);
 			}
 		}
+
+
+		void AdaptResultResultCallback<TInput, TResult> (NSError error, TaskCompletionSource<TResult> tcs, TInput data, Func<TInput, TResult> adapter)
+		{
+			try
+			{
+				ProcessError (error);
+				tcs.SetResult (adapter (data));
+			}
+			catch (Exception ex)
+			{
+				tcs.TrySetException (ex);
+			}
+		}
+
+
+		void AdaptResultResultCallback<TInput, TResult, TException> (NSError error, TaskCompletionSource<TResult> tcs, TInput data, Func<TInput, TResult> adapter, Func<TException, bool> exceptionProcessor)
+		where TException : Exception
+		{
+			try
+			{
+				ProcessError (error);
+				tcs.SetResult (adapter (data));
+			}
+			catch (Exception ex)
+			{
+				if (ex is TException)
+				{
+					if (exceptionProcessor ((TException) ex))
+					{
+						return; //handled
+					}
+				}
+
+				tcs.TrySetException (ex);
+			}
+		}
+
+
+		void AdaptListResultCallback<TInput, TResult> (NSError error, TaskCompletionSource<List<TResult>> tcs, TInput [] data, Func<TInput, TResult> adapter)
+		{
+			try
+			{
+				ProcessError (error);
+
+				var list = data.Select (d => adapter (d)).ToList ();
+
+				tcs.SetResult (list);
+			}
+			catch (Exception ex)
+			{
+				tcs.TrySetException (ex);
+			}
+		}
+
+
+		void AdaptListResultCallback<TInput, TParam, TResult> (NSError error, TaskCompletionSource<List<TResult>> tcs, TInput [] data, Func<TInput, TParam, TResult> adapter, TParam adapterParam)
+		{
+			try
+			{
+				ProcessError (error);
+
+				var list = data.Select (d => adapter (d, adapterParam)).ToList ();
+
+				tcs.SetResult (list);
+			}
+			catch (Exception ex)
+			{
+				tcs.TrySetException (ex);
+			}
+		}
+
+
+		void AdaptListResultCallback<TInput, TParam1, TParam2, TResult> (NSError error, TaskCompletionSource<List<TResult>> tcs, TInput [] data, Func<TInput, TParam1, TParam2, TResult> adapter, TParam1 adapterParam1, TParam2 adapterParam2)
+		{
+			try
+			{
+				ProcessError (error);
+
+				var list = data.Select (d => adapter (d, adapterParam1, adapterParam2)).ToList ();
+
+				tcs.SetResult (list);
+			}
+			catch (Exception ex)
+			{
+				tcs.TrySetException (ex);
+			}
+		}
+
+
+		#endregion
 
 
 		#region Person Group
 
 
-		public Task<List<PersonGroup>> GetGroups (bool forceRefresh = false)
+		internal Task<List<PersonGroup>> GetGroups ()
 		{
-			if (Groups.Count == 0 || forceRefresh)
-			{
-				var tcs = new TaskCompletionSource<List<PersonGroup>> ();
+			var tcs = new TaskCompletionSource<List<PersonGroup>> ();
 
-				Client.ListPersonGroupsWithCompletion ((groups, error) =>
-				{
-					try
-					{
-						ProcessError (error);
+			Client.ListPersonGroupsWithCompletion (
+				(personGroups, error) => AdaptListResultCallback (error, tcs, personGroups, FaceExtensions.ToPersonGroup))
+				  .Resume ();
 
-						if (tcs.IsNullFinishCanceledOrFaulted ()) return;
-
-						Groups = new List<PersonGroup> (
-							groups.Select (g => g.ToPersonGroup ())
-						);
-
-						tcs.SetResult (Groups);
-					}
-					catch (Exception ex)
-					{
-						Log.Error (ex);
-						tcs.TrySetException (ex);
-					}
-				}).Resume ();
-
-				return tcs.Task;
-			}
-
-			return Task.FromResult (Groups);
+			return tcs.Task;
 		}
 
 
-		public Task<PersonGroup> GetPersonGroup (string personGroupId)
+		internal Task<PersonGroup> GetGroup (string personGroupId)
 		{
 			var tcs = new TaskCompletionSource<PersonGroup> ();
 
-			Client.GetPersonGroupWithPersonGroupId (personGroupId, (personGroup, error) =>
-			{
-				try
-				{
-					ProcessError (error);
-
-					tcs.SetResult (personGroup.ToPersonGroup ());
-				}
-				catch (Exception ex)
-				{
-					Log.Error (ex);
-					tcs.TrySetException (ex);
-				}
-			}).Resume ();
+			Client.GetPersonGroupWithPersonGroupId (
+				personGroupId,
+				(personGroup, error) => AdaptResultResultCallback (error, tcs, personGroup, FaceExtensions.ToPersonGroup))
+				  .Resume ();
 
 			return tcs.Task;
 		}
 
 
-		public Task<PersonGroup> CreatePersonGroup (string groupName, string userData = null)
-		{
-			var tcs = new TaskCompletionSource<PersonGroup> ();
-			var personGroupId = Guid.NewGuid ().ToString ();
-
-			Client.CreatePersonGroupWithId (personGroupId, groupName, userData, error =>
-			{
-				try
-				{
-					ProcessError (error);
-
-					var personGroup = new PersonGroup
-					{
-						Name = groupName,
-						Id = personGroupId,
-						UserData = userData,
-						People = new List<Person> ()
-					};
-
-					Groups.Add (personGroup);
-
-					tcs.SetResult (personGroup);
-				}
-				catch (Exception ex)
-				{
-					Log.Error (ex);
-					tcs.TrySetException (ex);
-				}
-			}).Resume ();
-
-			return tcs.Task;
-		}
-
-
-		public Task UpdatePersonGroup (PersonGroup personGroup, string groupName, string userData = null)
+		internal Task CreatePersonGroup (string personGroupId, string groupName, string userData)
 		{
 			var tcs = new TaskCompletionSource<bool> ();
 
-			Client.UpdatePersonGroupWithPersonGroupId (personGroup.Id, groupName, userData, error =>
-			{
-				try
-				{
-					ProcessError (error);
-
-					personGroup.Name = groupName;
-					personGroup.UserData = userData;
-
-					tcs.SetResult (true);
-				}
-				catch (Exception ex)
-				{
-					Log.Error (ex);
-					tcs.TrySetException (ex);
-				}
-			}).Resume ();
+			Client.CreatePersonGroupWithId (
+				personGroupId,
+				groupName,
+				userData,
+				error => NoopResultCallback (error, tcs))
+				  .Resume ();
 
 			return tcs.Task;
 		}
 
 
-		public Task DeletePersonGroup (string personGroupId)
+		internal Task UpdatePersonGroup (string personGroupId, string groupName, string userData = null)
 		{
 			var tcs = new TaskCompletionSource<bool> ();
 
-			Client.DeletePersonGroupWithPersonGroupId (personGroupId, error =>
-			{
-				try
-				{
-					ProcessError (error);
-
-					RemoveGroup (personGroupId);
-
-					tcs.SetResult (true);
-				}
-				catch (Exception ex)
-				{
-					Log.Error (ex);
-					tcs.TrySetException (ex);
-				}
-			}).Resume ();
+			Client.UpdatePersonGroupWithPersonGroupId (
+				personGroupId,
+				groupName,
+				userData,
+				error => NoopResultCallback (error, tcs))
+				  .Resume ();
 
 			return tcs.Task;
 		}
 
 
-		public Task TrainGroup (PersonGroup personGroup)
+		internal Task DeletePersonGroup (string personGroupId)
 		{
 			var tcs = new TaskCompletionSource<bool> ();
 
-			Client.TrainPersonGroupWithPersonGroupId (personGroup.Id, error =>
-			{
-				try
-				{
-					ProcessError (error);
-
-					tcs.SetResult (true);
-				}
-				catch (Exception ex)
-				{
-					Log.Error (ex);
-					tcs.TrySetException (ex);
-				}
-			}).Resume ();
+			Client.DeletePersonGroupWithPersonGroupId (
+				personGroupId,
+				error => NoopResultCallback (error, tcs))
+				  .Resume ();
 
 			return tcs.Task;
 		}
 
 
-		/// <summary>
-		/// Gets the group training status: notstarted, running, succeeded, failed
-		/// </summary>
-		/// <returns>The group training status.</returns>
-		/// <param name="personGroupId">Person group Id.</param>
-		public Task<TrainingStatus> GetGroupTrainingStatus (string personGroupId)
+		internal Task TrainPersonGroup (string personGroupId)
+		{
+			var tcs = new TaskCompletionSource<bool> ();
+
+			Client.TrainPersonGroupWithPersonGroupId (
+				personGroupId,
+				error => NoopResultCallback (error, tcs))
+				  .Resume ();
+
+			return tcs.Task;
+		}
+
+
+		internal Task<TrainingStatus> GetGroupTrainingStatus (string personGroupId)
 		{
 			var tcs = new TaskCompletionSource<TrainingStatus> ();
 
-			Client.GetPersonGroupTrainingStatusWithPersonGroupId (personGroupId, (trainingStatus, error) =>
+			Client.GetPersonGroupTrainingStatusWithPersonGroupId (
+				personGroupId,
+				(trainingStatus, error) => AdaptResultResultCallback (error, tcs, trainingStatus, FaceExtensions.ToTrainingStatus,
+		 	(ErrorDetailException ede) =>
 			{
-				try
+				if (ede.ErrorDetail.Code == ErrorCodes.TrainingStatus.PersonGroupNotTrained)
 				{
-					ProcessError (error);
+					tcs.SetResult (TrainingStatus.FromStatus (TrainingStatus.TrainingStatusType.NotStarted));
+					return true;
+				}
 
-					tcs.SetResult (trainingStatus.ToTrainingStatus ());
-				}
-				catch (ErrorDetailException ede)
-				{
-					if (ede.ErrorDetail.Code == ErrorCodes.TrainingStatus.PersonGroupNotTrained)
-					{
-						tcs.SetResult (TrainingStatus.FromStatus (TrainingStatus.TrainingStatusType.NotStarted));
-					}
-					else tcs.TrySetException (ede);
-				}
-				catch (Exception ex)
-				{
-					Log.Error (ex);
-					tcs.TrySetException (ex);
-				}
-			}).Resume ();
+				return false;
+			}))
+				  .Resume ();
 
 			return tcs.Task;
 		}
@@ -259,295 +261,123 @@ namespace Xamarin.Cognitive.Face.Sample
 		#region Person
 
 
-		public Task<List<Person>> GetPeopleForGroup (PersonGroup personGroup, bool forceRefresh = false)
+		internal Task<List<Person>> GetPeopleForGroup (string personGroupId)
 		{
-			if (personGroup.PeopleLoaded && !forceRefresh)
-			{
-				return Task.FromResult (personGroup.People);
-			}
-
 			var tcs = new TaskCompletionSource<List<Person>> ();
 
-			Client.ListPersonsWithPersonGroupId (personGroup.Id, (mpoPeople, error) =>
-			{
-				try
-				{
-					ProcessError (error);
-
-					var people = new List<Person> (
-						mpoPeople.Select (p => p.ToPerson ())
-					);
-
-					if (personGroup.PeopleLoaded)
-					{
-						personGroup.People.Clear ();
-						personGroup.People.AddRange (people);
-					}
-					else
-					{
-						personGroup.People = people;
-					}
-
-					tcs.SetResult (people);
-				}
-				catch (Exception ex)
-				{
-					Log.Error (ex);
-					tcs.TrySetException (ex);
-				}
-			}).Resume ();
+			Client.ListPersonsWithPersonGroupId (
+				personGroupId,
+				(people, error) => AdaptListResultCallback (error, tcs, people, FaceExtensions.ToPerson))
+				  .Resume ();
 
 			return tcs.Task;
 		}
 
 
-		public Task<Person> CreatePerson (string personName, PersonGroup personGroup, string userData = null)
+		internal Task<string> CreatePerson (string personName, string personGroupId, string userData)
+		{
+			var tcs = new TaskCompletionSource<string> ();
+
+			Client.CreatePersonWithPersonGroupId (
+				personGroupId,
+				personName,
+				userData,
+				(result, error) => AdaptResultResultCallback (error, tcs, result, r => r.PersonId))
+				  .Resume ();
+
+			return tcs.Task;
+		}
+
+
+		internal Task UpdatePerson (string personId, string personGroupId, string personName, string userData)
+		{
+			var tcs = new TaskCompletionSource<bool> ();
+
+			Client.UpdatePersonWithPersonGroupId (
+				personGroupId,
+				personId,
+				personName,
+				userData,
+				error => NoopResultCallback (error, tcs))
+				  .Resume ();
+
+			return tcs.Task;
+		}
+
+
+		internal Task DeletePerson (string personGroupId, string personId)
+		{
+			var tcs = new TaskCompletionSource<bool> ();
+
+			Client.DeletePersonWithPersonGroupId (
+				personGroupId,
+				personId,
+				error => NoopResultCallback (error, tcs))
+				  .Resume ();
+
+			return tcs.Task;
+		}
+
+
+		internal Task<Person> GetPerson (string personGroupId, string personId)
 		{
 			var tcs = new TaskCompletionSource<Person> ();
 
-			Client.CreatePersonWithPersonGroupId (personGroup.Id, personName, userData, (result, error) =>
-			{
-				try
-				{
-					ProcessError (error);
-					ThrowConditionalError (string.IsNullOrEmpty (result.PersonId), "CreatePersonResult returned invalid person Id");
-
-					var person = new Person
-					{
-						Name = personName,
-						Id = result.PersonId,
-						UserData = userData
-					};
-
-					personGroup.People.Add (person);
-
-					tcs.SetResult (person);
-				}
-				catch (Exception ex)
-				{
-					Log.Error (ex);
-					tcs.TrySetException (ex);
-				}
-			}).Resume ();
+			Client.GetPersonWithPersonGroupId (
+				personGroupId,
+				personId,
+				(person, error) => AdaptResultResultCallback (error, tcs, person, FaceExtensions.ToPerson))
+				  .Resume ();
 
 			return tcs.Task;
 		}
 
 
-		public Task UpdatePerson (Person person, PersonGroup personGroup, string personName, string userData = null)
+		internal Task<string> AddFaceForPerson (string personId, string personGroupId, Shared.Face face, Stream photoStream, string userData = null)
 		{
-			var tcs = new TaskCompletionSource<bool> ();
+			var tcs = new TaskCompletionSource<string> ();
 
-			Client.UpdatePersonWithPersonGroupId (personGroup.Id, person.Id, personName, userData, error =>
+			using (var data = NSData.FromStream (photoStream))
 			{
-				try
-				{
-					ProcessError (error);
-
-					person.Name = personName;
-					person.UserData = userData;
-
-					tcs.SetResult (true);
-				}
-				catch (Exception ex)
-				{
-					Log.Error (ex);
-					tcs.TrySetException (ex);
-				}
-			}).Resume ();
-
-			return tcs.Task;
-		}
-
-
-		public Task DeletePerson (PersonGroup personGroup, Person person)
-		{
-			var tcs = new TaskCompletionSource<bool> ();
-
-			Client.DeletePersonWithPersonGroupId (personGroup.Id, person.Id, error =>
-			{
-				try
-				{
-					ProcessError (error);
-
-					if (personGroup.PeopleLoaded && personGroup.People.Contains (person))
-					{
-						personGroup.People.Remove (person);
-					}
-
-					tcs.SetResult (true);
-				}
-				catch (Exception ex)
-				{
-					Log.Error (ex);
-					tcs.TrySetException (ex);
-				}
-			}).Resume ();
-
-			return tcs.Task;
-		}
-
-
-		public Task<Person> GetPerson (PersonGroup personGroup, string personId)
-		{
-			//if people are already loaded for this group try to find it there...
-			if (personGroup.PeopleLoaded)
-			{
-				var person = personGroup.People.FirstOrDefault (p => p.Id == personId);
-
-				if (person != null)
-				{
-					return Task.FromResult (person);
-				}
-			}
-
-			var tcs = new TaskCompletionSource<Person> ();
-
-			Client.GetPersonWithPersonGroupId (personGroup.Id, personId, (mpoPerson, error) =>
-			{
-				try
-				{
-					ProcessError (error);
-
-					var person = mpoPerson.ToPerson ();
-
-					//add them to the group?
-					if (personGroup.PeopleLoaded)
-					{
-						personGroup.People.Add (person);
-					}
-
-					tcs.SetResult (person);
-				}
-				catch (Exception ex)
-				{
-					Log.Error (ex);
-					tcs.TrySetException (ex);
-				}
-			}).Resume ();
-
-			return tcs.Task;
-		}
-
-
-		public Task AddFaceForPerson (Person person, PersonGroup personGroup, Shared.Face face, UIImage photo, string userData = null, float quality = .8f)
-		{
-			var tcs = new TaskCompletionSource<bool> ();
-
-			try
-			{
-				using (var jpgData = photo.AsJPEG (quality))
-				{
-					Client.AddPersonFaceWithPersonGroupId (personGroup.Id, person.Id, jpgData, userData, face.FaceRectangle.ToMPOFaceRect (), (result, error) =>
-					{
-						try
-						{
-							ProcessError (error);
-							ThrowConditionalError (string.IsNullOrEmpty (result?.PersistedFaceId), "AddPersistedFaceResult returned invalid face Id");
-
-							face.Id = result.PersistedFaceId;
-							face.UpdatePhotoPath ();
-
-							person.Faces.Add (face);
-
-							face.SavePhotoFromSource (photo);
-
-							tcs.SetResult (true);
-						}
-						catch (Exception ex)
-						{
-							Log.Error (ex);
-							tcs.TrySetException (ex);
-						}
-					}).Resume ();
-				}
+				Client.AddPersonFaceWithPersonGroupId (
+					personGroupId,
+					personId,
+					data,
+					userData,
+					face.FaceRectangle.ToMPOFaceRect (),
+					(result, error) => AdaptResultResultCallback (error, tcs, result, r => r.PersistedFaceId))
+					  .Resume ();
 
 				return tcs.Task;
 			}
-			catch (Exception ex)
-			{
-				Log.Error (ex);
-				throw;
-			}
 		}
 
 
-		public Task DeletePersonFace (Person person, PersonGroup personGroup, Shared.Face face)
+		internal Task DeletePersonFace (string personId, string personGroupId, string faceId)
 		{
 			var tcs = new TaskCompletionSource<bool> ();
 
-			Client.DeletePersonFaceWithPersonGroupId (personGroup.Id, person.Id, face.Id, error =>
-			{
-				try
-				{
-					ProcessError (error);
-
-					if (person.Faces.Contains (face))
-					{
-						person.Faces.Remove (face);
-					}
-
-					tcs.SetResult (true);
-				}
-				catch (Exception ex)
-				{
-					Log.Error (ex);
-					tcs.TrySetException (ex);
-				}
-			}).Resume ();
+			Client.DeletePersonFaceWithPersonGroupId (
+				personGroupId,
+				personId,
+				faceId,
+				error => NoopResultCallback (error, tcs))
+				  .Resume ();
 
 			return tcs.Task;
 		}
 
 
-		public async Task<List<Shared.Face>> GetFacesForPerson (Person person, PersonGroup personGroup)
-		{
-			try
-			{
-				person.Faces.Clear ();
-
-				if (person.FaceIds?.Count > 0)
-				{
-					foreach (var faceId in person.FaceIds)
-					{
-						var face = await GetFaceForPerson (person, personGroup, faceId);
-
-						person.Faces.Add (face);
-					}
-
-					return person.Faces;
-				}
-
-				return default (List<Shared.Face>);
-			}
-			catch (Exception ex)
-			{
-				Log.Error (ex);
-				throw;
-			}
-		}
-
-
-		public Task<Shared.Face> GetFaceForPerson (Person person, PersonGroup personGroup, string persistedFaceId)
+		internal Task<Shared.Face> GetFaceForPerson (string personId, string personGroupId, string persistedFaceId)
 		{
 			var tcs = new TaskCompletionSource<Shared.Face> ();
 
-			Client.GetPersonFaceWithPersonGroupId (personGroup.Id, person.Id, persistedFaceId, (mpoFace, error) =>
-			{
-				try
-				{
-					ProcessError (error);
-
-					var face = mpoFace.ToFace ();
-
-					tcs.SetResult (face);
-				}
-				catch (Exception ex)
-				{
-					Log.Error (ex);
-					tcs.TrySetException (ex);
-				}
-			}).Resume ();
+			Client.GetPersonFaceWithPersonGroupId (
+				personGroupId,
+				personId,
+				persistedFaceId,
+				(face, error) => AdaptResultResultCallback (error, tcs, face, FaceExtensions.ToFace))
+				  .Resume ();
 
 			return tcs.Task;
 		}
@@ -559,259 +389,96 @@ namespace Xamarin.Cognitive.Face.Sample
 		#region Face
 
 
-		public Task<List<Shared.Face>> DetectFacesInPhoto (UIImage photo, params MPOFaceAttributeType [] attributes)
+		internal Task<List<Shared.Face>> DetectFacesInPhotoInternal (Stream photoStream, bool returnLandmarks, FaceAttributeType [] attributes)
 		{
-			return DetectFacesInPhoto (photo, .8f, false, attributes);
+			var tcs = new TaskCompletionSource<List<Shared.Face>> ();
+
+			var types = attributes.Select (a => a.ToNativeFaceAttributeType ()).ToArray ();
+
+			using (var data = NSData.FromStream (photoStream))
+			{
+				Client.DetectWithData (
+					data,
+					true,
+					returnLandmarks,
+					types,
+					(detectedFaces, error) => AdaptListResultCallback (error, tcs, detectedFaces, FaceExtensions.ToFace, returnLandmarks, attributes))
+					  .Resume ();
+			}
+
+			return tcs.Task;
 		}
 
 
-		public Task<List<Shared.Face>> DetectFacesInPhoto (UIImage photo, bool returnLandmarks = true, params MPOFaceAttributeType [] attributes)
+		internal Task<List<SimilarFaceResult>> FindSimilarInternal (string targetFaceId, string [] faceIds)
 		{
-			return DetectFacesInPhoto (photo, .8f, returnLandmarks, attributes);
+			var tcs = new TaskCompletionSource<List<SimilarFaceResult>> ();
+
+			var results = new List<SimilarFaceResult> ();
+
+			Client.FindSimilarWithFaceId (
+				targetFaceId,
+				faceIds,
+				(similarFaces, error) => AdaptListResultCallback (error, tcs, similarFaces, FaceExtensions.ToSimilarFaceResult))
+				  .Resume ();
+
+			return tcs.Task;
 		}
 
 
-		public Task<List<Shared.Face>> DetectFacesInPhoto (UIImage photo, float quality, bool returnLandmarks = true, params MPOFaceAttributeType [] attributes)
+		internal Task<GroupResult> GroupFaces (string [] targetFaceIds)
 		{
-			try
-			{
-				var tcs = new TaskCompletionSource<List<Shared.Face>> ();
+			var tcs = new TaskCompletionSource<GroupResult> ();
 
-				using (var jpgData = photo.AsJPEG (quality))
-				{
-					Client.DetectWithData (jpgData, true, returnLandmarks, attributes, (detectedFaces, error) =>
-					{
-						try
-						{
-							ProcessError (error);
+			Client.GroupWithFaceIds (
+				targetFaceIds,
+				(groupResult, error) => AdaptResultResultCallback (error, tcs, groupResult, FaceExtensions.ToGroupResult))
+				  .Resume ();
 
-							var faces = new List<Shared.Face> (detectedFaces.Length);
-
-							foreach (var detectedFace in detectedFaces)
-							{
-								var face = detectedFace.ToFace ();
-								faces.Add (face);
-
-								face.SavePhotoFromSource (photo);
-							}
-
-							tcs.SetResult (faces);
-						}
-						catch (Exception ex)
-						{
-							Log.Error (ex);
-							tcs.TrySetException (ex);
-						}
-					}).Resume ();
-				}
-
-				return tcs.Task;
-			}
-			catch (Exception ex)
-			{
-				Log.Error (ex);
-				throw;
-			}
+			return tcs.Task;
 		}
 
 
-		public async Task<List<IdentificationResult>> Identify (PersonGroup group, Shared.Face face, int maxNumberOfCandidates = 1)
-		{
-			try
-			{
-				//ensure people are loaded for this group
-				await GetPeopleForGroup (group);
-
-				return await IdentifyInternal (group, new Shared.Face [] { face }, maxNumberOfCandidates);
-			}
-			catch (Exception ex)
-			{
-				Log.Error (ex);
-				throw;
-			}
-		}
-
-
-		Task<List<IdentificationResult>> IdentifyInternal (PersonGroup group, Shared.Face [] detectedFaces, int maxNumberOfCandidates = 1)
+		internal Task<List<IdentificationResult>> Identify (string personGroupId, string [] detectedFaceIds, int maxNumberOfCandidates = 1)
 		{
 			var results = new List<IdentificationResult> ();
 			var tcs = new TaskCompletionSource<List<IdentificationResult>> ();
 
-			var detectedFaceIds = detectedFaces.Select (f => f.Id).ToArray ();
-
-			Client.IdentifyWithPersonGroupId (group.Id, detectedFaceIds, maxNumberOfCandidates, async (identifyResults, error) =>
-			{
-				try
-				{
-					ProcessError (error);
-
-					foreach (MPOIdentifyResult result in identifyResults)
-					{
-						var face = detectedFaces.FirstOrDefault (f => f.Id == result.FaceId);
-
-						foreach (MPOCandidate candidate in result.Candidates)
-						{
-							var person = await GetPerson (group, candidate.PersonId);
-
-							var identifyResult = new IdentificationResult
-							{
-								Person = person,
-								Face = face,
-								Confidence = candidate.Confidence
-							};
-
-							results.Add (identifyResult);
-						}
-					}
-
-					tcs.SetResult (results);
-				}
-				catch (Exception ex)
-				{
-					Log.Error (ex);
-					tcs.TrySetException (ex);
-				}
-			}).Resume ();
+			Client.IdentifyWithPersonGroupId (
+				personGroupId,
+				detectedFaceIds,
+				maxNumberOfCandidates,
+				(identifyResults, error) => AdaptListResultCallback (error, tcs, identifyResults, FaceExtensions.ToIdentificationResult))
+				.Resume ();
 
 			return tcs.Task;
 		}
 
 
-		public Task<VerifyResult> Verify (Shared.Face face1, Shared.Face face2)
+		internal Task<VerifyResult> Verify (string face1Id, string face2Id)
 		{
 			var tcs = new TaskCompletionSource<VerifyResult> ();
 
-			Client.VerifyWithFirstFaceId (face1.Id, face2.Id, (verifyResult, error) =>
-			{
-				try
-				{
-					ProcessError (error);
-
-					var result = new VerifyResult
-					{
-						IsIdentical = verifyResult.IsIdentical,
-						Confidence = verifyResult.Confidence
-					};
-
-					tcs.SetResult (result);
-				}
-				catch (Exception ex)
-				{
-					Log.Error (ex);
-					tcs.TrySetException (ex);
-				}
-			}).Resume ();
+			Client.VerifyWithFirstFaceId (
+				face1Id,
+				face2Id,
+				(verifyResult, error) => AdaptResultResultCallback (error, tcs, verifyResult, FaceExtensions.ToVerifyResult))
+				  .Resume ();
 
 			return tcs.Task;
 		}
 
 
-		public Task<VerifyResult> Verify (Shared.Face face, Person person, PersonGroup personGroup)
+		internal Task<VerifyResult> Verify (string faceId, string personId, string personGroupId)
 		{
 			var tcs = new TaskCompletionSource<VerifyResult> ();
 
-			Client.VerifyWithFaceId (face.Id, person.Id, personGroup.Id, (verifyResult, error) =>
-			{
-				try
-				{
-					ProcessError (error);
-
-					var result = new VerifyResult
-					{
-						IsIdentical = verifyResult.IsIdentical,
-						Confidence = verifyResult.Confidence
-					};
-
-					tcs.SetResult (result);
-				}
-				catch (Exception ex)
-				{
-					Log.Error (ex);
-					tcs.TrySetException (ex);
-				}
-			}).Resume ();
-
-			return tcs.Task;
-		}
-
-
-		public Task<List<SimilarFaceResult>> FindSimilar (Shared.Face targetFace, List<Shared.Face> faceList)
-		{
-			var tcs = new TaskCompletionSource<List<SimilarFaceResult>> ();
-			var faceIds = faceList.Select (f => f.Id).ToArray ();
-			var results = new List<SimilarFaceResult> ();
-
-			Client.FindSimilarWithFaceId (targetFace.Id, faceIds, (similarFaces, error) =>
-			{
-				try
-				{
-					ProcessError (error);
-
-					foreach (var similarFace in similarFaces)
-					{
-						var face = faceList.FirstOrDefault (f => f.Id == similarFace.FaceId);
-
-						results.Add (new SimilarFaceResult
-						{
-							Face = face,
-							FaceId = similarFace.FaceId,
-							Confidence = similarFace.Confidence
-						});
-					}
-
-					tcs.SetResult (results);
-				}
-				catch (Exception ex)
-				{
-					Log.Error (ex);
-					tcs.TrySetException (ex);
-				}
-			}).Resume ();
-
-			return tcs.Task;
-		}
-
-
-		public Task<List<FaceGroup>> GroupFaces (List<Shared.Face> targetFaces)
-		{
-			var tcs = new TaskCompletionSource<List<FaceGroup>> ();
-			var faceIds = targetFaces.Select (f => f.Id).ToArray ();
-			var results = new List<FaceGroup> ();
-
-			Client.GroupWithFaceIds (faceIds, (groupResult, error) =>
-			{
-				try
-				{
-					ProcessError (error);
-
-					for (var i = 0; i < groupResult.Groups.Count; i++)
-					{
-						var faceGroup = groupResult.Groups [i];
-
-						results.Add (new FaceGroup
-						{
-							Title = $"Face Group #{i + 1}",
-							Faces = targetFaces.Where (f => faceGroup.Contains (f.Id)).ToList ()
-						});
-					}
-
-					if (groupResult.MesseyGroup.Length > 0)
-					{
-						results.Add (new FaceGroup
-						{
-							Title = "Messy Group",
-							Faces = targetFaces.Where (f => groupResult.MesseyGroup.Contains (f.Id)).ToList ()
-						});
-					}
-
-					tcs.SetResult (results);
-				}
-				catch (Exception ex)
-				{
-					Log.Error (ex);
-					tcs.TrySetException (ex);
-				}
-			}).Resume ();
+			Client.VerifyWithFaceId (
+				faceId,
+				personId,
+				personGroupId,
+				(verifyResult, error) => AdaptResultResultCallback (error, tcs, verifyResult, FaceExtensions.ToVerifyResult))
+				  .Resume ();
 
 			return tcs.Task;
 		}
