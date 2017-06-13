@@ -4,15 +4,11 @@ using System.Drawing;
 using Android.Graphics;
 using NomadCode.UIExtensions;
 using Xamarin.Cognitive.Face.Droid.Contract;
-using Xamarin.Cognitive.Face.Shared;
 
 namespace Xamarin.Cognitive.Face.Droid.Extensions
 {
 	public static class ImageHelper
 	{
-
-
-
 		/// <summary>
 		/// Draw detected face rectangles in the original image. And return the image drawn.
 		/// If drawLandmarks is set to be true, draw the five main landmarks of each face.
@@ -21,7 +17,7 @@ namespace Xamarin.Cognitive.Face.Droid.Extensions
 		/// <param name="originalBitmap">Original bitmap.</param>
 		/// <param name="faces">Faces.</param>
 		/// <param name="drawLandmarks">If set to <c>true</c> draw landmarks.</param>
-		public static Bitmap DrawFaceRectanglesOnBitmap (Bitmap originalBitmap, Model.Face [] faces, bool drawLandmarks, double faceRectEnlargeRatio = FACE_RECT_SCALE_RATIO)
+		public static Bitmap DrawFaceRectanglesOnBitmap (Bitmap originalBitmap, IEnumerable<Model.Face> faces, bool drawLandmarks, double faceRectEnlargeRatio = FACE_RECT_SCALE_RATIO)
 		{
 			var bitmap = originalBitmap.Copy (Bitmap.Config.Argb8888, true);
 
@@ -220,87 +216,6 @@ namespace Xamarin.Cognitive.Face.Droid.Extensions
 		#region Legacy
 
 
-		// Draw detected face rectangles in the original image. And return the image drawn.
-		// If drawLandmarks is set to be true, draw the five main landmarks of each face.
-		public static Bitmap DrawFaceRectanglesOnBitmap (Bitmap originalBitmap, Contract.Face [] faces, bool drawLandmarks)
-		{
-			Bitmap bitmap = originalBitmap.Copy (Bitmap.Config.Argb8888, true);
-			Canvas canvas = new Canvas (bitmap);
-
-			Paint paint = new Paint ();
-			paint.AntiAlias = true;
-			paint.SetStyle (Paint.Style.Stroke);
-			paint.Color = global::Android.Graphics.Color.Green;
-			int stokeWidth = Math.Max (originalBitmap.Width, originalBitmap.Height) / 100;
-			if (stokeWidth == 0)
-			{
-				stokeWidth = 1;
-			}
-			paint.StrokeWidth = stokeWidth;
-
-			if (faces != null)
-			{
-				foreach (Face.Droid.Contract.Face face in faces)
-				{
-					FaceRectangle faceRectangle = CalculateFaceRectangle (bitmap, face.FaceRectangle, 1.3);
-
-					canvas.DrawRect (
-							faceRectangle.Left,
-							faceRectangle.Top,
-							faceRectangle.Left + faceRectangle.Width,
-							faceRectangle.Top + faceRectangle.Height,
-							paint);
-
-					if (drawLandmarks)
-					{
-						int radius = face.FaceRectangle.Width / 30;
-						if (radius == 0)
-						{
-							radius = 1;
-						}
-						paint.SetStyle (Paint.Style.Fill);
-						paint.StrokeWidth = radius;
-
-						canvas.DrawCircle (
-								(float) face.FaceLandmarks.PupilLeft.X,
-								(float) face.FaceLandmarks.PupilLeft.Y,
-								radius,
-								paint);
-
-						canvas.DrawCircle (
-								(float) face.FaceLandmarks.PupilRight.X,
-								(float) face.FaceLandmarks.PupilRight.Y,
-								radius,
-								paint);
-
-						canvas.DrawCircle (
-								(float) face.FaceLandmarks.NoseTip.X,
-								(float) face.FaceLandmarks.NoseTip.Y,
-								radius,
-								paint);
-
-						canvas.DrawCircle (
-								(float) face.FaceLandmarks.MouthLeft.X,
-								(float) face.FaceLandmarks.MouthLeft.Y,
-								radius,
-								paint);
-
-						canvas.DrawCircle (
-								(float) face.FaceLandmarks.MouthRight.X,
-								(float) face.FaceLandmarks.MouthRight.Y,
-								radius,
-								paint);
-
-						paint.SetStyle (Paint.Style.Stroke);
-						paint.StrokeWidth = stokeWidth;
-					}
-				}
-			}
-
-			return bitmap;
-		}
-
-
 		// Resize face rectangle, for better view for human
 		// To make the rectangle larger, faceRectEnlargeRatio should be larger than 1, recommend 1.3
 		static FaceRectangle CalculateFaceRectangle (
@@ -336,6 +251,7 @@ namespace Xamarin.Cognitive.Face.Droid.Extensions
 			result.Top = (int) top;
 			result.Width = (int) sideLength;
 			result.Height = (int) sideLength;
+
 			return result;
 		}
 

@@ -1,21 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+using System.Threading.Tasks;
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
 using Android.Graphics;
-using Android.Icu.Text;
 using Android.OS;
 using Android.Support.V7.App;
 using Android.Views;
 using Android.Widget;
-using Java.IO;
-using Xamarin.Cognitive.Face.Droid;
-using Xamarin.Cognitive.Face.Droid.Contract;
+using NomadCode.UIExtensions;
 using Xamarin.Cognitive.Face.Droid.Extensions;
 using Xamarin.Cognitive.Face.Extensions;
+using Xamarin.Cognitive.Face.Model;
 
 namespace Xamarin.Cognitive.Face.Sample.Droid
 {
@@ -25,21 +22,21 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			  ScreenOrientation = ScreenOrientation.Portrait)]
 	public class DetectionActivity : AppCompatActivity
 	{
-		private const int REQUEST_SELECT_IMAGE = 0;
-		private Button select_image, detect, view_log = null;
-		private Bitmap mBitmap = null;
-		private ProgressDialog mProgressDialog = null;
-		private global::Android.Net.Uri mImageUri = null;
+		const int REQUEST_SELECT_IMAGE = 0;
+
+		Button select_image, detect, view_log;
+		Bitmap bitmap;
+		ProgressDialog progressDialog;
+		string imageUri;
 
 		protected override void OnCreate (Bundle savedInstanceState)
 		{
 			base.OnCreate (savedInstanceState);
 
-			// Create your application here
 			SetContentView (Resource.Layout.activity_detection);
 
-			mProgressDialog = new ProgressDialog (this);
-			mProgressDialog.SetTitle (Application.Context.GetString (Resource.String.progress_dialog_title));
+			progressDialog = new ProgressDialog (this);
+			progressDialog.SetTitle (Application.Context.GetString (Resource.String.progress_dialog_title));
 
 			select_image = FindViewById<Button> (Resource.Id.select_image);
 			detect = FindViewById<Button> (Resource.Id.detect);
@@ -49,38 +46,26 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			LogHelper.ClearDetectionLog ();
 		}
 
+
 		protected override void OnResume ()
 		{
 			base.OnResume ();
+
 			select_image.Click += Select_Image_Click;
 			detect.Click += Detect_Click;
 			view_log.Click += View_Log_Click;
 		}
 
+
 		protected override void OnPause ()
 		{
 			base.OnPause ();
+
 			select_image.Click -= Select_Image_Click;
 			detect.Click -= Detect_Click;
 			view_log.Click -= View_Log_Click;
 		}
 
-		protected override void OnSaveInstanceState (Bundle outState)
-		{
-			base.OnSaveInstanceState (outState);
-			outState.PutParcelable ("ImageUri", mImageUri);
-		}
-
-		protected override void OnRestoreInstanceState (Bundle savedInstanceState)
-		{
-			base.OnRestoreInstanceState (savedInstanceState);
-			mImageUri = (global::Android.Net.Uri) savedInstanceState.GetParcelable ("ImageUri");
-
-			if (mImageUri != null)
-			{
-				mBitmap = ContentResolver.LoadSizeLimitedBitmapFromUri (mImageUri);
-			}
-		}
 
 		protected override void OnActivityResult (int requestCode, Result resultCode, Intent data)
 		{
@@ -88,21 +73,23 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 			switch (requestCode)
 			{
-				case (int) REQUEST_SELECT_IMAGE:
+				case REQUEST_SELECT_IMAGE:
 					if (resultCode == Result.Ok)
 					{
-						mImageUri = data.Data;
-						mBitmap = ContentResolver.LoadSizeLimitedBitmapFromUri (mImageUri);
+						imageUri = data.Data.ToString ();
 
-						if (mBitmap != null)
+						bitmap = ContentResolver.LoadSizeLimitedBitmapFromUri (data.Data);
+
+						if (bitmap != null)
 						{
-							ImageView image = FindViewById<ImageView> (Resource.Id.image);
-							image.SetImageBitmap (mBitmap);
-							AddLog ("Image: " + mImageUri + " resized to " + mBitmap.Width + "x" + mBitmap.Height);
+							var image = FindViewById<ImageView> (Resource.Id.image);
+							image.SetImageBitmap (bitmap);
+
+							AddLog ($"Image: {imageUri} resized to {bitmap.Width}x{bitmap.Height}");
 						}
 
-						FaceListAdapter faceListAdapter = new FaceListAdapter (null, this);
-						ListView list_detected_faces = FindViewById<ListView> (Resource.Id.list_detected_faces);
+						var faceListAdapter = new FaceListAdapter (null, null);
+						var list_detected_faces = FindViewById<ListView> (Resource.Id.list_detected_faces);
 						list_detected_faces.Adapter = faceListAdapter;
 
 						SetInfo ("");
@@ -110,270 +97,237 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 						SetDetectButtonEnabledStatus (true);
 					}
 					break;
-				default:
-					break;
 			}
 		}
 
-		private void Select_Image_Click (object sender, EventArgs e)
+
+		void Select_Image_Click (object sender, EventArgs e)
 		{
-			Intent intent = new Intent (this, typeof (SelectImageActivity));
-			this.StartActivityForResult (intent, REQUEST_SELECT_IMAGE);
+			var intent = new Intent (this, typeof (SelectImageActivity));
+			StartActivityForResult (intent, REQUEST_SELECT_IMAGE);
 		}
 
-		private void Detect_Click (object sender, EventArgs e)
+
+		async void Detect_Click (object sender, EventArgs e)
 		{
-			ExecuteDetection ();
+			await ExecuteDetection ();
+
 			SetAllButtonsEnabledStatus (false);
 		}
 
-		private async void ExecuteDetection ()
+
+		async Task ExecuteDetection ()
 		{
-			Face.Droid.Contract.Face [] faces = null;
-			bool mSucceed = true;
-
-			mProgressDialog.Show ();
-			AddLog ("Request: Detecting in image " + mImageUri);
-
 			try
 			{
-				using (MemoryStream pre_output = new MemoryStream ())
-				{
-					mBitmap.Compress (Bitmap.CompressFormat.Jpeg, 100, pre_output);
+				progressDialog.Show ();
+				progressDialog.SetMessage ("Detecting...");
+				SetInfo ("Detecting...");
+				AddLog ($"Request: Detecting in image {imageUri}");
 
-					using (ByteArrayInputStream inputStream = new ByteArrayInputStream (pre_output.ToArray ()))
-					{
-						byte [] arr = new byte [inputStream.Available ()];
-						inputStream.Read (arr);
-						var output = new MemoryStream (arr);
-
-						mProgressDialog.SetMessage ("Detecting...");
-						SetInfo ("Detecting...");
-						faces = await FaceClient.Shared.Detect (output, true, true, new [] {
-								  FaceServiceClientFaceAttributeType.Age,
-								  FaceServiceClientFaceAttributeType.Gender,
-								  FaceServiceClientFaceAttributeType.Smile,
-								  FaceServiceClientFaceAttributeType.Glasses,
-								  FaceServiceClientFaceAttributeType.FacialHair,
-								  FaceServiceClientFaceAttributeType.Emotion,
-								  FaceServiceClientFaceAttributeType.HeadPose
-								});
-					}
-				}
-			}
-			catch (Java.Lang.Exception e)
-			{
-				mSucceed = false;
-				AddLog (e.Message);
-			}
-
-			RunOnUiThread (() =>
-			{
-				AddLog ("Response: Success. Detected " + (faces == null ? 0 : faces.Length) + " face(s) in " + mImageUri);
+				var faces = await FaceClient.Shared.DetectFacesInPhoto (
+					() => bitmap.AsJpeg (),
+					true,
+			   		FaceAttributeType.Age,
+					FaceAttributeType.Gender,
+					FaceAttributeType.Smile,
+					FaceAttributeType.Glasses,
+					FaceAttributeType.FacialHair,
+					FaceAttributeType.Emotion,
+					FaceAttributeType.HeadPose);
 
 				// Show the result on screen when detection is done.
-				ListView list_detected_faces = FindViewById<ListView> (Resource.Id.list_detected_faces);
-				SetUiAfterDetection (faces, mSucceed, list_detected_faces);
-			});
-		}
+				var list_detected_faces = FindViewById<ListView> (Resource.Id.list_detected_faces);
 
-		private void View_Log_Click (object sender, EventArgs e)
-		{
-			Intent intent = new Intent (this, typeof (DetectionLogActivity));
-			this.StartActivity (intent);
-		}
+				string detectionResult = "0 face detected";
 
-		private void SetUiAfterDetection (Face.Droid.Contract.Face [] result, bool succeed, ListView list_detected_faces)
-		{
-			mProgressDialog.Dismiss ();
-			SetAllButtonsEnabledStatus (true);
-			SetDetectButtonEnabledStatus (false);
-
-			if (succeed)
-			{
-				string detectionResult;
-
-				if (result != null)
+				if (faces?.Count > 0)
 				{
-					detectionResult = result.Length + " face"
-					   + (result.Length != 1 ? "s" : "") + " detected";
+					detectionResult = $"{faces.Count} face{(faces.Count != 1 ? "s" : "")} detected";
+					AddLog ($"Response: Success. {detectionResult} in {imageUri}");
 
-					ImageView image = FindViewById<ImageView> (Resource.Id.image);
-					image.SetImageBitmap (ImageHelper.DrawFaceRectanglesOnBitmap (mBitmap, result, true));
-					FaceListAdapter faceListAdapter = new FaceListAdapter (result, this);
+					var image = FindViewById<ImageView> (Resource.Id.image);
+					image.SetImageBitmap (ImageHelper.DrawFaceRectanglesOnBitmap (bitmap, faces, true));
+
+					var faceListAdapter = new FaceListAdapter (faces, bitmap);
 					list_detected_faces.Adapter = faceListAdapter;
-				}
-				else
-				{
-					detectionResult = "0 face detected";
 				}
 
 				SetInfo (detectionResult);
 			}
+			catch (Exception e)
+			{
+				AddLog (e.Message);
+			}
 
-			mImageUri = null;
-			mBitmap = null;
+			progressDialog.Dismiss ();
+			SetAllButtonsEnabledStatus (true);
+			SetDetectButtonEnabledStatus (false);
+
+			imageUri = null;
+			bitmap = null;
 		}
 
-		private void SetDetectButtonEnabledStatus (bool isEnabled)
+
+		void View_Log_Click (object sender, EventArgs e)
+		{
+			var intent = new Intent (this, typeof (DetectionLogActivity));
+			StartActivity (intent);
+		}
+
+
+		void SetDetectButtonEnabledStatus (bool isEnabled)
 		{
 			detect.Enabled = isEnabled;
 		}
 
-		private void SetAllButtonsEnabledStatus (bool isEnabled)
+
+		void SetAllButtonsEnabledStatus (bool isEnabled)
 		{
 			select_image.Enabled = isEnabled;
 			detect.Enabled = isEnabled;
 			view_log.Enabled = isEnabled;
 		}
 
-		private void SetInfo (string inf)
+
+		void SetInfo (string inf)
 		{
-			TextView info = FindViewById<TextView> (Resource.Id.info);
+			var info = FindViewById<TextView> (Resource.Id.info);
 			info.Text = inf;
 		}
 
-		private void AddLog (string _log)
+
+		void AddLog (string _log)
 		{
 			LogHelper.AddDetectionLog (_log);
 		}
 
-		private class FaceListAdapter : BaseAdapter
+
+		class FaceListAdapter : BaseAdapter<Model.Face>
 		{
-			private List<Face.Droid.Contract.Face> faces;
-			private List<Bitmap> faceThumbnails;
-			private DetectionActivity activity;
+			readonly List<Bitmap> faceThumbnails;
 
-			public FaceListAdapter (Face.Droid.Contract.Face [] detectionResult, DetectionActivity act)
+			public List<Model.Face> DetectedFaces { get; private set; }
+
+			public FaceListAdapter (List<Model.Face> detectedFaces, Bitmap photo)
 			{
-				faces = new List<Face.Droid.Contract.Face> ();
-				faceThumbnails = new List<Bitmap> ();
-				activity = act;
+				DetectedFaces = detectedFaces;
 
-				if (detectionResult != null)
+				if (detectedFaces != null && photo != null)
 				{
-					faces = detectionResult.ToList ();
-
-					foreach (Face.Droid.Contract.Face face in faces)
-					{
-						try
-						{
-							faceThumbnails.Add (ImageHelper.GenerateFaceThumbnail (activity.mBitmap, face.FaceRectangle));
-						}
-						catch (Java.IO.IOException ex)
-						{
-							activity.SetInfo (ex.Message);
-						}
-					}
+					faceThumbnails = detectedFaces.GenerateThumbnails (photo);
 				}
 			}
 
-			public override bool IsEnabled (int position)
-			{
-				return false;
-			}
 
-			public override int Count
-			{
-				get
-				{
-					return faces.Count;
-				}
-			}
+			public override bool IsEnabled (int position) => false;
 
-			public override Java.Lang.Object GetItem (int position)
-			{
-				return faces [position];
-			}
 
-			public override long GetItemId (int position)
-			{
-				return position;
-			}
+			public override int Count => DetectedFaces?.Count ?? 0;
+
+
+			public override Model.Face this [int position] => DetectedFaces [position];
+
+
+			public override long GetItemId (int position) => position;
+
 
 			public override View GetView (int position, View convertView, ViewGroup parent)
 			{
 				if (convertView == null)
 				{
-					LayoutInflater layoutInflater = (LayoutInflater) Application.Context.GetSystemService (Context.LayoutInflaterService);
+					var layoutInflater = (LayoutInflater) Application.Context.GetSystemService (LayoutInflaterService);
 					convertView = layoutInflater.Inflate (Resource.Layout.item_face_with_description, parent, false);
 				}
+
 				convertView.Id = position;
 
-				((ImageView) convertView.FindViewById (Resource.Id.face_thumbnail)).SetImageBitmap (faceThumbnails [position]);
+				var face = DetectedFaces [position];
 
-				DecimalFormat formatter = new DecimalFormat ("#0.0");
+				convertView.FindViewById<ImageView> (Resource.Id.face_thumbnail).SetImageBitmap (faceThumbnails [position]);
+
 				string face_description = string.Format ("Age: {0}\nGender: {1}\nSmile: {2}\nGlasses: {3}\nFacialHair: {4}\nHeadPose: {5}",
-						faces [position].FaceAttributes.Age,
-						faces [position].FaceAttributes.Gender,
-						faces [position].FaceAttributes.Smile,
-						faces [position].FaceAttributes.Glasses,
-						GetFacialHair (faces [position].FaceAttributes.FacialHair),
-						GetEmotion (faces [position].FaceAttributes.Emotion),
-						GetHeadPose (faces [position].FaceAttributes.HeadPose)
-						);
+						face.Attributes.Age,
+						face.Attributes.Gender,
+						face.Attributes.SmileIntensity,
+						face.Attributes.Glasses,
+						GetFacialHair (face.Attributes.FacialHair),
+						GetEmotion (face.Attributes.Emotion),
+						GetHeadPose (face.Attributes.HeadPose));
 
-				TextView text_detected_face = convertView.FindViewById<TextView> (Resource.Id.text_detected_face);
+				var text_detected_face = convertView.FindViewById<TextView> (Resource.Id.text_detected_face);
 				text_detected_face.Text = face_description;
 
 				return convertView;
 			}
 
-			private string GetFacialHair (FacialHair facialHair)
+
+			string GetFacialHair (FacialHair facialHair)
 			{
-				return (facialHair.Moustache + facialHair.Beard + facialHair.Sideburns > 0) ? "Yes" : "No";
+				return (facialHair.Mustache + facialHair.Beard + facialHair.Sideburns > 0) ? "Yes" : "No";
 			}
 
-			private string GetEmotion (Emotion emotion)
+
+			string GetEmotion (FaceEmotion emotion)
 			{
 				string emotionType = "";
 				double emotionValue = 0.0;
+
 				if (emotion.Anger > emotionValue)
 				{
 					emotionValue = emotion.Anger;
 					emotionType = "Anger";
 				}
+
 				if (emotion.Contempt > emotionValue)
 				{
 					emotionValue = emotion.Contempt;
 					emotionType = "Contempt";
 				}
+
 				if (emotion.Disgust > emotionValue)
 				{
 					emotionValue = emotion.Disgust;
 					emotionType = "Disgust";
 				}
+
 				if (emotion.Fear > emotionValue)
 				{
 					emotionValue = emotion.Fear;
 					emotionType = "Fear";
 				}
+
 				if (emotion.Happiness > emotionValue)
 				{
 					emotionValue = emotion.Happiness;
 					emotionType = "Happiness";
 				}
+
 				if (emotion.Neutral > emotionValue)
 				{
 					emotionValue = emotion.Neutral;
 					emotionType = "Neutral";
 				}
+
 				if (emotion.Sadness > emotionValue)
 				{
 					emotionValue = emotion.Sadness;
 					emotionType = "Sadness";
 				}
+
 				if (emotion.Surprise > emotionValue)
 				{
 					emotionValue = emotion.Surprise;
 					emotionType = "Surprise";
 				}
+
 				return string.Format ("{0}: {1}", emotionType, emotionValue);
 			}
 
-			private string GetHeadPose (HeadPose headPose)
+
+			string GetHeadPose (FaceHeadPose headPose)
 			{
-				return string.Format ("Pitch: {0}, Roll: {1}, Yaw: {2}", headPose.Pitch, headPose.Roll, headPose.Yaw);
+				return string.Format ("Roll: {0}, Yaw: {1}", headPose.Roll, headPose.Yaw);
 			}
 		}
 	}
