@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.IO;
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
@@ -10,10 +9,12 @@ using Android.OS;
 using Android.Support.V7.App;
 using Android.Views;
 using Android.Widget;
-using Java.IO;
-using Java.Util;
-using Java.Text;
 using Xamarin.Cognitive.Face.Droid.Extensions;
+using Xamarin.Cognitive.Face.Extensions;
+using Xamarin.Cognitive.Face.Sample.Droid.Shared.Adapters;
+using System.Threading.Tasks;
+using NomadCode.UIExtensions;
+using Xamarin.Cognitive.Face.Model;
 
 namespace Xamarin.Cognitive.Face.Sample.Droid
 {
@@ -21,53 +22,55 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			  ParentActivity = typeof (MainActivity),
 			  LaunchMode = LaunchMode.SingleTop,
 			  ScreenOrientation = ScreenOrientation.Portrait)]
-	public class IdentificationActivity : AppCompatActivity
+	public class IdentificationActivity : AppCompatActivity, AdapterView.IOnItemClickListener
 	{
-		private string mPersonGroupId = null;
-		private bool detected = false;
-		private FaceListAdapter mFaceListAdapter = null;
-		private PersonGroupListAdapter mPersonGroupListAdapter = null;
-		private const int REQUEST_SELECT_IMAGE = 0;
-		private Bitmap mBitmap = null;
-		private ProgressDialog mProgressDialog = null;
-		private Button select_image, manage_person_groups, identify, view_log = null;
+		const int REQUEST_SELECT_IMAGE = 0;
+
+		bool detected;
+		PersonGroup selectedPersonGroup;
+		FaceListAdapter faceListAdapter;
+		PersonGroupsListAdapter personGroupListAdapter;
+		Bitmap bitmap;
+		ProgressDialog progressDialog;
+		Button select_image, manage_person_groups, identify, view_log;
 
 		protected override void OnCreate (Bundle savedInstanceState)
 		{
 			base.OnCreate (savedInstanceState);
 
-			// Create your application here
 			SetContentView (Resource.Layout.activity_identification);
 
 			detected = false;
 
-			mProgressDialog = new ProgressDialog (this);
-			mProgressDialog.SetTitle (Application.Context.GetString (Resource.String.progress_dialog_title));
+			progressDialog = new ProgressDialog (this);
+			progressDialog.SetTitle (Application.Context.GetString (Resource.String.progress_dialog_title));
 
-			select_image = (Button) FindViewById (Resource.Id.select_image);
-			manage_person_groups = (Button) FindViewById (Resource.Id.manage_person_groups);
-			identify = (Button) FindViewById (Resource.Id.identify);
-			view_log = (Button) FindViewById (Resource.Id.view_log);
+			select_image = FindViewById<Button> (Resource.Id.select_image);
+			manage_person_groups = FindViewById<Button> (Resource.Id.manage_person_groups);
+			identify = FindViewById<Button> (Resource.Id.identify);
+			view_log = FindViewById<Button> (Resource.Id.view_log);
 
 			LogHelper.ClearIdentificationLog ();
 		}
 
-		protected override void OnResume ()
+
+		protected async override void OnResume ()
 		{
 			base.OnResume ();
-			ListView listView = (ListView) FindViewById (Resource.Id.list_person_groups_identify);
-			mPersonGroupListAdapter = new PersonGroupListAdapter (this);
-			listView.Adapter = mPersonGroupListAdapter;
-			listView.OnItemClickListener = new SetOnItemClickListener (this);
 
-			if (mPersonGroupListAdapter.personGroupIdList.Count != 0)
+			var groups = await FaceClient.Shared.GetPersonGroups ();
+
+			var listView = FindViewById<ListView> (Resource.Id.list_person_groups_identify);
+			personGroupListAdapter = new PersonGroupsListAdapter (this, groups);
+			listView.Adapter = personGroupListAdapter;
+			listView.OnItemClickListener = this;
+
+			if (groups.Count > 0)
 			{
-
 				SetPersonGroupSelected (0);
 			}
 			else
 			{
-
 				SetPersonGroupSelected (-1);
 			}
 
@@ -77,36 +80,33 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			view_log.Click += View_Log_Click;
 		}
 
+
 		protected override void OnPause ()
 		{
 			base.OnPause ();
+
 			select_image.Click -= Select_Image_Click;
 			manage_person_groups.Click -= Manage_Person_Groups_Click;
 			identify.Click -= Identify_Click;
 			view_log.Click -= View_Log_Click;
 		}
 
-		private void Select_Image_Click (object sender, EventArgs e)
+
+		void Select_Image_Click (object sender, EventArgs e)
 		{
-			Intent intent = new Intent (this, typeof (SelectImageActivity));
+			var intent = new Intent (this, typeof (SelectImageActivity));
 			StartActivityForResult (intent, REQUEST_SELECT_IMAGE);
 		}
 
-		private void Identify_Click (object sender, EventArgs e)
+
+		async void Identify_Click (object sender, EventArgs e)
 		{
 			// Start detection task only if the image to detect is selected.
-			if (detected && mPersonGroupId != null)
+			if (detected && selectedPersonGroup != null)
 			{
-				// Start a background task to identify faces in the image.
-				List<UUID> faceIds = new List<UUID> ();
-				foreach (Face.Droid.Contract.Face face in mFaceListAdapter.faces)
-				{
-					faceIds.Add (face.FaceId);
-				}
-
 				SetAllButtonsEnabledStatus (false);
 
-				ExecuteIdentification (faceIds.ToArray ());
+				await ExecuteIdentification ();
 			}
 			else
 			{
@@ -115,22 +115,26 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			}
 		}
 
-		private void Manage_Person_Groups_Click (object sender, EventArgs e)
+
+		void Manage_Person_Groups_Click (object sender, EventArgs e)
 		{
-			Intent intent = new Intent (this, typeof (PersonGroupListActivity));
+			var intent = new Intent (this, typeof (PersonGroupListActivity));
 			StartActivity (intent);
 			RefreshIdentifyButtonEnabledStatus ();
 		}
 
-		private void View_Log_Click (object sender, EventArgs e)
+
+		void View_Log_Click (object sender, EventArgs e)
 		{
-			Intent intent = new Intent (this, typeof (IdentificationLogActivity));
+			var intent = new Intent (this, typeof (IdentificationLogActivity));
 			StartActivity (intent);
 		}
 
-		protected override void OnActivityResult (int requestCode, Result resultCode, Intent data)
+
+		protected async override void OnActivityResult (int requestCode, Result resultCode, Intent data)
 		{
 			base.OnActivityResult (requestCode, resultCode, data);
+
 			switch (requestCode)
 			{
 				case REQUEST_SELECT_IMAGE:
@@ -139,73 +143,74 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 						detected = false;
 
 						// If image is selected successfully, set the image URI and bitmap.
-						global::Android.Net.Uri imageUri = data.Data;
-						mBitmap = ImageHelper.LoadSizeLimitedBitmapFromUri (
-								imageUri, this.ContentResolver);
-						if (mBitmap != null)
+						bitmap = ContentResolver.LoadSizeLimitedBitmapFromUri (data.Data);
+
+						if (bitmap != null)
 						{
 							// Show the image on screen.
-							ImageView imageView = (ImageView) FindViewById (Resource.Id.image);
-							imageView.SetImageBitmap (mBitmap);
+							var imageView = FindViewById<ImageView> (Resource.Id.image);
+							imageView.SetImageBitmap (bitmap);
 						}
 
 						// Clear the identification result.
-						FaceListAdapter faceListAdapter = new FaceListAdapter (null, this);
-						ListView listView = (ListView) FindViewById (Resource.Id.list_identified_faces);
-						listView.Adapter = faceListAdapter;
+						var emptyFaceListAdapter = new FaceListAdapter (null, null);
+						var listView = FindViewById<ListView> (Resource.Id.list_identified_faces);
+						listView.Adapter = emptyFaceListAdapter;
 
 						// Clear the information panel.
 						SetInfo ("");
 
 						// Start detecting in image.
-						Detect ();
+						await Detect ();
 					}
-					break;
-				default:
 					break;
 			}
 		}
 
-		private void Detect ()
+
+		public void OnItemClick (AdapterView parent, View view, int position, long id)
+		{
+			SetPersonGroupSelected (position);
+		}
+
+
+		async Task Detect ()
 		{
 			SetAllButtonsEnabledStatus (false);
 
 			// Start a background task to detect faces in the image.
-			ExecuteDetection ();
+			await ExecuteDetection ();
 		}
 
-		private void AddLog (String _log)
+
+		void AddLog (string log)
 		{
-			LogHelper.AddIdentificationLog (_log);
+			LogHelper.AddIdentificationLog (log);
 		}
+
 
 		// Set whether the buttons are enabled.
-		private void SetAllButtonsEnabledStatus (bool isEnabled)
+		void SetAllButtonsEnabledStatus (bool isEnabled)
 		{
-			Button selectImageButton = (Button) FindViewById (Resource.Id.manage_person_groups);
-			selectImageButton.Enabled = isEnabled;
-
-			Button groupButton = (Button) FindViewById (Resource.Id.select_image);
-			groupButton.Enabled = isEnabled;
-
-			Button identifyButton = (Button) FindViewById (Resource.Id.identify);
-			identifyButton.Enabled = isEnabled;
-
-			Button viewLogButton = (Button) FindViewById (Resource.Id.view_log);
-			viewLogButton.Enabled = isEnabled;
+			manage_person_groups.Enabled = isEnabled;
+			select_image.Enabled = isEnabled;
+			identify.Enabled = isEnabled;
+			view_log.Enabled = isEnabled;
 		}
 
+
 		// Set the group button is enabled or not.
-		private void SetIdentifyButtonEnabledStatus (bool isEnabled)
+		void SetIdentifyButtonEnabledStatus (bool isEnabled)
 		{
-			Button button = (Button) FindViewById (Resource.Id.identify);
+			var button = FindViewById<Button> (Resource.Id.identify);
 			button.Enabled = isEnabled;
 		}
 
+
 		// Set the group button is enabled or not.
-		private void RefreshIdentifyButtonEnabledStatus ()
+		void RefreshIdentifyButtonEnabledStatus ()
 		{
-			if (detected && mPersonGroupId != null)
+			if (detected && selectedPersonGroup != null)
 			{
 				SetIdentifyButtonEnabledStatus (true);
 			}
@@ -215,24 +220,27 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			}
 		}
 
-		// Set the information panel on screen.
-		private void SetInfo (string info)
+
+		void SetInfo (string info)
 		{
-			TextView textView = (TextView) FindViewById (Resource.Id.info);
+			var textView = FindViewById<TextView> (Resource.Id.info);
 			textView.Text = info;
 		}
 
-		private void SetPersonGroupSelected (int position)
+
+		void SetPersonGroupSelected (int position)
 		{
-			TextView textView = (TextView) FindViewById (Resource.Id.text_person_group_selected);
-			if (position > 0)
+			personGroupListAdapter.SetSelectedPosition (position);
+
+			var textView = FindViewById<TextView> (Resource.Id.text_person_group_selected);
+
+			if (position >= 0)
 			{
-				String personGroupIdSelected = mPersonGroupListAdapter.personGroupIdList [position];
-				mPersonGroupListAdapter.personGroupIdList [position] = mPersonGroupListAdapter.personGroupIdList [0];
-				mPersonGroupListAdapter.personGroupIdList [0] = personGroupIdSelected;
-				ListView listView = (ListView) FindViewById (Resource.Id.list_person_groups_identify);
-				listView.Adapter = mPersonGroupListAdapter;
-				SetPersonGroupSelected (0);
+				selectedPersonGroup = personGroupListAdapter.GetGroup (position);
+
+				RefreshIdentifyButtonEnabledStatus ();
+				textView.SetTextColor (Color.Black);
+				textView.Text = $"Person group to use: {selectedPersonGroup.Name}";
 			}
 			else if (position < 0)
 			{
@@ -240,345 +248,177 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 				textView.SetTextColor (Color.Red);
 				textView.Text = Application.Context.GetString (Resource.String.no_person_group_selected_for_identification_warning);
 			}
-			else
-			{
-				mPersonGroupId = mPersonGroupListAdapter.personGroupIdList [0];
-				String personGroupName = StorageHelper.GetPersonGroupName (
-						mPersonGroupId, this);
-				RefreshIdentifyButtonEnabledStatus ();
-				textView.SetTextColor (Color.Black);
-				textView.Text = String.Format ("Person group to use: {0}", personGroupName);
-			}
 		}
 
-		private async void ExecuteIdentification (UUID [] mFaceIds)
+
+		async Task ExecuteIdentification ()
 		{
-			Face.Droid.Contract.IdentifyResult [] result = null;
-			bool mSucceed = true;
-			string logString = string.Empty;
-
-			mProgressDialog.Show ();
-
-			logString = "Request: Identifying faces ";
-			foreach (UUID faceId in mFaceIds)
-			{
-				logString += faceId.ToString () + ", ";
-			}
-			logString += " in group " + mPersonGroupId;
-			AddLog (logString);
-
 			try
 			{
-				mProgressDialog.SetMessage ("Getting person group status...");
+				progressDialog.Show ();
+
+				var ids = string.Join (", ", faceListAdapter.DetectedFaces.Select (f => f.Id));
+
+				AddLog ($"Request: Identifying faces {ids}");
+
+				progressDialog.SetMessage ("Getting person group status...");
 				SetInfo ("Getting person group status...");
 
-				Shared.TrainingStatus trainingStatus = await FaceClient.Shared.GetGroupTrainingStatus (
-						this.mPersonGroupId);     /* personGroupId */
+				var trainingStatus = await FaceClient.Shared.GetGroupTrainingStatus (selectedPersonGroup);
 
-				if (trainingStatus.Status != Shared.TrainingStatus.TrainingStatusType.Succeeded)
+				if (trainingStatus.Status == TrainingStatus.TrainingStatusType.Succeeded)
 				{
-					mProgressDialog.SetMessage ("Person group training status is " + trainingStatus.Status);
-					SetInfo ("Person group training status is " + trainingStatus.Status);
+					progressDialog.SetMessage ("Identifying...");
+					SetInfo ("Identifying...");
 
-					mSucceed = false;
+					var results = await FaceClient.Shared.Identify (
+						selectedPersonGroup,            /* personGroupId */
+						faceListAdapter.DetectedFaces); /* faceIds */
+
+					SetAllButtonsEnabledStatus (true);
+					SetIdentifyButtonEnabledStatus (false);
+
+					// Set the information about the detection result.
+					SetInfo ("Identification is done");
+
+					if (results != null)
+					{
+						faceListAdapter.SetIdentificationResult (results);
+
+						foreach (var identifyResult in results)
+						{
+							var personString = identifyResult.CandidateResult != null
+															 ? identifyResult.CandidateResult.PersonId : "Unknown Person";
+
+							AddLog ($"Face {identifyResult.FaceId} is identified as {personString}.");
+						}
+
+						// Show the detailed list of detected faces.
+						var listView = FindViewById<ListView> (Resource.Id.list_identified_faces);
+						listView.Adapter = faceListAdapter;
+					}
 				}
-
-				mProgressDialog.SetMessage ("Identifying...");
-				SetInfo ("Identifying...");
-
-
-				// Start identification.
-				result = await FaceClient.Shared.Identity (
-						mPersonGroupId,   /* personGroupId */
-						mFaceIds,                  /* faceIds */
-						1);  /* maxNumOfCandidatesReturned */
+				else
+				{
+					progressDialog.SetMessage ("Person group training status is " + trainingStatus.Status);
+					SetInfo ("Person group training status is " + trainingStatus.Status);
+				}
 			}
-			catch (Java.Lang.Exception e)
+			catch (Exception e)
 			{
-				mSucceed = false;
 				AddLog (e.Message);
 			}
 
-			RunOnUiThread (() =>
-			 {
-				 mProgressDialog.Dismiss ();
-
-				 SetAllButtonsEnabledStatus (true);
-				 SetIdentifyButtonEnabledStatus (false);
-
-				 if (mSucceed)
-				 {
-					 // Set the information about the detection result.
-					 SetInfo ("Identification is done");
-
-					 if (result != null)
-					 {
-						 mFaceListAdapter.SetIdentificationResult (result);
-
-						 logString = "Response: Success. ";
-						 foreach (Face.Droid.Contract.IdentifyResult identifyResult in result)
-						 {
-							 logString += "Face " + identifyResult.FaceId.ToString () + " is identified as "
-									 + (identifyResult.Candidates.Count > 0
-										? ((Face.Droid.Contract.Candidate) identifyResult.Candidates [0]).PersonId.ToString ()
-											 : "Unknown Person")
-									 + ". ";
-						 }
-						 AddLog (logString);
-
-						 // Show the detailed list of detected faces.
-						 ListView listView = (ListView) FindViewById (Resource.Id.list_identified_faces);
-						 listView.Adapter = mFaceListAdapter;
-					 }
-				 }
-
-			 });
+			progressDialog.Dismiss ();
 		}
 
-		private async void ExecuteDetection ()
+
+		async Task ExecuteDetection ()
 		{
-			Face.Droid.Contract.Face [] faces = null;
-
-			mProgressDialog.Show ();
-			//AddLog("Request: Detecting in image " + mImageUri);
-
 			try
 			{
-				using (MemoryStream pre_output = new MemoryStream ())
+				progressDialog.Show ();
+				progressDialog.SetMessage ("Detecting...");
+				SetInfo ("Detecting...");
+
+				var faces = await FaceClient.Shared.DetectFacesInPhoto (() => bitmap.AsJpeg ());
+
+				SetAllButtonsEnabledStatus (true);
+
+				faceListAdapter = new FaceListAdapter (faces, bitmap);
+				var listView = FindViewById<ListView> (Resource.Id.list_identified_faces);
+				listView.Adapter = faceListAdapter;
+
+				if (faces?.Count > 0)
 				{
-					mBitmap.Compress (Bitmap.CompressFormat.Jpeg, 100, pre_output);
-
-					using (ByteArrayInputStream inputStream = new ByteArrayInputStream (pre_output.ToArray ()))
-					{
-						byte [] arr = new byte [inputStream.Available ()];
-						inputStream.Read (arr);
-						var output = new MemoryStream (arr);
-
-						mProgressDialog.SetMessage ("Detecting...");
-						SetInfo ("Detecting...");
-						faces = await FaceClient.Shared.Detect (output, true, false, null);
-					}
+					detected = true;
+					SetInfo ("Click on the \"Identify\" button to identify the faces in image.");
+				}
+				else
+				{
+					detected = false;
+					SetInfo ("No faces detected!");
 				}
 			}
-			catch (Java.Lang.Exception e)
+			catch (Exception e)
 			{
+				detected = false;
 				AddLog (e.Message);
 			}
 
-			RunOnUiThread (() =>
-			 {
-				 mProgressDialog.Dismiss ();
-
-				 SetAllButtonsEnabledStatus (true);
-
-				 if (faces != null)
-				 {
-					 // Set the adapter of the ListView which contains the details of detected faces.
-					 mFaceListAdapter = new FaceListAdapter (faces, this);
-					 ListView listView = (ListView) FindViewById (Resource.Id.list_identified_faces);
-					 listView.Adapter = mFaceListAdapter;
-
-					 if (faces.Length == 0)
-					 {
-						 detected = false;
-						 SetInfo ("No faces detected!");
-					 }
-					 else
-					 {
-						 detected = true;
-						 SetInfo ("Click on the \"Identify\" button to identify the faces in image.");
-					 }
-				 }
-				 else
-				 {
-					 detected = false;
-				 }
-
-				 RefreshIdentifyButtonEnabledStatus ();
-
-			 });
+			progressDialog.Dismiss ();
+			RefreshIdentifyButtonEnabledStatus ();
 		}
 
-		private class SetOnItemClickListener : Java.Lang.Object, ListView.IOnItemClickListener
+
+		class FaceListAdapter : BaseAdapter<Model.Face>
 		{
-			IdentificationActivity activity;
-			public SetOnItemClickListener (IdentificationActivity act)
+			readonly List<Bitmap> faceThumbnails;
+
+			List<IdentificationResult> identifyResults;
+
+			public List<Model.Face> DetectedFaces { get; private set; }
+
+			public FaceListAdapter (List<Model.Face> detectedFaces, Bitmap photo)
 			{
-				this.activity = act;
-			}
+				DetectedFaces = detectedFaces;
 
-
-			public void OnItemClick (AdapterView parent, View view, int position, long id)
-			{
-				activity.SetPersonGroupSelected (position);
-			}
-		}
-
-		private class FaceListAdapter : BaseAdapter
-		{
-			public List<Face.Droid.Contract.Face> faces;
-			private List<Face.Droid.Contract.IdentifyResult> mIdentifyResults;
-			private List<Bitmap> faceThumbnails;
-			private IdentificationActivity activity;
-
-			public FaceListAdapter (Face.Droid.Contract.Face [] detectionResult, IdentificationActivity act)
-			{
-				faces = new List<Face.Droid.Contract.Face> ();
-				faceThumbnails = new List<Bitmap> ();
-				mIdentifyResults = new List<Face.Droid.Contract.IdentifyResult> ();
-				activity = act;
-
-				if (detectionResult != null)
+				if (detectedFaces != null && photo != null)
 				{
-					faces = detectionResult.ToList ();
-					foreach (Face.Droid.Contract.Face face in faces)
-					{
-						try
-						{
-							faceThumbnails.Add (ImageHelper.GenerateFaceThumbnail (
-									activity.mBitmap, face.FaceRectangle));
-						}
-						catch (Java.IO.IOException e)
-						{
-							activity.SetInfo (e.Message);
-						}
-					}
+					faceThumbnails = detectedFaces.GenerateThumbnails (photo);
 				}
 			}
 
-			public void SetIdentificationResult (Face.Droid.Contract.IdentifyResult [] identifyResults)
+
+			public void SetIdentificationResult (List<IdentificationResult> identifyResults)
 			{
-				mIdentifyResults = identifyResults.ToList ();
+				this.identifyResults = identifyResults;
 			}
 
-			public override int Count
-			{
-				get
-				{
-					return faces.Count;
-				}
-			}
 
-			public override Java.Lang.Object GetItem (int position)
-			{
-				return faces [position];
-			}
+			public override int Count => DetectedFaces?.Count ?? 0;
 
-			public override long GetItemId (int position)
-			{
-				return position;
-			}
+
+			public override Model.Face this [int position] => DetectedFaces [position];
+
+
+			public override long GetItemId (int position) => position;
+
 
 			public override View GetView (int position, View convertView, ViewGroup parent)
 			{
 				if (convertView == null)
 				{
-					LayoutInflater layoutInflater = (LayoutInflater) Application.Context.GetSystemService (Context.LayoutInflaterService);
+					var layoutInflater = (LayoutInflater) Application.Context.GetSystemService (LayoutInflaterService);
 					convertView = layoutInflater.Inflate (Resource.Layout.item_face_with_description, parent, false);
 				}
+
 				convertView.Id = position;
 
 				// Show the face thumbnail.
-				((ImageView) convertView.FindViewById (Resource.Id.face_thumbnail)).SetImageBitmap (
-						faceThumbnails [position]);
+				convertView.FindViewById<ImageView> (Resource.Id.face_thumbnail).SetImageBitmap (faceThumbnails [position]);
 
-				if (mIdentifyResults.Count == faces.Count)
+				if (identifyResults?.Count == DetectedFaces.Count)
 				{
 					// Show the face details.
-					DecimalFormat formatter = new DecimalFormat ("#0.00");
-					if (mIdentifyResults [position].Candidates.Count > 0)
+					//DecimalFormat formatter = new DecimalFormat ("#0.00");
+					var result = identifyResults [position];
+
+					if (result.CandidateResults.Count > 0)
 					{
-						String personId =
-								((Face.Droid.Contract.Candidate) mIdentifyResults [position].Candidates [0]).PersonId.ToString ();
-						String personName = StorageHelper.GetPersonName (
-								personId, activity.mPersonGroupId, activity);
-						String identity = "Person: " + personName + "\n"
-								+ "Confidence: " + formatter.Format (
-								((Face.Droid.Contract.Candidate) mIdentifyResults [position].Candidates [0]).Confidence);
-						((TextView) convertView.FindViewById (Resource.Id.text_detected_face)).Text = identity;
+						string personId = result.CandidateResult.PersonId;
+						string identity = $"Person: {result.CandidateResult.Person.Name}\nConfidence: {result.CandidateResult.Confidence}";
+
+						convertView.FindViewById<TextView> (Resource.Id.text_detected_face).Text = identity;
 					}
 					else
 					{
-						((TextView) convertView.FindViewById (Resource.Id.text_detected_face)).Text = Application.Context.GetString (Resource.String.face_cannot_be_identified);
+						convertView.FindViewById<TextView> (Resource.Id.text_detected_face).Text = Application.Context.GetString (Resource.String.face_cannot_be_identified);
 					}
-				}
-
-
-
-				return convertView;
-			}
-		}
-
-		private class PersonGroupListAdapter : BaseAdapter
-		{
-			public List<String> personGroupIdList;
-			private IdentificationActivity activity;
-
-			public PersonGroupListAdapter (IdentificationActivity act)
-			{
-				personGroupIdList = new List<String> ();
-				activity = act;
-
-				ICollection<String> personGroupIds = StorageHelper.GetAllPersonGroupIds (activity);
-
-				foreach (String personGroupId in personGroupIds)
-				{
-					personGroupIdList.Add (personGroupId);
-					if (activity.mPersonGroupId != null && personGroupId.Equals (activity.mPersonGroupId))
-					{
-						personGroupIdList [personGroupIdList.Count - 1] = activity.mPersonGroupListAdapter.personGroupIdList [0];
-						activity.mPersonGroupListAdapter.personGroupIdList [0] = personGroupId;
-					}
-				}
-			}
-
-			public override int Count
-			{
-				get
-				{
-					return personGroupIdList.Count;
-				}
-			}
-
-			public override Java.Lang.Object GetItem (int position)
-			{
-				return personGroupIdList [position];
-			}
-
-			public override long GetItemId (int position)
-			{
-				return position;
-			}
-
-			public override View GetView (int position, View convertView, ViewGroup parent)
-			{
-				if (convertView == null)
-				{
-					LayoutInflater layoutInflater = (LayoutInflater) Application.Context.GetSystemService (Context.LayoutInflaterService);
-					convertView = layoutInflater.Inflate (Resource.Layout.item_person_group, parent, false);
-				}
-				convertView.Id = position;
-
-				// set the text of the item
-				String personGroupName = StorageHelper.GetPersonGroupName (
-						personGroupIdList [position], activity);
-				int personNumberInGroup = StorageHelper.GetAllPersonIds (
-						personGroupIdList [position], activity).Count ();
-				((TextView) convertView.FindViewById (Resource.Id.text_person_group)).Text =
-						String.Format (
-								"{0} (Person count: {1})",
-								personGroupName,
-								personNumberInGroup);
-
-				if (position == 0)
-				{
-					((TextView) convertView.FindViewById (Resource.Id.text_person_group)).SetTextColor (
-							Color.ParseColor ("#3399FF"));
 				}
 
 				return convertView;
 			}
 		}
-
 	}
 }

@@ -10,6 +10,7 @@ using Android.Support.V4.Content;
 using Android.Support.V7.App;
 using Android.Views;
 using Android.Widget;
+using Xamarin.Cognitive.Face.Model;
 using Xamarin.Cognitive.Face.Shared;
 using Xamarin.Cognitive.Face.Shared.Extensions;
 
@@ -102,7 +103,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 		{
 			try
 			{
-				var status = await FaceClient.Shared.GetGroupTrainingStatus (Group.Id);
+				var status = await FaceClient.Shared.GetGroupTrainingStatus (Group);
 
 				switch (status.Status)
 				{

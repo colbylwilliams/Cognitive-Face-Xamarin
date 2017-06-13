@@ -9,6 +9,7 @@ using Android.OS;
 using Android.Support.V7.App;
 using Android.Views;
 using Android.Widget;
+using Xamarin.Cognitive.Face.Model;
 using Xamarin.Cognitive.Face.Shared;
 using Xamarin.Cognitive.Face.Shared.Extensions;
 
@@ -228,7 +229,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 		}
 
 
-		async Task ExecuteDeleteFace (Shared.Face face)
+		async Task ExecuteDeleteFace (Model.Face face)
 		{
 			progressDialog.Show ();
 			AddLog ("Request: Deleting face " + face.Id);
@@ -320,7 +321,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 		#endregion
 
 
-		class FaceGridViewAdapter : BaseAdapter<Shared.Face>, CompoundButton.IOnCheckedChangeListener
+		class FaceGridViewAdapter : BaseAdapter<Model.Face>, CompoundButton.IOnCheckedChangeListener
 		{
 			readonly Context context;
 			readonly Person person;
@@ -339,7 +340,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			public override int Count => person.Faces?.Count ?? 0;
 
 
-			public override Shared.Face this [int position] => person.Faces? [position];
+			public override Model.Face this [int position] => person.Faces? [position];
 
 
 			public override long GetItemId (int position) => position;
@@ -384,7 +385,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			}
 
 
-			public Shared.Face GetFace (int position)
+			public Model.Face GetFace (int position)
 			{
 				return this [position];
 			}
@@ -396,7 +397,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			}
 
 
-			public Shared.Face [] GetCheckedItems ()
+			public Model.Face [] GetCheckedItems ()
 			{
 				return person.Faces.Where ((f, index) => faceChecked [index]).ToArray ();
 			}

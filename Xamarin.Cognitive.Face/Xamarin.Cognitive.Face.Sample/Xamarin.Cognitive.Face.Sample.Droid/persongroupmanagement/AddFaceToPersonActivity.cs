@@ -13,6 +13,7 @@ using Android.Widget;
 using NomadCode.UIExtensions;
 using Xamarin.Cognitive.Face.Droid.Extensions;
 using Xamarin.Cognitive.Face.Extensions;
+using Xamarin.Cognitive.Face.Model;
 using Xamarin.Cognitive.Face.Shared;
 
 namespace Xamarin.Cognitive.Face.Sample.Droid
@@ -120,7 +121,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 		}
 
 
-		async Task ExecuteFaceTask (Shared.Face [] faces)
+		async Task ExecuteFaceTask (Model.Face [] faces)
 		{
 			progressDialog.Show ();
 
@@ -173,13 +174,13 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 		}
 
 
-		class FaceGridViewAdapter : BaseAdapter<Shared.Face>, CompoundButton.IOnCheckedChangeListener
+		class FaceGridViewAdapter : BaseAdapter<Model.Face>, CompoundButton.IOnCheckedChangeListener
 		{
-			readonly List<Shared.Face> detectedFaces;
+			readonly List<Model.Face> detectedFaces;
 			readonly List<Bitmap> faceThumbnails;
 			List<bool> faceChecked;
 
-			public FaceGridViewAdapter (List<Shared.Face> detectedFaces, Bitmap photo)
+			public FaceGridViewAdapter (List<Model.Face> detectedFaces, Bitmap photo)
 			{
 				this.detectedFaces = detectedFaces;
 
@@ -189,7 +190,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			}
 
 
-			public override Shared.Face this [int position] => detectedFaces [position];
+			public override Model.Face this [int position] => detectedFaces [position];
 
 
 			public override int Count => detectedFaces.Count;
@@ -220,7 +221,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			}
 
 
-			public Bitmap GetThumbnail (Shared.Face face)
+			public Bitmap GetThumbnail (Model.Face face)
 			{
 				var position = detectedFaces.IndexOf (face);
 
@@ -240,7 +241,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			}
 
 
-			public Shared.Face [] GetCheckedItems ()
+			public Model.Face [] GetCheckedItems ()
 			{
 				return detectedFaces.Where ((f, index) => faceChecked [index]).ToArray ();
 			}

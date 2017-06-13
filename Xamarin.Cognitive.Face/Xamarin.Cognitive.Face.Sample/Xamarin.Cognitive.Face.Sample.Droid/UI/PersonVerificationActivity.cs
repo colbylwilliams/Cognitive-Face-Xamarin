@@ -16,6 +16,7 @@ using Java.Util;
 using Xamarin.Cognitive.Face.Droid;
 using Xamarin.Cognitive.Face.Droid.Contract;
 using Xamarin.Cognitive.Face.Droid.Extensions;
+using Xamarin.Cognitive.Face.Extensions;
 
 namespace Xamarin.Cognitive.Face.Sample.Droid
 {
@@ -150,7 +151,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 			if (resultCode == Result.Ok)
 			{
-				Bitmap bitmap = ImageHelper.LoadSizeLimitedBitmapFromUri (data.Data, this.ContentResolver);
+				Bitmap bitmap = ContentResolver.LoadSizeLimitedBitmapFromUri (data.Data);
 
 				if (bitmap != null)
 				{

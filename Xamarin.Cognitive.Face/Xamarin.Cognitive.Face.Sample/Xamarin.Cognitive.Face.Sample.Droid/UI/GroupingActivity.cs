@@ -14,6 +14,7 @@ using Java.IO;
 using Java.Util;
 using Xamarin.Cognitive.Face.Droid.Contract;
 using Xamarin.Cognitive.Face.Droid.Extensions;
+using Xamarin.Cognitive.Face.Extensions;
 
 namespace Xamarin.Cognitive.Face.Sample.Droid
 {
@@ -73,7 +74,8 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			{
 				if (resultCode == Result.Ok)
 				{
-					mBitmap = ImageHelper.LoadSizeLimitedBitmapFromUri (data.Data, this.ContentResolver);
+					mBitmap = ContentResolver.LoadSizeLimitedBitmapFromUri (data.Data);
+
 					if (mBitmap != null)
 					{
 						View originalFaces = FindViewById (Resource.Id.all_faces);

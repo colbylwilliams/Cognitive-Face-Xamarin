@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Android.App;
@@ -9,10 +8,10 @@ using Android.OS;
 using Android.Support.V7.App;
 using Android.Views;
 using Android.Widget;
-using Xamarin.Cognitive.Face.Extensions;
+using Xamarin.Cognitive.Face.Model;
+using Xamarin.Cognitive.Face.Sample.Droid.Shared.Adapters;
 using Xamarin.Cognitive.Face.Shared;
 using Xamarin.Cognitive.Face.Shared.Extensions;
-using Xamarin.Cognitive.Face.Shared.Utilities;
 
 namespace Xamarin.Cognitive.Face.Sample.Droid
 {
@@ -54,7 +53,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			done_and_save.Click += Done_And_Save_Click;
 
 			var groups = await FaceClient.Shared.GetPersonGroups ();
-			personGroupsListAdapter = new PersonGroupsListAdapter (groups);
+			personGroupsListAdapter = new PersonGroupsListAdapter (this, groups, true);
 			listView.Adapter = personGroupsListAdapter;
 
 			//reset current group
@@ -210,112 +209,5 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 
 		#endregion
-
-
-		class PersonGroupsListAdapter : BaseAdapter<PersonGroup>, CompoundButton.IOnCheckedChangeListener
-		{
-			public bool LongPressed;
-
-			readonly TaskQueue queue = new TaskQueue ();
-			readonly List<PersonGroup> personGroups;
-			List<bool> personGroupChecked;
-
-			public PersonGroupsListAdapter (List<PersonGroup> personGroups)
-			{
-				this.personGroups = personGroups;
-
-				ResetCheckedItems ();
-			}
-
-
-			public override PersonGroup this [int position] => personGroups [position];
-
-
-			public override int Count => personGroups.Count;
-
-
-			public override long GetItemId (int position) => position;
-
-
-			public override View GetView (int position, View convertView, ViewGroup parent)
-			{
-				if (convertView == null)
-				{
-					var layoutInflater = (LayoutInflater) Application.Context.GetSystemService (LayoutInflaterService);
-					convertView = layoutInflater.Inflate (Resource.Layout.item_person_group_with_checkbox, parent, false);
-				}
-
-				convertView.Id = position;
-
-				var currentGroup = GetGroup (position);
-
-				//int personNumberInGroup = StorageHelper.GetAllPersonIds (currentGroup.Id, context).Count;
-
-				var nameTextView = convertView.FindViewById<TextView> (Resource.Id.text_person_group);
-
-				if (currentGroup.PeopleLoaded)
-				{
-					nameTextView.Text = currentGroup.GetFormattedGroupName ();
-				}
-				else nameTextView.Text = currentGroup.Name;
-
-				var checkBox = convertView.FindViewById<CheckBox> (Resource.Id.checkbox_person_group);
-
-				if (LongPressed)
-				{
-					checkBox.Visibility = ViewStates.Visible;
-					checkBox.Tag = position;
-					checkBox.SetOnCheckedChangeListener (this);
-					checkBox.Checked = personGroupChecked [position];
-				}
-				else
-				{
-					checkBox.Visibility = ViewStates.Invisible;
-				}
-
-				//load the people from the server...
-				if (!currentGroup.PeopleLoaded)
-				{
-					queue.Enqueue (async () => await FaceClient.Shared.GetPeopleForGroup (currentGroup))
-						 .ContinueWith (t =>
-					{
-						nameTextView.Text = currentGroup.GetFormattedGroupName ();
-					}, TaskScheduler.FromCurrentSynchronizationContext ());
-				}
-
-				return convertView;
-			}
-
-
-			public void OnCheckedChanged (CompoundButton buttonView, bool isChecked)
-			{
-				var position = (int) buttonView.Tag;
-				personGroupChecked [position] = isChecked;
-			}
-
-
-			public PersonGroup GetGroup (int position)
-			{
-				return personGroups [position];
-			}
-
-
-			public void SetChecked (int position, bool @checked)
-			{
-				personGroupChecked [position] = @checked;
-			}
-
-
-			public PersonGroup [] GetCheckedItems ()
-			{
-				return personGroups.Where ((grp, index) => personGroupChecked [index]).ToArray ();
-			}
-
-
-			public void ResetCheckedItems ()
-			{
-				personGroupChecked = new List<bool> (personGroups.Select (g => false));
-			}
-		}
 	}
 }
