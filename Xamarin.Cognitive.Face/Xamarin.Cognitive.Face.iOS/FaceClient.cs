@@ -7,10 +7,10 @@ using Foundation;
 using Newtonsoft.Json;
 using Xamarin.Cognitive.Face.Extensions;
 using Xamarin.Cognitive.Face.iOS;
-using Xamarin.Cognitive.Face.Sample.iOS.Domain;
-using Xamarin.Cognitive.Face.Shared;
+using Xamarin.Cognitive.Face.iOS.Domain;
+using Xamarin.Cognitive.Face.Model;
 
-namespace Xamarin.Cognitive.Face.Sample
+namespace Xamarin.Cognitive.Face
 {
 	public partial class FaceClient
 	{
@@ -333,7 +333,7 @@ namespace Xamarin.Cognitive.Face.Sample
 		}
 
 
-		internal Task<string> AddFaceForPerson (string personId, string personGroupId, Shared.Face face, Stream photoStream, string userData = null)
+		internal Task<string> AddFaceForPerson (string personId, string personGroupId, Model.Face face, Stream photoStream, string userData = null)
 		{
 			var tcs = new TaskCompletionSource<string> ();
 
@@ -368,9 +368,9 @@ namespace Xamarin.Cognitive.Face.Sample
 		}
 
 
-		internal Task<Shared.Face> GetFaceForPerson (string personId, string personGroupId, string persistedFaceId)
+		internal Task<Model.Face> GetFaceForPerson (string personId, string personGroupId, string persistedFaceId)
 		{
-			var tcs = new TaskCompletionSource<Shared.Face> ();
+			var tcs = new TaskCompletionSource<Model.Face> ();
 
 			Client.GetPersonFaceWithPersonGroupId (
 				personGroupId,
@@ -389,9 +389,9 @@ namespace Xamarin.Cognitive.Face.Sample
 		#region Face
 
 
-		internal Task<List<Shared.Face>> DetectFacesInPhotoInternal (Stream photoStream, bool returnLandmarks, FaceAttributeType [] attributes)
+		internal Task<List<Model.Face>> DetectFacesInPhotoInternal (Stream photoStream, bool returnLandmarks, FaceAttributeType [] attributes)
 		{
-			var tcs = new TaskCompletionSource<List<Shared.Face>> ();
+			var tcs = new TaskCompletionSource<List<Model.Face>> ();
 
 			var types = attributes.Select (a => a.ToNativeFaceAttributeType ()).ToArray ();
 

@@ -42,9 +42,17 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="Xamarin.iOS" />
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\portable-net45+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Extensions\FaceExtensions.cs" />
+    <Compile Include="FaceClient.cs" />
+    <Compile Include="Domain\Error.cs" />
+    <Compile Include="Domain\ErrorDetailException.cs" />
+    <Compile Include="Extensions\MediaExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Cognitive-Face-iOS-Xamarin\Cognitive.Face.iOS\Xamarin.Cognitive.Face.iOS.csproj">
@@ -54,6 +62,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Extensions\" />
+    <Folder Include="Domain\" />
   </ItemGroup>
   <Import Project="..\Xamarin.Cognitive.Face.Shared\Xamarin.Cognitive.Face.Shared.projitems" Label="Shared" Condition="Exists('..\Xamarin.Cognitive.Face.Shared\Xamarin.Cognitive.Face.Shared.projitems')" />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />

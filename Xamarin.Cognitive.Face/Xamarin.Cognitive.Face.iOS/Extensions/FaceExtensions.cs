@@ -2,12 +2,11 @@
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using Xamarin.Cognitive.Face.Shared;
 using Foundation;
-using NomadCode.UIExtensions;
 using UIKit;
 using Xamarin.Cognitive.Face.iOS;
-using Xamarin.Cognitive.Face.Shared.Extensions;
+using Xamarin.Cognitive.Face.Extensions;
+using Xamarin.Cognitive.Face.Model;
 
 namespace Xamarin.Cognitive.Face.Extensions
 {
@@ -81,14 +80,14 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static Shared.Face ToFace (this MPOFace mpoFace, bool adaptLandmarks = false, FaceAttributeType [] attributes = null)
+		public static Model.Face ToFace (this MPOFace mpoFace, bool adaptLandmarks = false, FaceAttributeType [] attributes = null)
 		{
 			var rect = new RectangleF (mpoFace.FaceRectangle.Left,
 									   mpoFace.FaceRectangle.Top,
 									   mpoFace.FaceRectangle.Width,
 									   mpoFace.FaceRectangle.Height);
 
-			var face = new Shared.Face
+			var face = new Model.Face
 			{
 				Id = mpoFace.FaceId,
 				FaceRectangle = rect
@@ -107,9 +106,9 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static Shared.Face ToFace (this MPOPersonFace mpoFace)
+		public static Model.Face ToFace (this MPOPersonFace mpoFace)
 		{
-			var face = new Shared.Face
+			var face = new Model.Face
 			{
 				Id = mpoFace.PersistedFaceId,
 				UserData = mpoFace.UserData
@@ -457,21 +456,21 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static void UpdatePhotoPath (this Shared.Face face)
+		public static void UpdatePhotoPath (this Model.Face face)
 		{
 			var filePath = Path.Combine (docsDir, face.FileName);
 			face.PhotoPath = filePath;
 		}
 
 
-		public static void SavePhotoFromCropped (this Shared.Face face, UIImage croppedImage)
+		public static void SavePhotoFromCropped (this Model.Face face, UIImage croppedImage)
 		{
 			face.UpdatePhotoPath ();
 			croppedImage.SaveAsJpeg (face.PhotoPath);
 		}
 
 
-		public static void SavePhotoFromSource (this Shared.Face face, UIImage sourceImage)
+		public static void SavePhotoFromSource (this Model.Face face, UIImage sourceImage)
 		{
 			using (var croppedFaceImg = sourceImage.Crop (face.FaceRectangle))
 			{
@@ -480,13 +479,13 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static UIImage CreateThumbnail (this Shared.Face face, UIImage sourceImage)
+		public static UIImage CreateThumbnail (this Model.Face face, UIImage sourceImage)
 		{
 			return sourceImage.Crop (face.FaceRectangle);
 		}
 
 
-		public static UIImage GetImage (this Shared.Face face)
+		public static UIImage GetImage (this Model.Face face)
 		{
 			return UIImage.FromFile (face.PhotoPath);
 		}

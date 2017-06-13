@@ -1,4 +1,4 @@
-﻿namespace Xamarin.Cognitive.Face.Sample.iOS.Domain
+﻿namespace Xamarin.Cognitive.Face.iOS.Domain
 {
 	public class Error
 	{

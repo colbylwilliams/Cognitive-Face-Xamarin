@@ -110,7 +110,6 @@
     <Folder Include="View\Identification\" />
     <Folder Include="View\Verification\" />
     <Folder Include="View\Grouping\" />
-    <Folder Include="Domain\" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="LaunchScreen.storyboard" />
@@ -124,8 +123,6 @@
   <ItemGroup>
     <Compile Include="Main.cs" />
     <Compile Include="AppDelegate.cs" />
-    <Compile Include="Extensions\FaceExtensions.cs" />
-    <Compile Include="FaceClient.cs" />
     <Compile Include="Extensions\UIExtensions.cs" />
     <Compile Include="View\FaceNavigationController.cs" />
     <Compile Include="View\FaceNavigationController.designer.cs">
@@ -232,12 +229,14 @@
     <Compile Include="View\Verification\VerificationViewController.designer.cs">
       <DependentUpon>VerificationViewController.cs</DependentUpon>
     </Compile>
-    <Compile Include="Domain\Error.cs" />
-    <Compile Include="Domain\ErrorDetailException.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Cognitive-Face-iOS-Xamarin\Cognitive.Face.iOS\Xamarin.Cognitive.Face.iOS.csproj">
       <Project>{C13B9CDB-003C-4CDB-9C05-1E79F9AB27D1}</Project>
+      <Name>Xamarin.Cognitive.Face.iOS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Xamarin.Cognitive.Face.iOS\Xamarin.Cognitive.Face.iOS.csproj">
+      <Project>{2F1B0B37-6328-42CB-9EA3-DE55F9967FA0}</Project>
       <Name>Xamarin.Cognitive.Face.iOS</Name>
     </ProjectReference>
   </ItemGroup>
