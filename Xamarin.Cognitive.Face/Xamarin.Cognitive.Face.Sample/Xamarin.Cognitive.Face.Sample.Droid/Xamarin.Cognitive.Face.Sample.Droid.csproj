@@ -179,7 +179,7 @@
       <Project>{A1046082-B104-4925-BC08-82D7386E5CF9}</Project>
       <Name>Cognitive.Face.Droid</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Xamarin.Cognitive.Face.Android\Xamarin.Cognitive.Face.Droid.csproj">
+    <ProjectReference Include="..\..\Xamarin.Cognitive.Face.Droid\Xamarin.Cognitive.Face.Droid.csproj">
       <Project>{8057BA86-1825-4A74-9BCC-7F63CC45AC7E}</Project>
       <Name>Xamarin.Cognitive.Face.Droid</Name>
     </ProjectReference>
