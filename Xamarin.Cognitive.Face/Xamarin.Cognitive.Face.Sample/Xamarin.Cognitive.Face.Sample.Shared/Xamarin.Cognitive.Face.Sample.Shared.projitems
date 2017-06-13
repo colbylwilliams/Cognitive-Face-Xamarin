@@ -11,42 +11,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\StringExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\TaskExtensions.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\Face.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\FaceGroup.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\FaceModel.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\IdentificationResult.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\Person.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\PersonGroup.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\SimilarFaceResult.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\VerificationType.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\VerifyResult.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\Accessories.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\Attribute.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\Blur.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\Exposure.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\FaceAttributes.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\FaceEmotion.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\FaceHeadPose.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\FacialHair.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\Hair.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\Makeup.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\Noise.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\Occlusion.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Utilities\Log.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)FaceClient.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\TrainingStatus.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\FaceState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\TaskQueue.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\Glasses.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\HairColorType.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\AccessoryType.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\BlurLevel.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\NoiseLevel.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\ExposureLevel.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\FaceLandmarks.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\FeatureCoordinate.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\Attributes\FaceAttributeType.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\CandidateResult.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\GroupResult.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FaceState.cs" />
   </ItemGroup>
 </Project>
