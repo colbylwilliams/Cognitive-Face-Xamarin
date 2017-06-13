@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using Android.Content;
-using Android.Database;
 using Android.Graphics;
-using Android.Media;
-using Android.Provider;
 using NomadCode.UIExtensions;
 using Xamarin.Cognitive.Face.Droid.Contract;
 using Xamarin.Cognitive.Face.Shared;
@@ -14,80 +10,7 @@ namespace Xamarin.Cognitive.Face.Droid.Extensions
 {
 	public static class ImageHelper
 	{
-		/// <summary>
-		/// Decode image from imageUri, and resize according to the expectedMaxImageSideLength
-		/// If expectedMaxImageSideLength is
-		///     (1) less than or equal to 0,
-		///     (2) more than the actual max size length of the bitmap
-		///     then return the original bitmap
-		/// Else, return the scaled bitmap
-		/// </summary>
-		/// <returns>The size limited bitmap from URI.</returns>
-		/// <param name="contentResolver">Content resolver.</param>
-		/// <param name="imageUri">Image URI.</param>
-		/// <param name="maxImageSideLength">The maximum side length of the image to detect, to keep the size of image less than 4MB.  Resize the image if its side length is larger than the maximum.</param>
-		public static Bitmap LoadSizeLimitedBitmapFromUri (this ContentResolver contentResolver, global::Android.Net.Uri imageUri, int maxImageSideLength = 1280)
-		{
-			try
-			{
-				var outPadding = new Rect ();
-				int maxSideLength = 0;
 
-				// For saving memory, only decode the image meta and get the side length.
-				var options = new BitmapFactory.Options
-				{
-					InJustDecodeBounds = true
-				};
-
-				using (var fileDescriptor = contentResolver.OpenFileDescriptor (imageUri, "r"))
-				{
-					using (BitmapFactory.DecodeFileDescriptor (fileDescriptor.FileDescriptor, outPadding, options))
-					{
-						// Calculate shrink rate when loading the image into memory.
-						maxSideLength = options.OutWidth > options.OutHeight ? options.OutWidth : options.OutHeight;
-						options.InSampleSize = 1;
-						options.InSampleSize = calculateSampleSize (maxSideLength, maxImageSideLength);
-						options.InJustDecodeBounds = false;
-					}
-
-					// Load the bitmap and resize it to the expected size length
-					var bitmap = BitmapFactory.DecodeFileDescriptor (fileDescriptor.FileDescriptor, outPadding, options);
-
-					maxSideLength = bitmap.Width > bitmap.Height ? bitmap.Width : bitmap.Height;
-					double ratio = maxImageSideLength / (double) maxSideLength;
-
-					if (ratio < 1)
-					{
-						var rotatedBitmap = Bitmap.CreateScaledBitmap (
-							bitmap,
-							(int) (bitmap.Width * ratio),
-							(int) (bitmap.Height * ratio),
-							false);
-
-						if (rotatedBitmap != bitmap)
-						{
-							bitmap.Dispose ();
-							bitmap = rotatedBitmap;
-						}
-					}
-
-					var returnBitmap = RotateBitmap (bitmap, GetImageRotationAngle (imageUri, contentResolver));
-
-					//kill this bitmap if rotate created a new one
-					if (returnBitmap != bitmap)
-					{
-						bitmap.Dispose ();
-					}
-
-					return returnBitmap;
-				}
-			}
-			catch (Exception ex)
-			{
-				Log.Error (ex);
-				return null;
-			}
-		}
 
 
 		/// <summary>
@@ -98,7 +21,7 @@ namespace Xamarin.Cognitive.Face.Droid.Extensions
 		/// <param name="originalBitmap">Original bitmap.</param>
 		/// <param name="faces">Faces.</param>
 		/// <param name="drawLandmarks">If set to <c>true</c> draw landmarks.</param>
-		public static Bitmap DrawFaceRectanglesOnBitmap (Bitmap originalBitmap, Shared.Face [] faces, bool drawLandmarks, double faceRectEnlargeRatio = FACE_RECT_SCALE_RATIO)
+		public static Bitmap DrawFaceRectanglesOnBitmap (Bitmap originalBitmap, Model.Face [] faces, bool drawLandmarks, double faceRectEnlargeRatio = FACE_RECT_SCALE_RATIO)
 		{
 			var bitmap = originalBitmap.Copy (Bitmap.Config.Argb8888, true);
 
@@ -221,93 +144,6 @@ namespace Xamarin.Cognitive.Face.Droid.Extensions
 		}
 
 
-		/// <summary>
-		/// Return the number of times for the image to shrink when loading it into memory.
-		/// The SampleSize can only be a final value based on powers of 2.
-		/// </summary>
-		/// <returns>The sample size.</returns>
-		/// <param name="maxSideLength">Max side length.</param>
-		/// <param name="expectedMaxImageSideLength">Expected max image side length.</param>
-		static int calculateSampleSize (int maxSideLength, int expectedMaxImageSideLength)
-		{
-			int inSampleSize = 1;
-
-			while (maxSideLength > 2 * expectedMaxImageSideLength)
-			{
-				maxSideLength /= 2;
-				inSampleSize *= 2;
-			}
-
-			return inSampleSize;
-		}
-
-
-		/// <summary>
-		/// Get the rotation angle of the image taken.
-		/// </summary>
-		/// <returns>The image rotation angle.</returns>
-		/// <param name="imageUri">Image URI.</param>
-		/// <param name="contentResolver">Content resolver.</param>
-		public static int GetImageRotationAngle (global::Android.Net.Uri imageUri, ContentResolver contentResolver)
-		{
-			int angle = 0;
-
-			ICursor cursor = contentResolver.Query (imageUri, new [] { MediaStore.Images.ImageColumns.Orientation }, null, null, null);
-
-			if (cursor != null)
-			{
-				if (cursor.Count == 1)
-				{
-					cursor.MoveToFirst ();
-					angle = cursor.GetInt (0);
-				}
-
-				cursor.Close ();
-			}
-			else
-			{
-				var exif = new ExifInterface (imageUri.Path);
-				int orientation = exif.GetAttributeInt (ExifInterface.TagOrientation, (int) Orientation.Normal);
-
-				switch (orientation)
-				{
-					case (int) Orientation.Rotate270:
-						angle = 270;
-						break;
-					case (int) Orientation.Rotate180:
-						angle = 180;
-						break;
-					case (int) Orientation.Rotate90:
-						angle = 90;
-						break;
-				}
-			}
-
-			return angle;
-		}
-
-
-		/// <summary>
-		/// Rotate the original bitmap according to the given orientation angle.
-		/// </summary>
-		/// <returns>The bitmap.</returns>
-		/// <param name="bitmap">Bitmap.</param>
-		/// <param name="angle">Angle.</param>
-		static Bitmap RotateBitmap (Bitmap bitmap, int angle)
-		{
-			// If the rotate angle is 0, then return the original image, else return the rotated image
-			if (angle != 0)
-			{
-				var matrix = new Matrix ();
-				matrix.PostRotate (angle);
-
-				return Bitmap.CreateBitmap (bitmap, 0, 0, bitmap.Width, bitmap.Height, matrix, true);
-			}
-
-			return bitmap;
-		}
-
-
 		// Ratio to scale a detected face rectangle, the face rectangle scaled up looks more natural.
 		const double FACE_RECT_SCALE_RATIO = 1.3;
 
@@ -356,7 +192,7 @@ namespace Xamarin.Cognitive.Face.Droid.Extensions
 		}
 
 
-		public static List<Bitmap> GenerateThumbnails (this List<Shared.Face> faces, Bitmap photo)
+		public static List<Bitmap> GenerateThumbnails (this List<Model.Face> faces, Bitmap photo)
 		{
 			var faceThumbnails = new List<Bitmap> ();
 
@@ -501,60 +337,6 @@ namespace Xamarin.Cognitive.Face.Droid.Extensions
 			result.Width = (int) sideLength;
 			result.Height = (int) sideLength;
 			return result;
-		}
-
-
-		// Decode image from imageUri, and resize according to the expectedMaxImageSideLength
-		// If expectedMaxImageSideLength is
-		//     (1) less than or equal to 0,
-		//     (2) more than the actual max size length of the bitmap
-		//     then return the original bitmap
-		// Else, return the scaled bitmap
-		public static Bitmap LoadSizeLimitedBitmapFromUri (global::Android.Net.Uri imageUri, ContentResolver contentResolver)
-		{
-			try
-			{
-				// Load the image into InputStream.
-				System.IO.Stream imageInputStream = contentResolver.OpenInputStream (imageUri);
-
-				// For saving memory, only decode the image meta and get the side length.
-				BitmapFactory.Options options = new BitmapFactory.Options ();
-				options.InJustDecodeBounds = true;
-				Rect outPadding = new Rect ();
-				BitmapFactory.DecodeStream (imageInputStream, outPadding, options);
-
-				// Calculate shrink rate when loading the image into memory.
-				int maxSideLength =
-						options.OutWidth > options.OutHeight ? options.OutWidth : options.OutHeight;
-				options.InSampleSize = 1;
-				options.InSampleSize = calculateSampleSize (maxSideLength, 1280);
-				options.InJustDecodeBounds = false;
-				if (imageInputStream != null)
-				{
-					imageInputStream.Close ();
-				}
-
-				// Load the bitmap and resize it to the expected size length
-				imageInputStream = contentResolver.OpenInputStream (imageUri);
-				Bitmap bitmap = BitmapFactory.DecodeStream (imageInputStream, outPadding, options);
-				maxSideLength = bitmap.Width > bitmap.Height
-						? bitmap.Width : bitmap.Height;
-				double ratio = 1280 / (double) maxSideLength;
-				if (ratio < 1)
-				{
-					bitmap = Bitmap.CreateScaledBitmap (
-							bitmap,
-							(int) (bitmap.Width * ratio),
-							(int) (bitmap.Height * ratio),
-							false);
-				}
-
-				return RotateBitmap (bitmap, GetImageRotationAngle (imageUri, contentResolver));
-			}
-			catch (Exception)
-			{
-				return null;
-			}
 		}
 
 

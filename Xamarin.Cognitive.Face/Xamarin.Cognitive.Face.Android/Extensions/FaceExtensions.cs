@@ -4,8 +4,8 @@ using System.Drawing;
 using System.Linq;
 using Android.Graphics;
 using Java.Util;
-using NomadCode.UIExtensions;
-using Xamarin.Cognitive.Face.Shared;
+using Xamarin.Cognitive.Face.Droid;
+using Xamarin.Cognitive.Face.Model;
 
 namespace Xamarin.Cognitive.Face.Extensions
 {
@@ -82,14 +82,14 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static Shared.Face ToFace (this Droid.Contract.Face thisFace, bool adaptLandmarks = false, FaceAttributeType [] attributes = null)
+		public static Model.Face ToFace (this Droid.Contract.Face thisFace, bool adaptLandmarks = false, FaceAttributeType [] attributes = null)
 		{
 			var rect = new RectangleF (thisFace.FaceRectangle.Left,
 									   thisFace.FaceRectangle.Top,
 									   thisFace.FaceRectangle.Width,
 									   thisFace.FaceRectangle.Height);
 
-			var thatFace = new Shared.Face
+			var thatFace = new Model.Face
 			{
 				Id = thisFace.FaceId.ToString (),
 				FaceRectangle = rect
@@ -108,9 +108,9 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static Shared.Face ToFace (this Droid.Contract.PersonFace personFace)
+		public static Model.Face ToFace (this Droid.Contract.PersonFace personFace)
 		{
-			var face = new Shared.Face
+			var face = new Model.Face
 			{
 				Id = personFace.PersistedFaceId.ToString (),
 				UserData = personFace.UserData
@@ -427,9 +427,9 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static Droid.FaceServiceClientFaceAttributeType ToNativeFaceAttributeType (this FaceAttributeType type)
+		public static FaceServiceClientFaceAttributeType ToNativeFaceAttributeType (this FaceAttributeType type)
 		{
-			return Droid.FaceServiceClientFaceAttributeType.ValueOf (type.ToString ());
+			return FaceServiceClientFaceAttributeType.ValueOf (type.ToString ());
 		}
 
 
@@ -494,14 +494,14 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static void UpdatePhotoPath (this Shared.Face face)
+		public static void UpdatePhotoPath (this Model.Face face)
 		{
 			var filePath = System.IO.Path.Combine (docsDir, face.FileName);
 			face.PhotoPath = filePath;
 		}
 
 
-		public static void SavePhotoFromCropped (this Shared.Face face, Bitmap croppedImage)
+		public static void SavePhotoFromCropped (this Model.Face face, Bitmap croppedImage)
 		{
 			face.UpdatePhotoPath ();
 			croppedImage.SaveAsJpeg (face.PhotoPath);

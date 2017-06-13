@@ -3,15 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Android.Graphics;
 using Java.Util;
-using NomadCode.UIExtensions;
-using Xamarin.Cognitive.Face.Droid;
-using Xamarin.Cognitive.Face.Droid.Extensions;
-using Xamarin.Cognitive.Face.Shared;
+using Xamarin.Cognitive.Face.Model;
 using Xamarin.Cognitive.Face.Extensions;
+using Xamarin.Cognitive.Face.Droid;
 
-namespace Xamarin.Cognitive.Face.Sample
+namespace Xamarin.Cognitive.Face
 {
 	public partial class FaceClient
 	{
@@ -92,7 +89,7 @@ namespace Xamarin.Cognitive.Face.Sample
 
 					return trainingStatus.ToTrainingStatus ();
 				}
-				catch (Face.Droid.Rest.ClientException cex)
+				catch (Droid.Rest.ClientException cex)
 				{
 					if (cex.Error?.Code == ErrorCodes.TrainingStatus.PersonGroupNotTrained)
 					{
@@ -165,7 +162,7 @@ namespace Xamarin.Cognitive.Face.Sample
 		}
 
 
-		internal Task<string> AddFaceForPerson (string personId, string personGroupId, Shared.Face face, Stream photoStream, string userData = null)
+		internal Task<string> AddFaceForPerson (string personId, string personGroupId, Model.Face face, Stream photoStream, string userData = null)
 		{
 			return Task.Run (() =>
 			{
@@ -185,7 +182,7 @@ namespace Xamarin.Cognitive.Face.Sample
 		}
 
 
-		internal Task<Shared.Face> GetFaceForPerson (string personId, string personGroupId, string persistedFaceId)
+		internal Task<Model.Face> GetFaceForPerson (string personId, string personGroupId, string persistedFaceId)
 		{
 			return Task.Run (() =>
 			{
@@ -201,7 +198,7 @@ namespace Xamarin.Cognitive.Face.Sample
 		#region Face
 
 
-		internal Task<List<Shared.Face>> DetectFacesInPhotoInternal (Stream photoStream, bool returnLandmarks, params FaceAttributeType [] attributes)
+		internal Task<List<Model.Face>> DetectFacesInPhotoInternal (Stream photoStream, bool returnLandmarks, params FaceAttributeType [] attributes)
 		{
 			return Task.Run (() =>
 			{
@@ -320,22 +317,6 @@ namespace Xamarin.Cognitive.Face.Sample
 			return Task.Run (() =>
 			 {
 				 return Client.FindSimilar (mFaceId, mFaceIds, mMaxNumOfCandidatesReturned, mMode);
-			 });
-		}
-
-		public Task<Face.Droid.Contract.TrainingStatus> GetPersonGroupTrainingStatus (string mPersonGroupId)
-		{
-			return Task.Run (() =>
-			 {
-				 return Client.GetPersonGroupTrainingStatus (mPersonGroupId);
-			 });
-		}
-
-		public Task<Face.Droid.Contract.IdentifyResult []> Identity (string mPersonGroupId, UUID [] mFaceIds, int maxNumOfCandidatesReturned)
-		{
-			return Task.Run (() =>
-			 {
-				 return Client.Identity (mPersonGroupId, mFaceIds, maxNumOfCandidatesReturned);
 			 });
 		}
 	}
