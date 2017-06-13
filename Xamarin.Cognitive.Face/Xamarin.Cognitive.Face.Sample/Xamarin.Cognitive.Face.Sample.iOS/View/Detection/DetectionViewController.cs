@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 using Foundation;
 using NomadCode.UIExtensions;
 using UIKit;
+using Xamarin.Cognitive.Face.Model;
 using Xamarin.Cognitive.Face.Sample.iOS.Extensions;
-using Xamarin.Cognitive.Face.Shared;
 using Xamarin.Cognitive.Face.Shared.Extensions;
 
 namespace Xamarin.Cognitive.Face.Sample.iOS
@@ -18,7 +18,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 		}
 
 		public UIImage SourceImage { get; set; }
-		public List<Shared.Face> DetectedFaces { get; set; }
+		public List<Model.Face> DetectedFaces { get; set; }
 
 		DetectionResultsTableViewController DetectionResultsController => ChildViewControllers [0] as DetectionResultsTableViewController;
 

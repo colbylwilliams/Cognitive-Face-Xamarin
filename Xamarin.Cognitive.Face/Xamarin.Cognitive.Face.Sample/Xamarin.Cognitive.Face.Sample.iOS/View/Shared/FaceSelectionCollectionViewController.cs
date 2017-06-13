@@ -9,10 +9,10 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 {
 	public partial class FaceSelectionCollectionViewController : ItemsPerRowCollectionViewController
 	{
-		public List<Shared.Face> Faces { get; set; } = new List<Shared.Face> ();
+		public List<Model.Face> Faces { get; set; } = new List<Model.Face> ();
 		public UIImage SourceImage { get; set; }
 		public string ReturnSegue { get; set; }
-		public Shared.Face SelectedFace { get; private set; }
+		public Model.Face SelectedFace { get; private set; }
 		public bool AllowSelection { get; set; } = true;
 
 		public event EventHandler FaceSelectionChanged;
@@ -66,7 +66,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 		}
 
 
-		public void SetDetectedFaces (UIImage sourceImage, List<Shared.Face> detectedFaces, bool append = false)
+		public void SetDetectedFaces (UIImage sourceImage, List<Model.Face> detectedFaces, bool append = false)
 		{
 			cleanup (true);
 
@@ -80,7 +80,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 		}
 
 
-		public void AppendDetectedFaces (UIImage sourceImage, List<Shared.Face> detectedFaces, bool append = false)
+		public void AppendDetectedFaces (UIImage sourceImage, List<Model.Face> detectedFaces, bool append = false)
 		{
 			cleanup (true, false);
 
@@ -93,7 +93,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 		}
 
 
-		void addCroppedImages (List<Shared.Face> detectedFaces, List<UIImage> images = null)
+		void addCroppedImages (List<Model.Face> detectedFaces, List<UIImage> images = null)
 		{
 			croppedImages = images ?? new List<UIImage> ();
 

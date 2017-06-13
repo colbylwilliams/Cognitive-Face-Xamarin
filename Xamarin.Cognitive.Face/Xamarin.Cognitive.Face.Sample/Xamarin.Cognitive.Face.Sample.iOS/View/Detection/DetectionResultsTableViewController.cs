@@ -9,7 +9,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 {
 	public partial class DetectionResultsTableViewController : BaseTableViewController
 	{
-		List<Shared.Face> DetectedFaces;
+		List<Model.Face> DetectedFaces;
 		UIImage SourceImage;
 		List<UIImage> thumbnails;
 
@@ -46,7 +46,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 		}
 
 
-		public void SetResults (List<Shared.Face> detectedFaces, UIImage sourceImage)
+		public void SetResults (List<Model.Face> detectedFaces, UIImage sourceImage)
 		{
 			cleanup ();
 
@@ -59,7 +59,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 		}
 
 
-		void addThumbnails (List<Shared.Face> detectedFaces)
+		void addThumbnails (List<Model.Face> detectedFaces)
 		{
 			thumbnails = new List<UIImage> ();
 

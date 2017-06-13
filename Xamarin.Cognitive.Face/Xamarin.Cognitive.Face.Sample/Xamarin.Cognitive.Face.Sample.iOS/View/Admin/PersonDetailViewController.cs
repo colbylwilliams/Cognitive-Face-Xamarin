@@ -5,6 +5,7 @@ using Foundation;
 using NomadCode.UIExtensions;
 using UIKit;
 using Xamarin.Cognitive.Face.Extensions;
+using Xamarin.Cognitive.Face.Model;
 using Xamarin.Cognitive.Face.Sample.iOS.Extensions;
 using Xamarin.Cognitive.Face.Shared;
 using Xamarin.Cognitive.Face.Shared.Extensions;
@@ -24,7 +25,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 		public PersonGroup Group => FaceState.Current.CurrentGroup;
 		public Person Person => FaceState.Current.CurrentPerson;
 
-		public List<Shared.Face> DetectedFaces { get; set; }
+		public List<Model.Face> DetectedFaces { get; set; }
 		public UIImage SourceImage { get; set; }
 
 		PersonFaceCollectionViewController PersonFaceCVC => ChildViewControllers [0] as PersonFaceCollectionViewController;
@@ -197,7 +198,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 		}
 
 
-		async Task AddFace (Shared.Face face, UIImage sourceImage)
+		async Task AddFace (Model.Face face, UIImage sourceImage)
 		{
 			try
 			{

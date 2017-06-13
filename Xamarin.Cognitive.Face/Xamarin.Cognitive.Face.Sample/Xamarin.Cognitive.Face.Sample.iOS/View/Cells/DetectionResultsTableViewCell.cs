@@ -21,7 +21,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 		}
 
 
-		public void SetFace (Shared.Face face, UIImage thumbnail)
+		public void SetFace (Model.Face face, UIImage thumbnail)
 		{
 			TitleLabel.Text = face.Id;
 			SizeLabel.Text = $"Position: {face.FaceRectangle.Left}, {face.FaceRectangle.Top}; Size: {face.FaceRectangle.Width}x{face.FaceRectangle.Height}";

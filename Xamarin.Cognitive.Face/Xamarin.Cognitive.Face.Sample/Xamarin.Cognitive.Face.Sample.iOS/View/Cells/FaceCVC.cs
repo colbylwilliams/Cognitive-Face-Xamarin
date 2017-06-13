@@ -6,7 +6,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 {
 	public partial class FaceCVC : UICollectionViewCell
 	{
-		Shared.Face face;
+		Model.Face face;
 
 		public override bool Highlighted
 		{
@@ -41,7 +41,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 		}
 
 
-		public void SetFaceImage (Shared.Face face, UIImage image)
+		public void SetFaceImage (Model.Face face, UIImage image)
 		{
 			this.face = face;
 			FaceImageView.Image = image;

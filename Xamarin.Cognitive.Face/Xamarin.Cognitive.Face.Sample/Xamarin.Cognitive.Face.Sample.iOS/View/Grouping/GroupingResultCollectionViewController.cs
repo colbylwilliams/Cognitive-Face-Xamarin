@@ -5,7 +5,7 @@ using Xamarin.Cognitive.Face.Extensions;
 using Foundation;
 using NomadCode.UIExtensions;
 using UIKit;
-using Xamarin.Cognitive.Face.Shared;
+using Xamarin.Cognitive.Face.Model;
 
 namespace Xamarin.Cognitive.Face.Sample.iOS
 {

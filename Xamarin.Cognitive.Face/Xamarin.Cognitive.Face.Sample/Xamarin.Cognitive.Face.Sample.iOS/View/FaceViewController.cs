@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Foundation;
 using NomadCode.UIExtensions;
+using Xamarin.Cognitive.Face.Model;
 using Xamarin.Cognitive.Face.Shared;
 using Xamarin.Cognitive.Face.Shared.Extensions;
 
