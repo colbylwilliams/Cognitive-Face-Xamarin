@@ -5,7 +5,7 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Xamarin.Cognitive.Face.Shar
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xamarin.Cognitive.Face.iOS", "Xamarin.Cognitive.Face.iOS\Xamarin.Cognitive.Face.iOS.csproj", "{2F1B0B37-6328-42CB-9EA3-DE55F9967FA0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xamarin.Cognitive.Face.Droid", "Xamarin.Cognitive.Face.Android\Xamarin.Cognitive.Face.Droid.csproj", "{8057BA86-1825-4A74-9BCC-7F63CC45AC7E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xamarin.Cognitive.Face.Droid", "Xamarin.Cognitive.Face.Droid\Xamarin.Cognitive.Face.Droid.csproj", "{8057BA86-1825-4A74-9BCC-7F63CC45AC7E}"
 EndProject
 Project("{5DD5E4FA-CB73-4610-85AB-557B54E96AA9}") = "Xamarin.Cognitive.Face.NuGet", "Xamarin.Cognitive.Face.NuGet\Xamarin.Cognitive.Face.NuGet.nuproj", "{DA36DEFA-D104-4483-8727-8FEFAE2DA627}"
 EndProject

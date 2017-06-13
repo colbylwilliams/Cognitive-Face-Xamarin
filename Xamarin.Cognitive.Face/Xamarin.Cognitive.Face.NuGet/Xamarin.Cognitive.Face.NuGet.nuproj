@@ -36,7 +36,7 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Xamarin.Cognitive.Face.Android\Xamarin.Cognitive.Face.Android.csproj">
+    <ProjectReference Include="..\Xamarin.Cognitive.Face.Droid\Xamarin.Cognitive.Face.Droid.csproj">
       <Project>{8057BA86-1825-4A74-9BCC-7F63CC45AC7E}</Project>
       <Name>Xamarin.Cognitive.Face.Droid</Name>
     </ProjectReference>
