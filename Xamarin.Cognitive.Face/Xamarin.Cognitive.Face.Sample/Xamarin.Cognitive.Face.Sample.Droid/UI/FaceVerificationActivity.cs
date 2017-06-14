@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
@@ -10,13 +9,10 @@ using Android.OS;
 using Android.Support.V7.App;
 using Android.Views;
 using Android.Widget;
-using Java.IO;
-using Java.Text;
-using Java.Util;
-using Xamarin.Cognitive.Face.Droid;
-using Xamarin.Cognitive.Face.Droid.Contract;
-using Xamarin.Cognitive.Face.Droid.Extensions;
+using NomadCode.UIExtensions;
 using Xamarin.Cognitive.Face.Extensions;
+using Xamarin.Cognitive.Face.Model;
+using Xamarin.Cognitive.Face.Sample.Droid.Shared.Adapters;
 
 namespace Xamarin.Cognitive.Face.Sample.Droid
 {
@@ -24,81 +20,74 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			  ParentActivity = typeof (VerificationMenuActivity),
 			  LaunchMode = LaunchMode.SingleTop,
 			  ScreenOrientation = ScreenOrientation.Portrait)]
-	public class FaceVerificationActivity : AppCompatActivity
+	public class FaceVerificationActivity : AppCompatActivity, AdapterView.IOnItemClickListener
 	{
-		private static int REQUEST_SELECT_IMAGE_0 = 0;
-		private static int REQUEST_SELECT_IMAGE_1 = 1;
-		private UUID mFaceId0 = null;
-		private UUID mFaceId1 = null;
-		private Bitmap mBitmap0 = null;
-		private Bitmap mBitmap1 = null;
-		private FaceListAdapter mFaceListAdapter0 = null;
-		private FaceListAdapter mFaceListAdapter1 = null;
-		private ProgressDialog mProgressDialog = null;
-		private Button select_image_0, select_image_1, view_log, verify = null;
+		Model.Face [] Faces = new Model.Face [2];
+		Bitmap [] Bitmaps = new Bitmap [2];
+		ListView [] ListViews = new ListView [2];
+		Button [] SelectImageButtons = new Button [2];
+		Button view_log, verify;
+		ProgressDialog progressDialog;
 
 		protected override void OnCreate (Bundle savedInstanceState)
 		{
 			base.OnCreate (savedInstanceState);
 
-			// Create your application here
 			SetContentView (Resource.Layout.activity_verification);
 
-			mProgressDialog = new ProgressDialog (this);
-			mProgressDialog.SetTitle (Application.Context.GetString (Resource.String.progress_dialog_title));
+			progressDialog = new ProgressDialog (this);
+			progressDialog.SetTitle (Application.Context.GetString (Resource.String.progress_dialog_title));
 
-			select_image_0 = FindViewById<Button> (Resource.Id.select_image_0);
-			select_image_1 = FindViewById<Button> (Resource.Id.select_image_1);
+			SelectImageButtons[0] = FindViewById<Button> (Resource.Id.select_image_0);
+			SelectImageButtons[1] = FindViewById<Button> (Resource.Id.select_image_1);
 			view_log = FindViewById<Button> (Resource.Id.view_log);
 			verify = FindViewById<Button> (Resource.Id.verify);
 
+			ListViews[0] = FindViewById<ListView> (Resource.Id.list_faces_0);
+			ListViews[0].Tag = 0;
+			ListViews[1] = FindViewById<ListView> (Resource.Id.list_faces_1);
+			ListViews[1].Tag = 1;
+
 			ClearDetectedFaces (0);
 			ClearDetectedFaces (1);
+
 			SetVerifyButtonEnabledStatus (false);
 			LogHelper.ClearVerificationLog ();
 		}
 
+
 		protected override void OnResume ()
 		{
 			base.OnResume ();
-			select_image_0.Click += Select_Image_0_Click;
-			select_image_1.Click += Select_Image_1_Click;
+
+			SelectImageButtons[0].Click += Select_Image_Click;
+			SelectImageButtons[1].Click += Select_Image_Click;
 			view_log.Click += View_Log_Click;
 			verify.Click += Verify_Click;
 		}
 
+
 		protected override void OnPause ()
 		{
 			base.OnPause ();
-			select_image_0.Click -= Select_Image_0_Click;
-			select_image_1.Click -= Select_Image_1_Click;
+
+			SelectImageButtons[0].Click -= Select_Image_Click;
+			SelectImageButtons[1].Click -= Select_Image_Click;
 			view_log.Click -= View_Log_Click;
 			verify.Click -= Verify_Click;
 		}
 
-		protected override void OnActivityResult (int requestCode, Result resultCode, Intent data)
+
+		protected async override void OnActivityResult (int requestCode, Result resultCode, Intent data)
 		{
 			base.OnActivityResult (requestCode, resultCode, data);
 
-			int index;
-
-			if (requestCode == REQUEST_SELECT_IMAGE_0)
-			{
-				index = 0;
-			}
-			else if (requestCode == REQUEST_SELECT_IMAGE_1)
-			{
-				index = 1;
-			}
-			else
-			{
-				return;
-			}
+			int index = requestCode;
 
 			if (resultCode == Result.Ok)
 			{
-				// If image is selected successfully, set the image URI and bitmap.
-				Bitmap bitmap = ContentResolver.LoadSizeLimitedBitmapFromUri (data.Data);
+				// If image is selected successfully, set the image bitmap.
+				var bitmap = ContentResolver.LoadSizeLimitedBitmapFromUri (data.Data);
 
 				if (bitmap != null)
 				{
@@ -107,392 +96,225 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 					ClearDetectedFaces (index);
 
-					// Set the image to detect.
-					if (index == 0)
-					{
-						mBitmap0 = bitmap;
-						mFaceId0 = null;
-					}
-					else
-					{
-						mBitmap1 = bitmap;
-						mFaceId1 = null;
-					}
+					Bitmaps [index] = bitmap;
+					Faces [index] = null;
 
-					// Add verification log.
-					AddLog ("Image" + index + ": " + data.Data + " resized to " + bitmap.Width + "x" + bitmap.Height);
+					AddLog ($"Image{index}: {data.Data} resized to {bitmap.Width} x {bitmap.Height}");
 
 					// Start detecting in image.
-					Detect (bitmap, index);
+					await Detect (bitmap, index);
 				}
 			}
 		}
 
-		private void ClearDetectedFaces (int index)
-		{
-			ListView faceList = (ListView) FindViewById (index == 0 ? Resource.Id.list_faces_0 : Resource.Id.list_faces_1);
-			faceList.Visibility = ViewStates.Gone;
 
-			ImageView imageView = (ImageView) FindViewById (index == 0 ? Resource.Id.image_0 : Resource.Id.image_1);
-			imageView.SetImageResource (Color.Transparent);
+		ListView ListViewAtIndex (int index)
+		{
+			return ListViews [index];
 		}
 
-		private void Select_Image_0_Click (object sender, EventArgs e)
+
+		ImageView ImageViewAtIndex (int index)
 		{
-			SelectImage (0);
+			return FindViewById<ImageView> (index == 0 ? Resource.Id.image_0 : Resource.Id.image_1);
 		}
 
-		private void Select_Image_1_Click (object sender, EventArgs e)
+
+		Button SelectButtonAtIndex (int index)
 		{
-			SelectImage (1);
+			return SelectImageButtons [index];
 		}
 
-		private void Verify_Click (object sender, EventArgs e)
+
+		void ClearDetectedFaces (int index)
+		{
+			ListViewAtIndex(index).Visibility = ViewStates.Gone;
+			ImageViewAtIndex (index).SetImageResource (Color.Transparent);
+		}
+
+
+		void Select_Image_Click (object sender, EventArgs e)
+		{
+			var index = Array.IndexOf (SelectImageButtons, sender);
+			SelectImage (index);
+		}
+
+
+		public void OnItemClick (AdapterView parent, View view, int position, long id)
+		{
+			var listView = (ListView) parent;
+			var faceListAdapter = listView.Adapter as FaceImageListAdapter;
+			var selectedFace = faceListAdapter.Faces [position];
+			var index = (int) listView.Tag;
+
+			if (selectedFace != Faces [0] && selectedFace != Faces [1])
+			{
+				var image = faceListAdapter.GetThumbnailForFace (selectedFace);
+				ImageViewAtIndex (index).SetImageBitmap (image);
+
+				Faces [index] = selectedFace;
+				faceListAdapter.SetSelectedIndex (position);
+
+				SetInfo ("");
+			}
+		}
+
+
+		async void Verify_Click (object sender, EventArgs e)
 		{
 			SetAllButtonEnabledStatus (false);
-			ExecuteVerification ();
+
+			await ExecuteVerification ();
 		}
 
-		private async void ExecuteVerification ()
+
+		async Task ExecuteVerification ()
 		{
-			VerifyResult verify_result = null;
-
-			mProgressDialog.Show ();
-			AddLog ("Request: Verifying face " + mFaceId0 + " and face " + mFaceId1);
-
 			try
 			{
-				mProgressDialog.SetMessage ("Verifying...");
+				AddLog ($"Request: Verifying face {Faces[0].Id} and face {Faces[1].Id}");
+				progressDialog.Show ();
+				progressDialog.SetMessage ("Verifying...");
 				SetInfo ("Verifying...");
-				verify_result = await FaceClient.Shared.Verify (mFaceId0, mFaceId1);
+
+				var result = await FaceClient.Shared.Verify (Faces[0], Faces[1]);
+
+				if (result != null)
+				{
+					AddLog ($"Response: Success. Face {Faces[0].Id} and face {Faces[1].Id} {(result.IsIdentical ? "" : " don't")} belong to the same person");
+
+					SetAllButtonEnabledStatus (true);
+
+					// Show verification result.
+			        string verificationResult = $"{(result.IsIdentical ? "The same person" : "Different persons")}. The confidence is {result.Confidence}";
+
+					SetInfo (verificationResult);
+				}
 			}
-			catch (Java.Lang.Exception e)
+			catch (Exception e)
 			{
 				AddLog (e.Message);
 			}
 
-			RunOnUiThread (() =>
-			 {
-				 if (verify_result != null)
-				 {
-					 AddLog ("Response: Success. Face " + mFaceId0 + " and face "
-							 + mFaceId1 + (verify_result.IsIdentical ? " " : " don't ")
-							 + "belong to the same person");
-				 }
-
-				 // Show the result on screen when verification is done.
-				 SetUiAfterVerification (verify_result);
-			 });
+	        progressDialog.Dismiss ();
 		}
 
-		private void View_Log_Click (object sender, EventArgs e)
+
+		void View_Log_Click (object sender, EventArgs e)
 		{
-			Intent intent = new Intent (this, typeof (VerificationLogActivity));
+			var intent = new Intent (this, typeof (VerificationLogActivity));
 			StartActivity (intent);
 		}
 
-		private void SelectImage (int index)
+
+		void SelectImage (int index)
 		{
-			Intent intent = new Intent (this, typeof (SelectImageActivity));
-			StartActivityForResult (intent, index == 0 ? REQUEST_SELECT_IMAGE_0 : REQUEST_SELECT_IMAGE_1);
+			var intent = new Intent (this, typeof (SelectImageActivity));
+			StartActivityForResult (intent, index);
 		}
 
-		private void SetSelectImageButtonEnabledStatus (bool isEnabled, int index)
+
+		void SetSelectImageButtonEnabledStatus (bool isEnabled, int index)
 		{
-			Button button;
+			SelectButtonAtIndex(index).Enabled = isEnabled;
+			view_log.Enabled = isEnabled;
+		}
+					        
 
-			if (index == 0)
-			{
-				button = (Button) FindViewById (Resource.Id.select_image_0);
-			}
-			else
-			{
-				button = (Button) FindViewById (Resource.Id.select_image_1);
-			}
-
-			button.Enabled = isEnabled;
-
-			Button viewLog = (Button) FindViewById (Resource.Id.view_log);
-			viewLog.Enabled = isEnabled;
+		void SetVerifyButtonEnabledStatus (bool isEnabled)
+		{
+			verify.Enabled = isEnabled;
 		}
 
-		private void SetVerifyButtonEnabledStatus (bool isEnabled)
+
+		void SetAllButtonEnabledStatus (bool isEnabled)
 		{
-			Button button = (Button) FindViewById (Resource.Id.verify);
-			button.Enabled = isEnabled;
+			SelectImageButtons [0].Enabled = isEnabled;
+			SelectImageButtons [1].Enabled = isEnabled;
+			verify.Enabled = isEnabled;
+			view_log.Enabled = isEnabled;
 		}
 
-		private void SetAllButtonEnabledStatus (bool isEnabled)
+
+		async Task Detect (Bitmap bitmap, int index)
 		{
-			Button selectImage0 = (Button) FindViewById (Resource.Id.select_image_0);
-			selectImage0.Enabled = isEnabled;
+			await ExecuteDetection (bitmap, index);
 
-			Button selectImage1 = (Button) FindViewById (Resource.Id.select_image_1);
-			selectImage1.Enabled = isEnabled;
-
-			Button verif = (Button) FindViewById (Resource.Id.verify);
-			verif.Enabled = isEnabled;
-
-			Button viewLog = (Button) FindViewById (Resource.Id.view_log);
-			viewLog.Enabled = isEnabled;
-		}
-
-		private void InitializeFaceList (int index)
-		{
-			ListView listView = (ListView) FindViewById (index == 0 ? Resource.Id.list_faces_0 : Resource.Id.list_faces_1);
-
-			listView.ItemClick += (sender, e) =>
-			{
-
-				FaceListAdapter faceListAdapter = index == 0 ? mFaceListAdapter0 : mFaceListAdapter1;
-
-				if (!faceListAdapter.faces [e.Position].FaceId.Equals (
-						index == 0 ? mFaceId0 : mFaceId1))
-				{
-					if (index == 0)
-					{
-						mFaceId0 = faceListAdapter.faces [e.Position].FaceId;
-					}
-					else
-					{
-						mFaceId1 = faceListAdapter.faces [e.Position].FaceId;
-					}
-
-					ImageView imageView = (ImageView) FindViewById (index == 0 ? Resource.Id.image_0 : Resource.Id.image_1);
-					imageView.SetImageBitmap (faceListAdapter.faceThumbnails [e.Position]);
-
-					SetInfo ("");
-				}
-
-				// Show the list of detected face thumbnails.
-				ListView lv = (ListView) FindViewById (index == 0 ? Resource.Id.list_faces_0 : Resource.Id.list_faces_1);
-				lv.Adapter = faceListAdapter;
-			};
-		}
-
-		private void SetUiAfterVerification (VerifyResult result)
-		{
-			mProgressDialog.Dismiss ();
-
-			SetAllButtonEnabledStatus (true);
-
-			// Show verification result.
-			if (result != null)
-			{
-				DecimalFormat formatter = new DecimalFormat ("#0.00");
-				string verificationResult = ((result.IsIdentical ? "The same person" : "Different persons") + ". The confidence is " + result.Confidence.ToString ());
-
-				SetInfo ((string) verificationResult);
-			}
-		}
-
-		private void SetUiAfterDetection (Face.Droid.Contract.Face [] result, int index, bool succeed)
-		{
-			SetSelectImageButtonEnabledStatus (true, index);
-
-			if (succeed)
-			{
-				AddLog ("Response: Success. Detected " + result.Length + " face(s) in image" + index);
-				SetInfo (result.Length + " face" + (result.Length != 1 ? "s" : "") + " detected");
-
-				FaceListAdapter faceListAdapter = new FaceListAdapter (result, index, this);
-
-				if (faceListAdapter.faces.Count != 0)
-				{
-					if (index == 0)
-					{
-						mFaceId0 = faceListAdapter.faces [0].FaceId;
-					}
-					else
-					{
-						mFaceId1 = faceListAdapter.faces [0].FaceId;
-					}
-					ImageView imageView = (ImageView) FindViewById (index == 0 ? Resource.Id.image_0 : Resource.Id.image_1);
-					imageView.SetImageBitmap (faceListAdapter.faceThumbnails [0]);
-				}
-
-				ListView listView = (ListView) FindViewById (index == 0 ? Resource.Id.list_faces_0 : Resource.Id.list_faces_1);
-				listView.Adapter = faceListAdapter;
-				listView.Visibility = ViewStates.Visible;
-
-				if (index == 0)
-				{
-					mFaceListAdapter0 = faceListAdapter;
-					mBitmap0 = null;
-				}
-				else
-				{
-					mFaceListAdapter1 = faceListAdapter;
-					mBitmap1 = null;
-				}
-			}
-
-			if (result != null && result.Length == 0)
-			{
-				SetInfo ("No face detected!");
-			}
-
-			if ((index == 0 && mBitmap1 == null) || (index == 1 && mBitmap0 == null) || index == 2)
-			{
-				mProgressDialog.Dismiss ();
-			}
-
-			if (mFaceId0 != null && mFaceId1 != null)
-			{
-
-				SetVerifyButtonEnabledStatus (true);
-			}
-		}
-
-		private void Detect (Bitmap bitmap, int index)
-		{
-			ExecuteDetection (index);
 			SetSelectImageButtonEnabledStatus (false, index);
 		}
 
-		private async void ExecuteDetection (int mIndex)
+
+		async Task ExecuteDetection (Bitmap bitmap, int index)
 		{
-			Face.Droid.Contract.Face [] faces = null;
-			bool mSucceed = true;
-
-			mProgressDialog.Show ();
-			AddLog ("Request: Detecting in image " + mIndex);
-
 			try
 			{
-				using (MemoryStream pre_output = new MemoryStream ())
+				AddLog ("Request: Detecting in image " + index);
+				progressDialog.Show ();
+				progressDialog.SetMessage ("Detecting...");
+				SetInfo ("Detecting...");
+
+				var faces = await FaceClient.Shared.DetectFacesInPhoto (
+					() => bitmap.AsJpeg (),
+					true,
+					FaceAttributeType.Age,
+					FaceAttributeType.Gender,
+					FaceAttributeType.Smile,
+					FaceAttributeType.Glasses,
+					FaceAttributeType.FacialHair,
+					FaceAttributeType.Emotion,
+					FaceAttributeType.HeadPose
+				);
+
+				AddLog ($"Response: Success. Detected {faces.Count} face(s) in image" + index);
+				SetInfo ($"{faces.Count} face{(faces.Count != 1 ? "s" : "")} detected");
+
+				var faceListAdapter = new FaceImageListAdapter (faces, bitmap);
+
+				if (faces?.Count != 0)
 				{
-					if (mIndex == 0)
-					{
-						mBitmap0.Compress (Bitmap.CompressFormat.Jpeg, 100, pre_output);
-					}
-					else
-					{
-						mBitmap1.Compress (Bitmap.CompressFormat.Jpeg, 100, pre_output);
-					}
+					Faces [index] = faces.First ();
+					ImageViewAtIndex (index).SetImageBitmap (faceListAdapter.GetThumbnailForFace (faces.First ()));
+					faceListAdapter.SetSelectedIndex (0);
+				}
+				else
+				{
+					SetInfo ("No face detected!");
+				}
 
-					using (ByteArrayInputStream inputStream = new ByteArrayInputStream (pre_output.ToArray ()))
-					{
-						byte [] arr = new byte [inputStream.Available ()];
-						inputStream.Read (arr);
-						var output = new MemoryStream (arr);
+				var listView = ListViewAtIndex (index);
+				listView.Adapter = faceListAdapter;
+				listView.Visibility = ViewStates.Visible;
+				listView.OnItemClickListener = this;
 
-						mProgressDialog.SetMessage ("Detecting...");
-						SetInfo ("Detecting...");
-						faces = await FaceClient.Shared.Detect (output, true, true, new [] {
-								  FaceServiceClientFaceAttributeType.Age,
-								  FaceServiceClientFaceAttributeType.Gender,
-								  FaceServiceClientFaceAttributeType.Smile,
-								  FaceServiceClientFaceAttributeType.Glasses,
-								  FaceServiceClientFaceAttributeType.FacialHair,
-								  FaceServiceClientFaceAttributeType.Emotion,
-								  FaceServiceClientFaceAttributeType.HeadPose
-								});
-					}
+				Bitmaps [index] = null;
+
+				if (Faces[0] != null && Faces[1] != null)
+				{
+					SetVerifyButtonEnabledStatus (true);
 				}
 			}
-			catch (Java.Lang.Exception e)
+			catch (Exception e)
 			{
-				mSucceed = false;
 				AddLog (e.Message);
+				SetInfo ("No face detected!");
 			}
 
-			RunOnUiThread (() =>
-			 {
-				 SetUiAfterDetection (faces, mIndex, mSucceed);
-			 });
+			SetSelectImageButtonEnabledStatus (true, index);
+
+			progressDialog.Dismiss ();
 		}
 
-		private void SetInfo (string _info)
+
+		void SetInfo (string info)
 		{
-			TextView info = FindViewById<TextView> (Resource.Id.info);
-			info.Text = _info;
+			var txtInfo = FindViewById<TextView> (Resource.Id.info);
+			txtInfo.Text = info;
 		}
 
-		private void AddLog (string _log)
+
+		void AddLog (string log)
 		{
-			LogHelper.AddVerificationLog (_log);
-		}
-
-		private class FaceListAdapter : BaseAdapter
-		{
-			public List<Face.Droid.Contract.Face> faces;
-			public List<Bitmap> faceThumbnails;
-			private int mIndex;
-			private FaceVerificationActivity activity;
-
-			public FaceListAdapter (Face.Droid.Contract.Face [] detectionResult, int index, FaceVerificationActivity act)
-			{
-				faces = new List<Face.Droid.Contract.Face> ();
-				faceThumbnails = new List<Bitmap> ();
-				mIndex = index;
-				activity = act;
-
-				if (detectionResult != null)
-				{
-					faces = detectionResult.ToList ();
-
-					foreach (Face.Droid.Contract.Face face in faces)
-					{
-						try
-						{
-							faceThumbnails.Add (ImageHelper.GenerateFaceThumbnail (index == 0 ? activity.mBitmap0 : activity.mBitmap1, face.FaceRectangle));
-						}
-						catch (Java.IO.IOException ex)
-						{
-							activity.SetInfo (ex.Message);
-						}
-					}
-				}
-			}
-
-			public override bool IsEnabled (int position)
-			{
-				return false;
-			}
-
-			public override int Count
-			{
-				get
-				{
-					return faces.Count;
-				}
-			}
-
-			public override Java.Lang.Object GetItem (int position)
-			{
-				return faces [position];
-			}
-
-			public override long GetItemId (int position)
-			{
-				return position;
-			}
-
-			public override View GetView (int position, View convertView, ViewGroup parent)
-			{
-				if (convertView == null)
-				{
-					LayoutInflater layoutInflater = (LayoutInflater) Application.Context.GetSystemService (Context.LayoutInflaterService);
-					convertView = layoutInflater.Inflate (Resource.Layout.item_face, parent, false);
-				}
-				convertView.Id = position;
-
-				Bitmap thumbnailToShow = faceThumbnails [position];
-				if (mIndex == 0 && faces [position].FaceId.Equals (activity.mFaceId0))
-				{
-					thumbnailToShow = ImageHelper.HighlightSelectedFaceThumbnail (thumbnailToShow);
-				}
-				else if (mIndex == 1 && faces [position].FaceId.Equals (activity.mFaceId1))
-				{
-					thumbnailToShow = ImageHelper.HighlightSelectedFaceThumbnail (thumbnailToShow);
-				}
-
-				// Show the face thumbnail.
-				((ImageView) convertView.FindViewById (Resource.Id.image_face)).SetImageBitmap (thumbnailToShow);
-
-				return convertView;
-			}
+			LogHelper.AddVerificationLog (log);
 		}
 	}
 }
