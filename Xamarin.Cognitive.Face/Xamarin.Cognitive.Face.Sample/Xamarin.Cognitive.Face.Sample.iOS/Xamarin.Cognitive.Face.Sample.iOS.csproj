@@ -102,7 +102,6 @@
     <Folder Include="Resources\" />
     <Folder Include="Extensions\" />
     <Folder Include="View\" />   
-    <Folder Include="View\Cells\" />
     <Folder Include="View\Admin\" />
     <Folder Include="View\Shared\" />
     <Folder Include="View\Detection\" />
@@ -110,6 +109,7 @@
     <Folder Include="View\Identification\" />
     <Folder Include="View\Verification\" />
     <Folder Include="View\Grouping\" />
+    <Folder Include="View\Shared\Cells\" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="LaunchScreen.storyboard" />
@@ -156,33 +156,6 @@
     <Compile Include="View\Admin\PersonFaceCollectionViewController.designer.cs">
       <DependentUpon>PersonFaceCollectionViewController.cs</DependentUpon>
     </Compile>
-    <Compile Include="View\Cells\DetectionResultsTableViewCell.cs" />
-    <Compile Include="View\Cells\DetectionResultsTableViewCell.designer.cs">
-      <DependentUpon>DetectionResultsTableViewCell.cs</DependentUpon>
-    </Compile>
-    <Compile Include="View\Cells\FaceCVC.cs" />
-    <Compile Include="View\Cells\FaceCVC.designer.cs">
-      <DependentUpon>FaceCVC.cs</DependentUpon>
-    </Compile>
-    <Compile Include="View\Cells\GestureCVC.cs" />
-    <Compile Include="View\Cells\GroupPersonCVC.cs" />
-    <Compile Include="View\Cells\GroupPersonCVC.designer.cs">
-      <DependentUpon>GroupPersonCVC.cs</DependentUpon>
-    </Compile>
-    <Compile Include="View\Cells\IHandleResults.cs" />
-    <Compile Include="View\Cells\ISupportActions.cs" />
-    <Compile Include="View\Cells\IdentifyResultTableViewCell.cs" />
-    <Compile Include="View\Cells\IdentifyResultTableViewCell.designer.cs">
-      <DependentUpon>IdentifyResultTableViewCell.cs</DependentUpon>
-    </Compile>
-    <Compile Include="View\Cells\SimilarFaceResultTableViewCell.cs" />
-    <Compile Include="View\Cells\SimilarFaceResultTableViewCell.designer.cs">
-      <DependentUpon>SimilarFaceResultTableViewCell.cs</DependentUpon>
-    </Compile>
-    <Compile Include="View\Cells\SimpleCVHeader.cs" />
-    <Compile Include="View\Cells\SimpleCVHeader.designer.cs">
-      <DependentUpon>SimpleCVHeader.cs</DependentUpon>
-    </Compile>
     <Compile Include="View\Detection\DetectionResultsTableViewController.cs" />
     <Compile Include="View\Detection\DetectionResultsTableViewController.designer.cs">
       <DependentUpon>DetectionResultsTableViewController.cs</DependentUpon>
@@ -228,6 +201,33 @@
     <Compile Include="View\Verification\VerificationViewController.cs" />
     <Compile Include="View\Verification\VerificationViewController.designer.cs">
       <DependentUpon>VerificationViewController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\Identification\IdentifyResultTableViewCell.cs" />
+    <Compile Include="View\Identification\IdentifyResultTableViewCell.designer.cs">
+      <DependentUpon>IdentifyResultTableViewCell.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\Detection\DetectionResultsTableViewCell.cs" />
+    <Compile Include="View\Detection\DetectionResultsTableViewCell.designer.cs">
+      <DependentUpon>DetectionResultsTableViewCell.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\FindSimilarFaces\SimilarFaceResultTableViewCell.cs" />
+    <Compile Include="View\FindSimilarFaces\SimilarFaceResultTableViewCell.designer.cs">
+      <DependentUpon>SimilarFaceResultTableViewCell.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\Shared\Cells\FaceCVC.cs" />
+    <Compile Include="View\Shared\Cells\FaceCVC.designer.cs">
+      <DependentUpon>..\..\Cells\FaceCVC.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\Shared\Cells\GestureCVC.cs" />
+    <Compile Include="View\Shared\Cells\GroupPersonCVC.cs" />
+    <Compile Include="View\Shared\Cells\GroupPersonCVC.designer.cs">
+      <DependentUpon>..\..\Cells\GroupPersonCVC.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\Shared\Cells\IHandleResults.cs" />
+    <Compile Include="View\Shared\Cells\ISupportActions.cs" />
+    <Compile Include="View\Shared\Cells\SimpleCVHeader.cs" />
+    <Compile Include="View\Shared\Cells\SimpleCVHeader.designer.cs">
+      <DependentUpon>..\..\Cells\SimpleCVHeader.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
