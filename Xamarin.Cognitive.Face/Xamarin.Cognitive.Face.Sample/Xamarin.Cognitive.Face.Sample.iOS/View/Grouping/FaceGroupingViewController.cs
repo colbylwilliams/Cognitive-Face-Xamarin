@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Foundation;
 using NomadCode.UIExtensions;
 using UIKit;
 using Xamarin.Cognitive.Face.Extensions;
 using Xamarin.Cognitive.Face.Sample.iOS.Extensions;
-using Xamarin.Cognitive.Face.Shared;
 using Xamarin.Cognitive.Face.Shared.Extensions;
 
 namespace Xamarin.Cognitive.Face.Sample.iOS
@@ -110,20 +108,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 
 				var groupResult = await FaceClient.Shared.GroupFaces (FaceSelectionController.Faces);
 
-				var faceImages = new Dictionary<Model.Face, UIImage> ();
-
-				foreach (var faceGroup in groupResult.Groups)
-				{
-					foreach (var face in faceGroup.Faces)
-					{
-						faceImages.Add (face, FaceSelectionController.GetImageForFace (face));
-					}
-				}
-
-				foreach (var face in groupResult.MessyGroup?.Faces)
-				{
-					faceImages.Add (face, FaceSelectionController.GetImageForFace (face));
-				}
+				var faceImages = groupResult.GetThumbnails (FaceSelectionController.GetImageForFace);
 
 				this.HideHUD ();
 

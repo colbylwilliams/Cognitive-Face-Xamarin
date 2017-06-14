@@ -7,6 +7,7 @@ using UIKit;
 using Xamarin.Cognitive.Face.iOS;
 using Xamarin.Cognitive.Face.Extensions;
 using Xamarin.Cognitive.Face.Model;
+using System.Collections.Generic;
 
 namespace Xamarin.Cognitive.Face.Extensions
 {
@@ -500,6 +501,27 @@ namespace Xamarin.Cognitive.Face.Extensions
 				Width = rect.Width,
 				Height = rect.Height
 			};
+		}
+
+
+		public static Dictionary<Model.Face, UIImage> GetThumbnails (this GroupResult groupResult, Func<Model.Face, UIImage> imageProvider)
+		{
+			var faceImages = new Dictionary<Model.Face, UIImage> ();
+
+			foreach (var faceGroup in groupResult.Groups)
+			{
+				foreach (var face in faceGroup.Faces)
+				{
+					faceImages.Add (face, imageProvider (face));
+				}
+			}
+
+			foreach (var face in groupResult.MessyGroup?.Faces)
+			{
+				faceImages.Add (face, imageProvider (face));
+			}
+
+			return faceImages;
 		}
 	}
 }
