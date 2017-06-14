@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Xamarin.Cognitive.Face.Extensions;
 using Foundation;
 using NomadCode.UIExtensions;
 using UIKit;
@@ -12,15 +11,18 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 	public partial class GroupingResultCollectionViewController : BaseCollectionViewController
 	{
 		List<FaceGroup> Results;
+		Dictionary<Model.Face, UIImage> faceImages;
 
 		public GroupingResultCollectionViewController (IntPtr handle) : base (handle)
 		{
 		}
 
 
-		public void SetFaceGroupResults (GroupResult groupResult)
+		public void SetFaceGroupResults (GroupResult groupResult, Dictionary<Model.Face, UIImage> faceImages)
 		{
-			if (groupResult.MessyGroup != null)
+			this.faceImages = faceImages;
+
+			if (groupResult.MessyGroup?.Faces.Count > 0)
 			{
 				Results = groupResult.Groups.Union (new [] { groupResult.MessyGroup }).ToList ();
 			}
@@ -55,7 +57,9 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 			var cell = collectionView.Dequeue<FaceCVC> (indexPath);
 			var face = Results [indexPath.Section].Faces [indexPath.Row];
 
-			cell.SetFaceImage (face, face.GetImage ());
+			faceImages.TryGetValue (face, out UIImage image);
+
+			cell.SetFaceImage (face, image);
 
 			return cell;
 		}

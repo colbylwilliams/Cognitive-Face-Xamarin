@@ -104,6 +104,19 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 		}
 
 
+		public UIImage GetImageForFace (Model.Face face)
+		{
+			var index = Faces.IndexOf (face);
+
+			if (index > -1 && croppedImages.Count > index)
+			{
+				return croppedImages [index];
+			}
+
+			return null;
+		}
+
+
 		public override nint NumberOfSections (UICollectionView collectionView) => 1;
 
 

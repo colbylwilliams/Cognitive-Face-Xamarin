@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Foundation;
 using NomadCode.UIExtensions;
 using UIKit;
+using Xamarin.Cognitive.Face.iOS.Domain;
 using Xamarin.Cognitive.Face.Model;
 using Xamarin.Cognitive.Face.Sample.iOS.Extensions;
 using Xamarin.Cognitive.Face.Shared.Extensions;
@@ -132,21 +133,39 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 		{
 			try
 			{
-				var group = GroupsTableController.SelectedPersonGroup;
+				var personGroup = GroupsTableController.SelectedPersonGroup;
 
 				this.ShowHUD ("Identifying faces");
 
-				Results = await FaceClient.Shared.Identify (group, FaceSelectionController.SelectedFace);
+				Results = await FaceClient.Shared.Identify (personGroup, FaceSelectionController.SelectedFace);
 
 				if (Results.Any (r => r.HasCandidates))
 				{
 					this.HideHUD ();
+
+					//load the first face for each person...
+					foreach (var candidate in Results.SelectMany (r => r.CandidateResults))
+					{
+						var faceId = candidate.Person.FaceIds.FirstOrDefault ();
+
+						if (faceId != null)
+						{
+							await FaceClient.Shared.GetFaceForPerson (candidate.Person, personGroup, faceId);
+						}
+					}
 
 					PerformSegue (Segues.ShowResults, this);
 				}
 				else
 				{
 					this.ShowSimpleHUD ("Not able to identify this face");
+				}
+			}
+			catch (ErrorDetailException ede)
+			{
+				if (ede.ErrorDetail.Code == FaceClient.ErrorCodes.TrainingStatus.PersonGroupNotTrained)
+				{
+					this.HideHUD ().ShowSimpleAlert ("Person group must be trained before identification.");
 				}
 			}
 			catch (Exception ex)
