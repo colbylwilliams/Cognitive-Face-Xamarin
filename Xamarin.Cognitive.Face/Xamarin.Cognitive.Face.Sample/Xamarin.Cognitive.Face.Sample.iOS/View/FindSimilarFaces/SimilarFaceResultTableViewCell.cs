@@ -1,21 +1,20 @@
 ﻿using System;
-using Xamarin.Cognitive.Face.Extensions;
 using UIKit;
 using Xamarin.Cognitive.Face.Model;
 
 namespace Xamarin.Cognitive.Face.Sample.iOS
 {
-	public partial class SimilarFaceResultTableViewCell : UITableViewCell, IHandleResults<SimilarFaceResult>
+	public partial class SimilarFaceResultTableViewCell : UITableViewCell, IHandleResults<(SimilarFaceResult, UIImage)>
 	{
 		public SimilarFaceResultTableViewCell (IntPtr handle) : base (handle)
 		{
 		}
 
 
-		public void SetResult (SimilarFaceResult result)
+		public void SetResult ((SimilarFaceResult, UIImage) result)
 		{
-			FaceImageView.Image = result.Face?.GetImage ();
-			ConfidenceLabel.Text = $"Confidence: {result.Confidence.ToString ()}";
+			FaceImageView.Image = result.Item2;
+			ConfidenceLabel.Text = $"Confidence: {result.Item1.Confidence.ToString ()}";
 		}
 	}
 }

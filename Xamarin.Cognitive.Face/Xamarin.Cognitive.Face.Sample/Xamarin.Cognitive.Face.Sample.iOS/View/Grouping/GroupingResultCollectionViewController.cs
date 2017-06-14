@@ -18,6 +18,15 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 		}
 
 
+		protected override void Dispose (bool disposing)
+		{
+			faceImages?.Clear ();
+			faceImages = null;
+
+			base.Dispose (disposing);
+		}
+
+
 		public void SetFaceGroupResults (GroupResult groupResult, Dictionary<Model.Face, UIImage> faceImages)
 		{
 			this.faceImages = faceImages;

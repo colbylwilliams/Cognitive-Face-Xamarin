@@ -17,7 +17,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 			public const string ShowResults = "ShowResults";
 		}
 
-		List<SimilarFaceResult> Results;
+		List<(SimilarFaceResult, UIImage)> Results;
 
 		FaceSelectionCollectionViewController Face1SelectionController => ChildViewControllers [0] as FaceSelectionCollectionViewController;
 		FaceSelectionCollectionViewController Face2SelectionController => ChildViewControllers [1] as FaceSelectionCollectionViewController;
@@ -141,7 +141,14 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 			{
 				this.ShowHUD ("Finding similar faces");
 
-				Results = await FaceClient.Shared.FindSimilar (Face2SelectionController.SelectedFace, Face1SelectionController.Faces);
+				var results = await FaceClient.Shared.FindSimilar (Face2SelectionController.SelectedFace, Face1SelectionController.Faces);
+
+				Results = new List<(SimilarFaceResult, UIImage)> ();
+
+				foreach (var result in results)
+				{
+					Results.Add ((result, Face1SelectionController.GetImageForFace (result.Face)));
+				}
 
 				this.HideHUD ();
 
