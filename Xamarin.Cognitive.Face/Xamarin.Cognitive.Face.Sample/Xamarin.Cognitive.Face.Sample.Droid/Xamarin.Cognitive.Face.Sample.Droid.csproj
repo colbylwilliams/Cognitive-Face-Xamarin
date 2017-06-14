@@ -119,6 +119,7 @@
     <Compile Include="log\FindSimilarFaceLogActivity.cs" />
     <Compile Include="log\IdentificationLogActivity.cs" />
     <Compile Include="Shared\Adapters\PersonGroupsListAdapter.cs" />
+    <Compile Include="Shared\Adapters\FaceImageListAdapter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
