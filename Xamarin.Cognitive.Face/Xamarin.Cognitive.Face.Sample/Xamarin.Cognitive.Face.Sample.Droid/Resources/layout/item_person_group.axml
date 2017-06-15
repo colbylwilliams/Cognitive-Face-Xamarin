@@ -13,5 +13,5 @@
         android:layout_marginTop="@dimen/view_margin"
         android:layout_marginBottom="@dimen/view_margin"
         android:textColor="@android:color/black"
-        android:textSize="@dimen/abc_text_size_large_material" />
+        android:textSize="@dimen/abc_text_size_medium_material" />
 </RelativeLayout>
