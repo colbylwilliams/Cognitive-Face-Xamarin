@@ -11,6 +11,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Shared.Adapters
 	public class FaceImageListAdapter : BaseAdapter<Model.Face>
 	{
 		readonly List<Bitmap> faceThumbnails;
+		Bitmap highlightedBitmap;
 
 		public List<Model.Face> Faces { get; private set; }
 
@@ -27,10 +28,22 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Shared.Adapters
 		}
 
 
+		protected override void Dispose (bool disposing)
+		{
+			highlightedBitmap?.Dispose ();
+			faceThumbnails?.ForEach (b => b.Dispose ());
+
+			base.Dispose (disposing);
+		}
+
+
 		public override int Count => Faces?.Count ?? 0;
 
 
 		public override Model.Face this [int position] => Faces [position];
+
+
+		public Model.Face SelectedFace => SelectedIndex > -1 ? Faces [SelectedIndex] : null;
 
 
 		public Bitmap GetThumbnailForFace (Model.Face face)
@@ -49,6 +62,9 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Shared.Adapters
 		public void SetSelectedIndex (int index)
 		{
 			SelectedIndex = index;
+
+			highlightedBitmap?.Dispose ();
+
 			NotifyDataSetChanged ();
 		}
 
@@ -70,7 +86,8 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Shared.Adapters
 
 			if (SelectedIndex == position)
 			{
-				thumbnailToShow = ImageHelper.HighlightSelectedFaceThumbnail (thumbnailToShow);
+				highlightedBitmap = ImageHelper.HighlightSelectedFaceThumbnail (thumbnailToShow);
+				thumbnailToShow = highlightedBitmap;
 			}
 
 			convertView.FindViewById<ImageView> (Resource.Id.image_face).SetImageBitmap (thumbnailToShow);
