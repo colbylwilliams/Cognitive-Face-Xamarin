@@ -101,25 +101,25 @@
     <Compile Include="log\DetectionLogActivity.cs" />
     <Compile Include="log\GroupingLogActivity.cs" />
     <Compile Include="log\VerificationLogActivity.cs" />
-    <Compile Include="persongroupmanagement\AddFaceToPersonActivity.cs" />
-    <Compile Include="persongroupmanagement\PersonActivity.cs" />
-    <Compile Include="persongroupmanagement\PersonGroupActivity.cs" />
-    <Compile Include="persongroupmanagement\PersonGroupListActivity.cs" />
-    <Compile Include="ui\DetectionActivity.cs" />
-    <Compile Include="ui\FaceVerificationActivity.cs" />
-    <Compile Include="ui\FindSimilarFaceActivity.cs" />
-    <Compile Include="ui\GroupingActivity.cs" />
-    <Compile Include="ui\IdentificationActivity.cs" />
-    <Compile Include="ui\MainActivity.cs" />
-    <Compile Include="ui\PersonVerificationActivity.cs" />
-    <Compile Include="ui\SelectImageActivity.cs" />
-    <Compile Include="ui\VerificationMenuActivity.cs" />
     <Compile Include="FaceDemoApp.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="log\FindSimilarFaceLogActivity.cs" />
     <Compile Include="log\IdentificationLogActivity.cs" />
     <Compile Include="Shared\Adapters\PersonGroupsListAdapter.cs" />
     <Compile Include="Shared\Adapters\FaceImageListAdapter.cs" />
+    <Compile Include="Activities\Admin\AddFaceToPersonActivity.cs" />
+    <Compile Include="Activities\Admin\PersonActivity.cs" />
+    <Compile Include="Activities\Admin\PersonGroupActivity.cs" />
+    <Compile Include="Activities\Admin\PersonGroupListActivity.cs" />
+    <Compile Include="Activities\DetectionActivity.cs" />
+    <Compile Include="Activities\FaceVerificationActivity.cs" />
+    <Compile Include="Activities\FindSimilarFaceActivity.cs" />
+    <Compile Include="Activities\GroupingActivity.cs" />
+    <Compile Include="Activities\IdentificationActivity.cs" />
+    <Compile Include="Activities\MainActivity.cs" />
+    <Compile Include="Activities\PersonVerificationActivity.cs" />
+    <Compile Include="Activities\SelectImageActivity.cs" />
+    <Compile Include="Activities\VerificationMenuActivity.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
@@ -174,6 +174,8 @@
     <Folder Include="Extensions\" />
     <Folder Include="Shared\" />
     <Folder Include="Shared\Adapters\" />
+    <Folder Include="Activities\" />
+    <Folder Include="Activities\Admin\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Cognitive-Face-Android-Xamarin\Cognitive.Face.Android\Cognitive.Face.Droid.csproj">
