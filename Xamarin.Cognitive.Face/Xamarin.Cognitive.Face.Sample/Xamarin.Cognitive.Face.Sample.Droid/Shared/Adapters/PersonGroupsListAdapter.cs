@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Android.App;
 using Android.Content;
 using Android.Views;
 using Android.Widget;
@@ -12,7 +13,6 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Shared.Adapters
 {
 	public class PersonGroupsListAdapter : BaseAdapter<PersonGroup>, CompoundButton.IOnCheckedChangeListener
 	{
-		readonly Context context;
 		readonly List<PersonGroup> personGroups;
 		readonly bool itemCheckEnabled;
 		readonly TaskQueue queue = new TaskQueue ();
@@ -22,9 +22,8 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Shared.Adapters
 
 		public bool LongPressed { get; set; }
 
-		public PersonGroupsListAdapter (Context context, List<PersonGroup> personGroups, bool itemCheckEnabled = false)
+		public PersonGroupsListAdapter (List<PersonGroup> personGroups, bool itemCheckEnabled = false)
 		{
-			this.context = context;
 			this.personGroups = personGroups;
 			this.itemCheckEnabled = itemCheckEnabled;
 
@@ -45,9 +44,9 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Shared.Adapters
 		{
 			if (convertView == null)
 			{
+				var layoutInflater = (LayoutInflater) Application.Context.GetSystemService (Context.LayoutInflaterService);
 				var layout = itemCheckEnabled ? Resource.Layout.item_person_group_with_checkbox : Resource.Layout.item_person_group;
-				var inflater = LayoutInflater.From (context);
-				convertView = inflater.Inflate (layout, parent, false);
+				convertView = layoutInflater.Inflate (layout, parent, false);
 			}
 
 			convertView.Id = position;

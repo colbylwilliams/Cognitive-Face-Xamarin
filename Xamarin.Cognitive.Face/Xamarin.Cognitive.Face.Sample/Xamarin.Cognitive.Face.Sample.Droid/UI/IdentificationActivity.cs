@@ -61,7 +61,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			var groups = await FaceClient.Shared.GetPersonGroups ();
 
 			var listView = FindViewById<ListView> (Resource.Id.list_person_groups_identify);
-			personGroupListAdapter = new PersonGroupsListAdapter (this, groups);
+			personGroupListAdapter = new PersonGroupsListAdapter (groups);
 			listView.Adapter = personGroupListAdapter;
 			listView.OnItemClickListener = this;
 

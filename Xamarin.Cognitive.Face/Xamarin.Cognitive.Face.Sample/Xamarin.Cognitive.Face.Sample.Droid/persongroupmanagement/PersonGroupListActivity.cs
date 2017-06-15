@@ -53,7 +53,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			done_and_save.Click += Done_And_Save_Click;
 
 			var groups = await FaceClient.Shared.GetPersonGroups ();
-			personGroupsListAdapter = new PersonGroupsListAdapter (this, groups, true);
+			personGroupsListAdapter = new PersonGroupsListAdapter (groups, true);
 			listView.Adapter = personGroupsListAdapter;
 
 			//reset current group

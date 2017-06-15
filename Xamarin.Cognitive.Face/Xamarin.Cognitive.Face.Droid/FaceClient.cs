@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -276,22 +275,6 @@ namespace Xamarin.Cognitive.Face
 			 {
 				 return Client.Detect (stream, true, true, attributes);
 
-			 });
-		}
-
-		public Task<Face.Droid.Contract.VerifyResult> Verify (UUID mFaceId0, UUID mFaceId1)
-		{
-			return Task.Run (() =>
-			 {
-				 return Client.Verify (mFaceId0, mFaceId1);
-			 });
-		}
-
-		public Task<Face.Droid.Contract.VerifyResult> Verify (UUID mFaceId, String mPersonGroupId, UUID mPersonId)
-		{
-			return Task.Run (() =>
-			 {
-				 return Client.Verify (mFaceId, mPersonGroupId, mPersonId);
 			 });
 		}
 

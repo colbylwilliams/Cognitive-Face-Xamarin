@@ -111,8 +111,8 @@ namespace Xamarin.Cognitive.Face.Droid.Extensions
 		public static Bitmap HighlightSelectedFaceThumbnail (Bitmap originalBitmap)
 		{
 			var bitmap = originalBitmap.Copy (Bitmap.Config.Argb8888, true);
-			var canvas = new Canvas (bitmap);
 
+			using (var canvas = new Canvas (bitmap))
 			using (var paint = new Paint ())
 			{
 				paint.AntiAlias = true;

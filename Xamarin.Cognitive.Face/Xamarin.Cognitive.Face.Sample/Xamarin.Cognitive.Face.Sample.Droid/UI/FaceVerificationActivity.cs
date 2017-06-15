@@ -144,7 +144,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 		{
 			var listView = (ListView) parent;
 			var faceListAdapter = listView.Adapter as FaceImageListAdapter;
-			var selectedFace = faceListAdapter.Faces [position];
+			var selectedFace = faceListAdapter [position];
 			var index = (int) listView.Tag;
 
 			if (selectedFace != Faces [0] && selectedFace != Faces [1])
@@ -248,7 +248,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 		{
 			try
 			{
-				AddLog ("Request: Detecting in image " + index);
+				AddLog ($"Request: Detecting in image {index}");
 				progressDialog.Show ();
 				progressDialog.SetMessage ("Detecting...");
 				SetInfo ("Detecting...");

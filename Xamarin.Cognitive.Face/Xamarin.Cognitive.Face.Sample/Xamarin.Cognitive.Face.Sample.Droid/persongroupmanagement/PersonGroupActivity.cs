@@ -192,8 +192,6 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			SetInfo (string.Empty);
 
 			var intent = new Intent (this, typeof (PersonActivity));
-			intent.PutExtra ("AddNewPerson", true);
-			intent.PutExtra ("PersonName", "");
 
 			StartActivity (intent);
 		}
