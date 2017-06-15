@@ -47,6 +47,28 @@ namespace Xamarin.Cognitive.Face
 		#region Group
 
 
+		public async Task<List<PersonGroup>> LoadGroupsWithPeople (bool forceRefresh = false)
+		{
+			try
+			{
+				//load all groups and people
+				var groups = await GetPersonGroups (forceRefresh);
+
+				foreach (var personGroup in groups)
+				{
+					await GetPeopleForGroup (personGroup, forceRefresh);
+				}
+
+				return groups;
+			}
+			catch (Exception ex)
+			{
+				Log.Error (ex);
+				throw;
+			}
+		}
+
+
 		public async Task<List<PersonGroup>> GetPersonGroups (bool forceRefresh = false)
 		{
 			try
