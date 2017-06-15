@@ -38,15 +38,15 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			progressDialog = new ProgressDialog (this);
 			progressDialog.SetTitle (Application.Context.GetString (Resource.String.progress_dialog_title));
 
-			SelectImageButtons[0] = FindViewById<Button> (Resource.Id.select_image_0);
-			SelectImageButtons[1] = FindViewById<Button> (Resource.Id.select_image_1);
+			SelectImageButtons [0] = FindViewById<Button> (Resource.Id.select_image_0);
+			SelectImageButtons [1] = FindViewById<Button> (Resource.Id.select_image_1);
 			view_log = FindViewById<Button> (Resource.Id.view_log);
 			verify = FindViewById<Button> (Resource.Id.verify);
 
-			ListViews[0] = FindViewById<ListView> (Resource.Id.list_faces_0);
-			ListViews[0].Tag = 0;
-			ListViews[1] = FindViewById<ListView> (Resource.Id.list_faces_1);
-			ListViews[1].Tag = 1;
+			ListViews [0] = FindViewById<ListView> (Resource.Id.list_faces_0);
+			ListViews [0].Tag = 0;
+			ListViews [1] = FindViewById<ListView> (Resource.Id.list_faces_1);
+			ListViews [1].Tag = 1;
 
 			ClearDetectedFaces (0);
 			ClearDetectedFaces (1);
@@ -60,8 +60,8 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 		{
 			base.OnResume ();
 
-			SelectImageButtons[0].Click += Select_Image_Click;
-			SelectImageButtons[1].Click += Select_Image_Click;
+			SelectImageButtons [0].Click += Select_Image_Click;
+			SelectImageButtons [1].Click += Select_Image_Click;
 			view_log.Click += View_Log_Click;
 			verify.Click += Verify_Click;
 		}
@@ -71,8 +71,8 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 		{
 			base.OnPause ();
 
-			SelectImageButtons[0].Click -= Select_Image_Click;
-			SelectImageButtons[1].Click -= Select_Image_Click;
+			SelectImageButtons [0].Click -= Select_Image_Click;
+			SelectImageButtons [1].Click -= Select_Image_Click;
 			view_log.Click -= View_Log_Click;
 			verify.Click -= Verify_Click;
 		}
@@ -128,7 +128,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 		void ClearDetectedFaces (int index)
 		{
-			ListViewAtIndex(index).Visibility = ViewStates.Gone;
+			ListViewAtIndex (index).Visibility = ViewStates.Gone;
 			ImageViewAtIndex (index).SetImageResource (Color.Transparent);
 		}
 
@@ -172,21 +172,21 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 		{
 			try
 			{
-				AddLog ($"Request: Verifying face {Faces[0].Id} and face {Faces[1].Id}");
+				AddLog ($"Request: Verifying face {Faces [0].Id} and face {Faces [1].Id}");
 				progressDialog.Show ();
 				progressDialog.SetMessage ("Verifying...");
 				SetInfo ("Verifying...");
 
-				var result = await FaceClient.Shared.Verify (Faces[0], Faces[1]);
+				var result = await FaceClient.Shared.Verify (Faces [0], Faces [1]);
 
 				if (result != null)
 				{
-					AddLog ($"Response: Success. Face {Faces[0].Id} and face {Faces[1].Id} {(result.IsIdentical ? "" : " don't")} belong to the same person");
+					AddLog ($"Response: Success. Face {Faces [0].Id} and face {Faces [1].Id} {(result.IsIdentical ? "" : " don't")} belong to the same person");
 
 					SetAllButtonEnabledStatus (true);
 
 					// Show verification result.
-			        string verificationResult = $"{(result.IsIdentical ? "The same person" : "Different persons")}. The confidence is {result.Confidence}";
+					string verificationResult = $"{(result.IsIdentical ? "The same person" : "Different persons")}. The confidence is {result.Confidence}";
 
 					SetInfo (verificationResult);
 				}
@@ -196,7 +196,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 				AddLog (e.Message);
 			}
 
-	        progressDialog.Dismiss ();
+			progressDialog.Dismiss ();
 		}
 
 
@@ -216,10 +216,10 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 		void SetSelectImageButtonEnabledStatus (bool isEnabled, int index)
 		{
-			SelectButtonAtIndex(index).Enabled = isEnabled;
+			SelectButtonAtIndex (index).Enabled = isEnabled;
 			view_log.Enabled = isEnabled;
 		}
-					        
+
 
 		void SetVerifyButtonEnabledStatus (bool isEnabled)
 		{
@@ -288,7 +288,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 				Bitmaps [index] = null;
 
-				if (Faces[0] != null && Faces[1] != null)
+				if (Faces [0] != null && Faces [1] != null)
 				{
 					SetVerifyButtonEnabledStatus (true);
 				}
