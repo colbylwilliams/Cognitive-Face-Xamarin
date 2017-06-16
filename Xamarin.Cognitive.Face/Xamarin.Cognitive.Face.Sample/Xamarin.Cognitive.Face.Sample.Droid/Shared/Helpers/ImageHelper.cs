@@ -205,6 +205,7 @@ namespace Xamarin.Cognitive.Face.Droid.Extensions
 					catch (Exception ex)
 					{
 						Log.Error (ex);
+						//TODO: add stock photo if/when this fails?
 					}
 				}
 			}

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using Android.Graphics;
+using Android.Runtime;
 using Java.Util;
 using Xamarin.Cognitive.Face.Droid;
 using Xamarin.Cognitive.Face.Model;
@@ -64,7 +65,6 @@ namespace Xamarin.Cognitive.Face.Extensions
 				Id = person.PersonId.ToString (),
 				Name = person.Name,
 				UserData = person.UserData,
-				//FaceIds = person.FaceIds?.Select (id => id.ToString ()).ToList ()
 				FaceIds = person.PersistedFaceIds?.Select (id => id.ToString ()).ToList ()
 			};
 		}
@@ -445,9 +445,11 @@ namespace Xamarin.Cognitive.Face.Extensions
 
 		public static GroupResult ToGroupResult (this Droid.Contract.GroupResult groupResult)
 		{
-			var groupingResult = new GroupResult
+			var typedList = ((JavaList) groupResult.Groups).JavaCast<JavaList<UUID []>> ();
+
+			var groupingResult = new GroupResult ()
 			{
-				Groups = groupResult.Groups.Cast<UUID []> ().Select ((grp, index) => new FaceGroup
+				Groups = typedList.Select ((grp, index) => new FaceGroup
 				{
 					Title = $"Face Group #{index + 1}",
 					FaceIds = grp.AsStrings ()
@@ -506,21 +508,6 @@ namespace Xamarin.Cognitive.Face.Extensions
 			face.UpdatePhotoPath ();
 			croppedImage.SaveAsJpeg (face.PhotoPath);
 		}
-
-
-		//public static void SavePhotoFromSource (this Shared.Face face, Bitmap sourceImage)
-		//{
-		//	using (var croppedFaceImg = sourceImage.Crop (face.FaceRectangleLarge ?? face.FaceRectangle))
-		//	{
-		//		face.SavePhotoFromCropped (croppedFaceImg);
-		//	}
-		//}
-
-
-		//public static UIImage GetImage (this Shared.Face face)
-		//{
-		//	return UIImage.FromFile (face.PhotoPath);
-		//}
 
 
 		public static TEnum AsEnum<TEnum> (this Java.Lang.Enum jEnum, int offset = 0)

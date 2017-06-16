@@ -10,21 +10,28 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Shared.Adapters
 {
 	public class FaceImageListAdapter : BaseAdapter<Model.Face>
 	{
-		readonly List<Bitmap> faceThumbnails;
+		readonly List<Bitmap> faceThumbnails = new List<Bitmap> ();
 		Bitmap highlightedBitmap;
 
-		public List<Model.Face> Faces { get; private set; }
+		public List<Model.Face> Faces { get; } = new List<Model.Face> ();
 
 		public int SelectedIndex { get; private set; } = -1;
 
+		public FaceImageListAdapter ()
+		{
+			//blank adapter, to be populated later
+		}
+
+
 		public FaceImageListAdapter (List<Model.Face> faces, Bitmap photo)
 		{
-			Faces = faces;
+			AddFaces (faces, photo);
+		}
 
-			if (faces != null && photo != null)
-			{
-				faceThumbnails = faces.GenerateThumbnails (photo);
-			}
+
+		public FaceImageListAdapter (List<Model.Face> faces, List<Bitmap> thumbnails)
+		{
+			AddFaces (faces, thumbnails);
 		}
 
 
@@ -34,6 +41,27 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Shared.Adapters
 			faceThumbnails?.ForEach (b => b.Dispose ());
 
 			base.Dispose (disposing);
+		}
+
+
+		public void AddFaces (List<Model.Face> faces, Bitmap photo)
+		{
+			if (faces != null && photo != null)
+			{
+				AddFaces (faces, faces.GenerateThumbnails (photo));
+			}
+		}
+
+
+		public void AddFaces (List<Model.Face> faces, List<Bitmap> thumbnails)
+		{
+			if (faces != null && thumbnails != null)
+			{
+				System.Diagnostics.Debug.Assert (thumbnails?.Count == faces?.Count, "Must have an equal count of faces and thumbnails");
+
+				Faces.AddRange (faces);
+				faceThumbnails.AddRange (thumbnails);
+			}
 		}
 
 
@@ -56,6 +84,24 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Shared.Adapters
 			}
 
 			return null;
+		}
+
+
+		public List<Bitmap> GetThumbnailsForFaceList (List<Model.Face> faces)
+		{
+			var list = new List<Bitmap> ();
+
+			foreach (var face in faces)
+			{
+				var index = Faces.IndexOf (face);
+
+				if (index > -1 && faceThumbnails.Count > index)
+				{
+					list.Add (faceThumbnails [index]);
+				}
+			}
+
+			return list;
 		}
 
 
