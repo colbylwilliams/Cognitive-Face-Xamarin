@@ -50,5 +50,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Model\VerifyResult.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\StringExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\Log.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\FindSimilarMatchMode.cs" />
   </ItemGroup>
 </Project>
