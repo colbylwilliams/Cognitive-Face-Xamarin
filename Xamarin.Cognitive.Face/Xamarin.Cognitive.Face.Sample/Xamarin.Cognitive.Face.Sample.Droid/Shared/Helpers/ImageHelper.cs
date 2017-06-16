@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using Android.Graphics;
 using NomadCode.UIExtensions;
-using Xamarin.Cognitive.Face.Droid.Contract;
 
 namespace Xamarin.Cognitive.Face.Droid.Extensions
 {
@@ -212,61 +211,5 @@ namespace Xamarin.Cognitive.Face.Droid.Extensions
 
 			return faceThumbnails;
 		}
-
-
-		#region Legacy
-
-
-		// Resize face rectangle, for better view for human
-		// To make the rectangle larger, faceRectEnlargeRatio should be larger than 1, recommend 1.3
-		static FaceRectangle CalculateFaceRectangle (
-						Bitmap bitmap, FaceRectangle faceRectangle, double faceRectEnlargeRatio)
-		{
-			// Get the resized side length of the face rectangle
-			double sideLength = faceRectangle.Width * faceRectEnlargeRatio;
-			sideLength = Math.Min (sideLength, bitmap.Width);
-			sideLength = Math.Min (sideLength, bitmap.Height);
-
-			// Make the left edge to left more.
-			double left = faceRectangle.Left
-					- faceRectangle.Width * (faceRectEnlargeRatio - 1.0) * 0.5;
-			left = Math.Max (left, 0.0);
-			left = Math.Min (left, bitmap.Width - sideLength);
-
-			// Make the top edge to top more.
-			double top = faceRectangle.Top
-					- faceRectangle.Height * (faceRectEnlargeRatio - 1.0) * 0.5;
-			top = Math.Max (top, 0.0);
-			top = Math.Min (top, bitmap.Height - sideLength);
-
-			// Shift the top edge to top more, for better view for human
-			double shiftTop = faceRectEnlargeRatio - 1.0;
-			shiftTop = Math.Max (shiftTop, 0.0);
-			shiftTop = Math.Min (shiftTop, 1.0);
-			top -= 0.15 * shiftTop * faceRectangle.Height;
-			top = Math.Max (top, 0.0);
-
-			// Set the result.
-			FaceRectangle result = new FaceRectangle ();
-			result.Left = (int) left;
-			result.Top = (int) top;
-			result.Width = (int) sideLength;
-			result.Height = (int) sideLength;
-
-			return result;
-		}
-
-
-		// Crop the face thumbnail out from the original image.
-		// For better view for human, face rectangles are resized to the rate faceRectEnlargeRatio.
-		public static Bitmap GenerateFaceThumbnail (Bitmap originalBitmap, FaceRectangle faceRectangle)
-		{
-			FaceRectangle faceRect = CalculateFaceRectangle (originalBitmap, faceRectangle, 1.3);
-
-			return Bitmap.CreateBitmap (originalBitmap, faceRect.Left, faceRect.Top, faceRect.Width, faceRect.Height);
-		}
-
-
-		#endregion
 	}
 }
