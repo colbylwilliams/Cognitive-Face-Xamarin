@@ -149,7 +149,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 			if (selectedFace != Faces [0] && selectedFace != Faces [1])
 			{
-				var image = faceListAdapter.GetThumbnailForFace (selectedFace);
+				var image = faceListAdapter.GetThumbnailForPosition (position);
 				ImageViewAtIndex (index).SetImageBitmap (image);
 
 				Faces [index] = selectedFace;
@@ -273,7 +273,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 				if (faces?.Count != 0)
 				{
 					Faces [index] = faces.First ();
-					ImageViewAtIndex (index).SetImageBitmap (faceListAdapter.GetThumbnailForFace (faces.First ()));
+					ImageViewAtIndex (index).SetImageBitmap (faceListAdapter.GetThumbnailForPosition (0));
 					faceListAdapter.SetSelectedIndex (0);
 				}
 				else

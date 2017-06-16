@@ -279,7 +279,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 				faceListAdapter.SetSelectedIndex (e.Position);
 
 				var imageView = FindViewById<ImageView> (Resource.Id.image_0);
-				imageView.SetImageBitmap (faceListAdapter.GetThumbnailForFace (faceListAdapter.SelectedFace));
+				imageView.SetImageBitmap (faceListAdapter.GetThumbnailForPosition (e.Position));
 
 				SetInfo ("");
 				SetVerifyButtonEnabledStatus ();
@@ -328,7 +328,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 					// Show the thumbnail of the default face.
 					var imageView = FindViewById<ImageView> (Resource.Id.image_0);
-					imageView.SetImageBitmap (faceListAdapter.GetThumbnailForFace (faces [0]));
+					imageView.SetImageBitmap (faceListAdapter.GetThumbnailForPosition (0));
 
 					SetVerifyButtonEnabledStatus ();
 				}

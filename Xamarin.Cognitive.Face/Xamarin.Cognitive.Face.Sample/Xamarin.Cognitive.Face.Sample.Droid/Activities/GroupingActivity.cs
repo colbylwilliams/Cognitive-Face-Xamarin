@@ -43,6 +43,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			view_log = FindViewById<Button> (Resource.Id.view_log);
 
 			faceListAdapter = new FaceImageListAdapter ();
+			FindViewById<GridView> (Resource.Id.all_faces).Adapter = faceListAdapter;
 
 			SetGroupButtonEnabledStatus (false);
 
@@ -80,8 +81,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 				if (bitmap != null)
 				{
-					var originalFaces = FindViewById (Resource.Id.all_faces);
-					originalFaces.Visibility = ViewStates.Visible;
+					FindViewById (Resource.Id.all_faces).Visibility = ViewStates.Visible;
 
 					var groupedFaces = FindViewById<ListView> (Resource.Id.grouped_faces);
 					var faceGroupsAdapter = new FaceGroupsAdapter (null, null);
@@ -126,8 +126,8 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 					faceListAdapter.AddFaces (faces, bitmap);
 
-					var listView = FindViewById<GridView> (Resource.Id.all_faces);
-					listView.Adapter = faceListAdapter;
+					//var listView = FindViewById<GridView> (Resource.Id.all_faces);
+					//listView.Adapter = faceListAdapter;
 
 					var textView = FindViewById<TextView> (Resource.Id.text_all_faces);
 					textView.Text = $"{faceListAdapter.Count} face{(faceListAdapter.Count != 1 ? "s" : "")} in total";
