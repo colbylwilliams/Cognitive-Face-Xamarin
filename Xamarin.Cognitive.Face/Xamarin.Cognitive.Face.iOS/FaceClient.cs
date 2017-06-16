@@ -410,7 +410,7 @@ namespace Xamarin.Cognitive.Face
 		}
 
 
-		internal Task<List<SimilarFaceResult>> FindSimilarInternal (string targetFaceId, string [] faceIds)
+		internal Task<List<SimilarFaceResult>> FindSimilarInternal (string targetFaceId, string [] faceIds, int maxCandidatesReturned = 1, FindSimilarMatchMode matchMode = FindSimilarMatchMode.MatchPerson)
 		{
 			var tcs = new TaskCompletionSource<List<SimilarFaceResult>> ();
 

@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Java.Util;
 using Xamarin.Cognitive.Face.Model;
 using Xamarin.Cognitive.Face.Extensions;
 using Xamarin.Cognitive.Face.Droid;
@@ -210,11 +209,11 @@ namespace Xamarin.Cognitive.Face
 		}
 
 
-		internal Task<List<SimilarFaceResult>> FindSimilarInternal (string targetFaceId, string [] faceIds, int maxCandidatesReturned = 1)
+		internal Task<List<SimilarFaceResult>> FindSimilarInternal (string targetFaceId, string [] faceIds, int maxCandidatesReturned = 1, FindSimilarMatchMode matchMode = FindSimilarMatchMode.MatchPerson)
 		{
 			return Task.Run (() =>
 			{
-				var results = Client.FindSimilar (targetFaceId.ToUUID (), faceIds.AsUUIDs (), maxCandidatesReturned);
+				var results = Client.FindSimilar (targetFaceId.ToUUID (), faceIds.AsUUIDs (), maxCandidatesReturned, matchMode.AsJavaEnum<FaceServiceClientFindSimilarMatchMode> ());
 
 				return results.Select (res => res.ToSimilarFaceResult ()).ToList ();
 			});
@@ -266,32 +265,5 @@ namespace Xamarin.Cognitive.Face
 
 
 		#endregion
-
-
-
-		public Task<Face.Droid.Contract.Face []> Detect (MemoryStream stream, bool returnFaceId, bool returnLandmarks, FaceServiceClientFaceAttributeType [] attributes)
-		{
-			return Task.Run (() =>
-			 {
-				 return Client.Detect (stream, true, true, attributes);
-
-			 });
-		}
-
-		public Task<Face.Droid.Contract.SimilarFace []> FindSimilar (UUID mFaceId, UUID [] mFaceIds, int mMaxNumOfCandidatesReturned)
-		{
-			return Task.Run (() =>
-			 {
-				 return Client.FindSimilar (mFaceId, mFaceIds, mMaxNumOfCandidatesReturned);
-			 });
-		}
-
-		public Task<Face.Droid.Contract.SimilarFace []> FindSimilar (UUID mFaceId, UUID [] mFaceIds, int mMaxNumOfCandidatesReturned, FaceServiceClientFindSimilarMatchMode mMode)
-		{
-			return Task.Run (() =>
-			 {
-				 return Client.FindSimilar (mFaceId, mFaceIds, mMaxNumOfCandidatesReturned, mMode);
-			 });
-		}
 	}
 }

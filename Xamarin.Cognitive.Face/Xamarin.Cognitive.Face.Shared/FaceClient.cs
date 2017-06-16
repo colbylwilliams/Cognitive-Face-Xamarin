@@ -491,20 +491,11 @@ namespace Xamarin.Cognitive.Face
 		}
 
 
-		public async Task<List<SimilarFaceResult>> FindSimilar (Model.Face targetFace, List<Model.Face> faceList)
+		public async Task<List<SimilarFaceResult>> FindSimilar (string targetFaceId, string [] faceIdList)
 		{
 			try
 			{
-				var faceIdList = faceList.Select (f => f.Id).ToArray ();
-
-				var results = await FindSimilarInternal (targetFace.Id, faceIdList);
-
-				foreach (var similarFaceResult in results)
-				{
-					similarFaceResult.Face = faceList.FirstOrDefault (f => f.Id == similarFaceResult.FaceId);
-				}
-
-				return results;
+				return await FindSimilarInternal (targetFaceId, faceIdList);
 			}
 			catch (Exception ex)
 			{
@@ -514,11 +505,32 @@ namespace Xamarin.Cognitive.Face
 		}
 
 
-		public async Task<List<SimilarFaceResult>> FindSimilar (string targetFaceId, string [] faceIdList)
+		public Task<List<SimilarFaceResult>> FindSimilar (Model.Face targetFace, List<Model.Face> faceList)
+		{
+			return FindSimilar (targetFace, faceList, 1, FindSimilarMatchMode.MatchPerson);
+		}
+
+
+		public Task<List<SimilarFaceResult>> FindSimilar (Model.Face targetFace, List<Model.Face> faceList, int maxCandidatesReturned)
+		{
+			return FindSimilar (targetFace, faceList, maxCandidatesReturned, FindSimilarMatchMode.MatchPerson);
+		}
+
+
+		public async Task<List<SimilarFaceResult>> FindSimilar (Model.Face targetFace, List<Model.Face> faceList, int maxCandidatesReturned = 1, FindSimilarMatchMode matchMode = FindSimilarMatchMode.MatchPerson)
 		{
 			try
 			{
-				return await FindSimilarInternal (targetFaceId, faceIdList);
+				var faceIdList = faceList.Select (f => f.Id).ToArray ();
+
+				var results = await FindSimilarInternal (targetFace.Id, faceIdList, maxCandidatesReturned, matchMode);
+
+				foreach (var similarFaceResult in results)
+				{
+					similarFaceResult.Face = faceList.FirstOrDefault (f => f.Id == similarFaceResult.FaceId);
+				}
+
+				return results;
 			}
 			catch (Exception ex)
 			{
