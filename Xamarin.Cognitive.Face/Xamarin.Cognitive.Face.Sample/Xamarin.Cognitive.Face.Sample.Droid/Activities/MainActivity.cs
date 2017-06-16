@@ -15,9 +15,10 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			  ScreenOrientation = ScreenOrientation.Portrait)]
 	public class MainActivity : AppCompatActivity
 	{
-		private Button detection, verification, grouping, findSimilarFace, identification = null;
-		private const int REQUEST_ANDROID_PERMISSIONS = 0;
-		private int permissions_granted = 0;
+		const int REQUEST_ANDROID_PERMISSIONS = 0;
+
+		Button detection, verification, grouping, findSimilarFace, identification;
+		int permissions_granted;
 
 		protected override void OnCreate (Bundle savedInstanceState)
 		{
@@ -52,13 +53,14 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			}
 		}
 
+
 		public override void OnRequestPermissionsResult (int requestCode, string [] permissions, Permission [] grantResults)
 		{
 			base.OnRequestPermissionsResult (requestCode, permissions, grantResults);
 
 			switch (requestCode)
 			{
-				case (int) REQUEST_ANDROID_PERMISSIONS:
+				case REQUEST_ANDROID_PERMISSIONS:
 
 					foreach (Permission permission in grantResults)
 					{
@@ -69,24 +71,26 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 					}
 
 					break;
-				default:
-					break;
 			}
+
 			CheckIfEnableButtons ();
 		}
 
-		private void CheckIfEnableButtons ()
+
+		void CheckIfEnableButtons ()
 		{
-			detection.Enabled = (permissions_granted == 2) ? true : false;
-			verification.Enabled = (permissions_granted == 2) ? true : false;
-			grouping.Enabled = (permissions_granted == 2) ? true : false;
-			findSimilarFace.Enabled = (permissions_granted == 2) ? true : false;
-			identification.Enabled = (permissions_granted == 2) ? true : false;
+			detection.Enabled = (permissions_granted == 2);
+			verification.Enabled = (permissions_granted == 2);
+			grouping.Enabled = (permissions_granted == 2);
+			findSimilarFace.Enabled = (permissions_granted == 2);
+			identification.Enabled = (permissions_granted == 2);
 		}
+
 
 		protected override void OnResume ()
 		{
 			base.OnResume ();
+
 			detection.Click += Detection_Click;
 			verification.Click += Verification_Click;
 			grouping.Click += Grouping_Click;
@@ -94,9 +98,11 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			identification.Click += Identification_Click;
 		}
 
+
 		protected override void OnPause ()
 		{
 			base.OnPause ();
+
 			detection.Click -= Detection_Click;
 			verification.Click -= Verification_Click;
 			grouping.Click -= Grouping_Click;
@@ -104,34 +110,39 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			identification.Click -= Identification_Click;
 		}
 
-		private void Detection_Click (object sender, System.EventArgs e)
+
+		void Detection_Click (object sender, System.EventArgs e)
 		{
-			Intent intent = new Intent (this, typeof (DetectionActivity));
-			this.StartActivity (intent);
+			var intent = new Intent (this, typeof (DetectionActivity));
+			StartActivity (intent);
 		}
 
-		private void Verification_Click (object sender, System.EventArgs e)
+
+		void Verification_Click (object sender, System.EventArgs e)
 		{
-			Intent intent = new Intent (this, typeof (VerificationMenuActivity));
-			this.StartActivity (intent);
+			var intent = new Intent (this, typeof (VerificationMenuActivity));
+			StartActivity (intent);
 		}
 
-		private void Grouping_Click (object sender, System.EventArgs e)
+
+		void Grouping_Click (object sender, System.EventArgs e)
 		{
-			Intent intent = new Intent (this, typeof (GroupingActivity));
-			this.StartActivity (intent);
+			var intent = new Intent (this, typeof (GroupingActivity));
+			StartActivity (intent);
 		}
 
-		private void FindSimilarFace_Click (object sender, System.EventArgs e)
+
+		void FindSimilarFace_Click (object sender, System.EventArgs e)
 		{
-			Intent intent = new Intent (this, typeof (FindSimilarFaceActivity));
-			this.StartActivity (intent);
+			var intent = new Intent (this, typeof (FindSimilarFaceActivity));
+			StartActivity (intent);
 		}
 
-		private void Identification_Click (object sender, System.EventArgs e)
+
+		void Identification_Click (object sender, System.EventArgs e)
 		{
-			Intent intent = new Intent (this, typeof (IdentificationActivity));
-			this.StartActivity (intent);
+			var intent = new Intent (this, typeof (IdentificationActivity));
+			StartActivity (intent);
 		}
 	}
 }

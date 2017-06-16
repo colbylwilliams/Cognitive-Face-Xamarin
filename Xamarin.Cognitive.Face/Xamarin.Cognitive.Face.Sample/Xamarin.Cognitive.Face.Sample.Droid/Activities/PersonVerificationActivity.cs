@@ -341,6 +341,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 				listView_faces.Adapter = faceListAdapter;
 				listView_faces.Visibility = ViewStates.Visible;
 
+				bitmap.Dispose ();
 				bitmap = null;
 			}
 			catch (Exception e)

@@ -146,6 +146,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 					SetGroupButtonEnabledStatus (false);
 				}
 
+				bitmap.Dispose ();
 				bitmap = null;
 			}
 			catch (Exception e)

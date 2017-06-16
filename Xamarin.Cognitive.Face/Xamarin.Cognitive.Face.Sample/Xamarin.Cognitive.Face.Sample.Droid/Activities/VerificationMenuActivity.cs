@@ -13,7 +13,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			  ScreenOrientation = ScreenOrientation.Portrait)]
 	public class VerificationMenuActivity : AppCompatActivity
 	{
-		private Button select_face_face_verification, select_face_person_verification = null;
+		Button select_face_face_verification, select_face_person_verification;
 
 		protected override void OnCreate (Bundle savedInstanceState)
 		{
@@ -29,23 +29,27 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			select_face_person_verification.Click += Select_Face_Person_Verification_Click;
 		}
 
+
 		protected override void OnDestroy ()
 		{
 			base.OnDestroy ();
+
 			select_face_face_verification.Click -= Select_Face_Face_Verification_Click;
 			select_face_person_verification.Click -= Select_Face_Person_Verification_Click;
 		}
 
+
 		void Select_Face_Face_Verification_Click (object sender, EventArgs e)
 		{
-			Intent intent = new Intent (this, typeof (FaceVerificationActivity));
-			this.StartActivity (intent);
+			var intent = new Intent (this, typeof (FaceVerificationActivity));
+			StartActivity (intent);
 		}
+
 
 		void Select_Face_Person_Verification_Click (object sender, EventArgs e)
 		{
-			Intent intent = new Intent (this, typeof (PersonVerificationActivity));
-			this.StartActivity (intent);
+			var intent = new Intent (this, typeof (PersonVerificationActivity));
+			StartActivity (intent);
 		}
 	}
 }

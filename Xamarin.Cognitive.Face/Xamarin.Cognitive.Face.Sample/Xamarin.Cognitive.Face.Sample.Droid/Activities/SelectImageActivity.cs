@@ -62,7 +62,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 					StartActivityForResult (intent, REQUEST_TAKE_PHOTO);
 				}
-				catch (IOException ex)
+				catch (Exception ex)
 				{
 					SetInfo (ex.Message);
 				}
