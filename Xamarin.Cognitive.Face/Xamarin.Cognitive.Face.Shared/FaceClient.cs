@@ -368,7 +368,7 @@ namespace Xamarin.Cognitive.Face
 
 				face.Id = id;
 
-				face.UpdatePhotoPath ();
+				face.UpdateThumbnailPath ();
 				person.Faces.Add (face);
 			}
 			catch (Exception ex)
@@ -438,6 +438,18 @@ namespace Xamarin.Cognitive.Face
 			{
 				Log.Error (ex);
 				throw;
+			}
+		}
+
+
+		public async Task LoadFacesForAllGroupPeople (PersonGroup personGroup)
+		{
+			foreach (var person in personGroup.People)
+			{
+				if (person.Faces?.Count == 0)
+				{
+					await GetFacesForPerson (person, personGroup);
+				}
 			}
 		}
 
