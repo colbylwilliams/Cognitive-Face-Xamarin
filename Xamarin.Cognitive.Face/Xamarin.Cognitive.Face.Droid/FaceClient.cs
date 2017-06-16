@@ -278,15 +278,6 @@ namespace Xamarin.Cognitive.Face
 			 });
 		}
 
-
-		public Task<Face.Droid.Contract.GroupResult> Group (UUID [] faceIds)
-		{
-			return Task.Run (() =>
-			 {
-				 return Client.Group (faceIds);
-			 });
-		}
-
 		public Task<Face.Droid.Contract.SimilarFace []> FindSimilar (UUID mFaceId, UUID [] mFaceIds, int mMaxNumOfCandidatesReturned)
 		{
 			return Task.Run (() =>
