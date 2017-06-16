@@ -124,8 +124,6 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 			var groupIds = checkedGroups.Select (g => g.Id).ToList ();
 
-			StorageHelper.DeletePersonGroups (groupIds, this);
-
 			personGroupsListAdapter.ResetCheckedItems ();
 			personGroupsListAdapter.NotifyDataSetChanged ();
 		}

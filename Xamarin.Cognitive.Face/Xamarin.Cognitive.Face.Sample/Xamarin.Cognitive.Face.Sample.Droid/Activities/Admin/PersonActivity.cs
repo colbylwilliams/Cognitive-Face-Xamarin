@@ -6,9 +6,11 @@ using Android.App;
 using Android.Content;
 using Android.Content.PM;
 using Android.OS;
+using Android.Support.V4.Content;
 using Android.Support.V7.App;
 using Android.Views;
 using Android.Widget;
+using Xamarin.Cognitive.Face.Extensions;
 using Xamarin.Cognitive.Face.Model;
 using Xamarin.Cognitive.Face.Shared;
 using Xamarin.Cognitive.Face.Shared.Extensions;
@@ -172,8 +174,6 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 					await FaceClient.Shared.UpdatePerson (Person, Group, editTextPersonName.Text);
 				}
 
-				StorageHelper.SetPersonName (Person.Id, editTextPersonName.Text, Group.Id, this);
-
 				FaceState.Current.CurrentPerson = null;
 
 				Finish ();
@@ -221,8 +221,6 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			}
 
 			var faceIds = checkedFaces.Select (f => f.Id).ToList ();
-
-			StorageHelper.DeleteFaces (faceIds, Person.Id, this);
 
 			faceGridViewAdapter.ResetCheckedItems ();
 			faceGridViewAdapter.NotifyDataSetChanged ();
@@ -357,9 +355,17 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 				convertView.Id = position;
 
 				var face = GetFace (position);
+				var thumbnail = face?.GetThumbnailImage ();
 
-				var uri = global::Android.Net.Uri.Parse (StorageHelper.GetFaceUri (face.Id, context));
-				convertView.FindViewById<ImageView> (Resource.Id.image_face).SetImageURI (uri);
+				if (thumbnail != null)
+				{
+					convertView.FindViewById<ImageView> (Resource.Id.image_face).SetImageBitmap (thumbnail);
+				}
+				else
+				{
+					var drawable = ContextCompat.GetDrawable (context, Resource.Drawable.select_image);
+					convertView.FindViewById<ImageView> (Resource.Id.image_face).SetImageDrawable (drawable);
+				}
 
 				var checkBox = convertView.FindViewById<CheckBox> (Resource.Id.checkbox_face);
 

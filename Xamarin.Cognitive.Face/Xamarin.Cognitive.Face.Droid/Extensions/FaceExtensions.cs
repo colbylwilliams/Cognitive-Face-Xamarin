@@ -128,7 +128,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 				thatFace.Landmarks = thisFace.FaceLandmarks?.ToFaceLandmarks ();
 			}
 
-			thatFace.UpdatePhotoPath ();
+			thatFace.UpdateThumbnailPath ();
 
 			return thatFace;
 		}
@@ -142,7 +142,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 				UserData = personFace.UserData
 			};
 
-			face.UpdatePhotoPath ();
+			face.UpdateThumbnailPath ();
 
 			return face;
 		}
@@ -522,17 +522,28 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static void UpdatePhotoPath (this Model.Face face)
+		public static void UpdateThumbnailPath (this Model.Face face)
 		{
 			var filePath = System.IO.Path.Combine (docsDir, face.FileName);
-			face.PhotoPath = filePath;
+			face.ThumbnailPath = filePath;
 		}
 
 
-		public static void SavePhotoFromCropped (this Model.Face face, Bitmap croppedImage)
+		public static void SaveThumbnailFromCropped (this Model.Face face, Bitmap croppedImage)
 		{
-			face.UpdatePhotoPath ();
-			croppedImage.SaveAsJpeg (face.PhotoPath);
+			face.UpdateThumbnailPath ();
+			croppedImage.SaveAsJpeg (face.ThumbnailPath);
+		}
+
+
+		public static Bitmap GetThumbnailImage (this Model.Face face)
+		{
+			if (!string.IsNullOrEmpty (face.ThumbnailPath))
+			{
+				return BitmapFactory.DecodeFile (face.ThumbnailPath);
+			}
+
+			return null;
 		}
 
 

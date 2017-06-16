@@ -10,6 +10,7 @@ using Android.Support.V4.Content;
 using Android.Support.V7.App;
 using Android.Views;
 using Android.Widget;
+using Xamarin.Cognitive.Face.Extensions;
 using Xamarin.Cognitive.Face.Model;
 using Xamarin.Cognitive.Face.Shared;
 using Xamarin.Cognitive.Face.Shared.Extensions;
@@ -68,13 +69,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 						await FaceClient.Shared.GetPeopleForGroup (Group);
 					}
 
-					foreach (var person in Group.People)
-					{
-						if (person.Faces?.Count == 0)
-						{
-							await FaceClient.Shared.GetFacesForPerson (person, Group);
-						}
-					}
+					await FaceClient.Shared.LoadFacesForAllGroupPeople (Group);
 
 					personGridViewAdapter = new PersonGridViewAdapter (Group, this);
 					gridView.Adapter = personGridViewAdapter;
@@ -225,8 +220,6 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 					return;
 				}
 
-				StorageHelper.SetPersonGroupName (Group.Id, newPersonGroupName, this);
-
 				if (saveAndTrainPersonGroup)
 				{
 					await FaceClient.Shared.UpdatePersonGroup (Group, editTextPersonGroupName.Text);
@@ -287,8 +280,6 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			}
 
 			var peopleIds = checkedPeople.Select (p => p.Id).ToList ();
-
-			StorageHelper.DeletePersons (peopleIds, Group.Id, this);
 
 			personGridViewAdapter.ResetCheckedItems ();
 			personGridViewAdapter.NotifyDataSetChanged ();
@@ -423,16 +414,13 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 				convertView.Id = position;
 
 				var person = GetPerson (position);
+				var face = person.Faces.FirstOrDefault ();
 
-				ICollection<string> faceIdSet = StorageHelper.GetAllFaceIds (person.Id, context);
+				var thumbnail = face?.GetThumbnailImage ();
 
-				if (faceIdSet.Count != 0)
+				if (thumbnail != null)
 				{
-					foreach (string id in faceIdSet)
-					{
-						var uri = global::Android.Net.Uri.Parse (StorageHelper.GetFaceUri (id, context));
-						convertView.FindViewById<ImageView> (Resource.Id.image_person).SetImageURI (uri);
-					}
+					convertView.FindViewById<ImageView> (Resource.Id.image_person).SetImageBitmap (thumbnail);
 				}
 				else
 				{

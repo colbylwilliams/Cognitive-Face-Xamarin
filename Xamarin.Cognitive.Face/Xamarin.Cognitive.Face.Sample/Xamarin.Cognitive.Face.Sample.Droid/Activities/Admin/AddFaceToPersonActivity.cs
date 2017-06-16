@@ -139,11 +139,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 						await FaceClient.Shared.AddFaceForPerson (Person, Group, face, stream);
 
 						var thumbnail = faceGridViewAdapter.GetThumbnail (face);
-						face.SavePhotoFromCropped (thumbnail);
-
-						//legacy
-						var uri = global::Android.Net.Uri.Parse (face.PhotoPath);
-						StorageHelper.SetFaceUri (face.Id, uri.ToString (), Person.Id, this);
+						face.SaveThumbnailFromCropped (thumbnail);
 					}
 				}
 
