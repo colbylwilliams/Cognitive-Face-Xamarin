@@ -15,7 +15,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 
 		public void SetResult (IdentificationResult identifyResult)
 		{
-			FaceImageView.Image = identifyResult.CandidateResult?.Person?.Faces?.FirstOrDefault ()?.GetImage ();
+			FaceImageView.Image = identifyResult.CandidateResult?.Person?.Faces?.FirstOrDefault ()?.GetThumbnailImage ();
 			PersonNameLabel.Text = identifyResult.CandidateResult?.Person?.Name;
 			ConfidenceLabel.Text = $"Confidence: {identifyResult.CandidateResult?.Confidence.ToString ()}";
 		}

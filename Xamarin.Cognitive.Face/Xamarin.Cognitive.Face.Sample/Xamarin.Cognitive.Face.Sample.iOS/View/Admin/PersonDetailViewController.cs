@@ -206,7 +206,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 
 				await FaceClient.Shared.AddFaceForPerson (Person, Group, face, sourceImage.AsStream);
 
-				face.SavePhotoFromSource (sourceImage);
+				face.SaveThumbnailFromSource (sourceImage);
 
 				this.ShowSimpleHUD ("Face added for this person");
 

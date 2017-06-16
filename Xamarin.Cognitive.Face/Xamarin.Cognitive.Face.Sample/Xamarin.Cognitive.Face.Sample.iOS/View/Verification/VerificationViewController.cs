@@ -59,7 +59,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 
 				PersonNameLabel.Text = FaceState.Current.Verification.Person.Name;
 				PersonImageView.Image = (FaceState.Current.Verification.Face ??
-										 FaceState.Current.Verification.Person.Faces.FirstOrDefault ())?.GetImage ();
+										 FaceState.Current.Verification.Person.Faces.FirstOrDefault ())?.GetThumbnailImage ();
 			}
 		}
 

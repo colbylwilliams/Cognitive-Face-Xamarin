@@ -27,7 +27,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 				if (face != null)
 				{
 					TextView.Text = $"Face #{faceIndex + 1}";
-					ImageView.Image = face.GetImage ();
+					ImageView.Image = face.GetThumbnailImage ();
 					ImageView.RemoveBorder ();
 				}
 			}
