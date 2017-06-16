@@ -6,7 +6,7 @@ using NomadCode.UIExtensions;
 
 namespace Xamarin.Cognitive.Face.Droid.Extensions
 {
-	public static class ImageHelper
+	public static class ImageExtensions
 	{
 		/// <summary>
 		/// Draw detected face rectangles in the original image. And return the image drawn.
@@ -16,7 +16,7 @@ namespace Xamarin.Cognitive.Face.Droid.Extensions
 		/// <param name="originalBitmap">Original bitmap.</param>
 		/// <param name="faces">Faces.</param>
 		/// <param name="drawLandmarks">If set to <c>true</c> draw landmarks.</param>
-		public static Bitmap DrawFaceRectanglesOnBitmap (Bitmap originalBitmap, IEnumerable<Model.Face> faces, bool drawLandmarks, double faceRectEnlargeRatio = FACE_RECT_SCALE_RATIO)
+		public static Bitmap DrawFaceRectangles (this Bitmap originalBitmap, IEnumerable<Model.Face> faces, bool drawLandmarks, double faceRectEnlargeRatio = FACE_RECT_SCALE_RATIO)
 		{
 			var bitmap = originalBitmap.Copy (Bitmap.Config.Argb8888, true);
 
@@ -103,22 +103,23 @@ namespace Xamarin.Cognitive.Face.Droid.Extensions
 
 
 		/// <summary>
-		/// Highlight the selected face thumbnail in face list.
+		/// Draws a highlight around the face thumbnail.
 		/// </summary>
-		/// <returns>The selected face thumbnail.</returns>
-		/// <param name="originalBitmap">Original bitmap.</param>
-		public static Bitmap HighlightSelectedFaceThumbnail (Bitmap originalBitmap)
+		/// <returns>The highlighted face thumbnail.  Note this is a new bitmap and the original is not disposed.</returns>
+		/// <param name="thumbnail">Original bitmap.</param>
+		/// <param name="colorHex">The hex code of the desired color to highlight with.</param>
+		public static Bitmap AddHighlight (this Bitmap thumbnail, string colorHex = "#3399FF")
 		{
-			var bitmap = originalBitmap.Copy (Bitmap.Config.Argb8888, true);
+			var bitmap = thumbnail.Copy (Bitmap.Config.Argb8888, true);
 
 			using (var canvas = new Canvas (bitmap))
 			using (var paint = new Paint ())
 			{
 				paint.AntiAlias = true;
-				paint.Color = global::Android.Graphics.Color.ParseColor ("#3399FF");
+				paint.Color = global::Android.Graphics.Color.ParseColor (colorHex);
 				paint.SetStyle (Paint.Style.Stroke);
 
-				int stokeWidth = Math.Max (originalBitmap.Width, originalBitmap.Height) / 10;
+				int stokeWidth = Math.Max (thumbnail.Width, thumbnail.Height) / 10;
 
 				if (stokeWidth == 0)
 				{

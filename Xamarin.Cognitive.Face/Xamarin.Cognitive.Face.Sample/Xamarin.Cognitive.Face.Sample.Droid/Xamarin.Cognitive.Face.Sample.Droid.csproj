@@ -116,10 +116,9 @@
     <Compile Include="Activities\PersonVerificationActivity.cs" />
     <Compile Include="Activities\SelectImageActivity.cs" />
     <Compile Include="Activities\VerificationMenuActivity.cs" />
-    <Compile Include="Shared\Helpers\ImageHelper.cs" />
     <Compile Include="Shared\Helpers\LogHelper.cs" />
-    <Compile Include="Shared\Helpers\StorageHelper.cs" />
     <Compile Include="Shared\View\EmbeddedGridView.cs" />
+    <Compile Include="Extensions\ImageExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />

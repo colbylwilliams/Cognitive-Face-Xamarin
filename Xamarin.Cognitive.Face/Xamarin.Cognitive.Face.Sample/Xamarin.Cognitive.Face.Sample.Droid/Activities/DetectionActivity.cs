@@ -147,7 +147,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 					AddLog ($"Response: Success. {detectionResult} in {imageUri}");
 
 					var image = FindViewById<ImageView> (Resource.Id.image);
-					image.SetImageBitmap (ImageHelper.DrawFaceRectanglesOnBitmap (bitmap, faces, true));
+					image.SetImageBitmap (bitmap.DrawFaceRectangles (faces, true));
 
 					var faceListAdapter = new FaceListAdapter (faces, bitmap);
 					list_detected_faces.Adapter = faceListAdapter;
@@ -165,6 +165,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			SetDetectButtonEnabledStatus (false);
 
 			imageUri = null;
+			bitmap.Dispose ();
 			bitmap = null;
 		}
 

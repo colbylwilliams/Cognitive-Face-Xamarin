@@ -140,7 +140,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Shared.Adapters
 
 			if (SelectedIndex == position)
 			{
-				highlightedBitmap = ImageHelper.HighlightSelectedFaceThumbnail (thumbnailToShow);
+				highlightedBitmap = thumbnailToShow.AddHighlight ();
 				thumbnailToShow = highlightedBitmap;
 			}
 
