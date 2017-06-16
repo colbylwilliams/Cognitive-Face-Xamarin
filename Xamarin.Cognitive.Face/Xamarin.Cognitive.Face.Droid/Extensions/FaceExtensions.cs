@@ -35,9 +35,35 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
+		public static UUID ToUUID (this string Id)
+		{
+			return UUID.FromString (Id);
+		}
+
+
 		public static List<string> AsStrings (this IEnumerable<UUID> ids)
 		{
 			return ids.Select (id => id.ToString ()).ToList ();
+		}
+
+
+		public static TEnum AsEnum<TEnum> (this Java.Lang.Enum jEnum, int offset = 0)
+		{
+			return (TEnum) Enum.ToObject (typeof (TEnum), jEnum.Ordinal () + offset);
+		}
+
+
+		public static TJEnum AsJavaEnum<TJEnum> (this Enum enumValue, bool lowerCaseLeadingLetter = true)
+		where TJEnum : Java.Lang.Enum
+		{
+			var enumString = enumValue.ToString ();
+
+			if (lowerCaseLeadingLetter)
+			{
+				enumString = enumString.FirstCharacterToLower ();
+			}
+
+			return (TJEnum) Java.Lang.Enum.ValueOf (Java.Lang.Class.FromType (typeof (TJEnum)), enumString);
 		}
 
 
@@ -507,18 +533,6 @@ namespace Xamarin.Cognitive.Face.Extensions
 		{
 			face.UpdatePhotoPath ();
 			croppedImage.SaveAsJpeg (face.PhotoPath);
-		}
-
-
-		public static TEnum AsEnum<TEnum> (this Java.Lang.Enum jEnum, int offset = 0)
-		{
-			return (TEnum) Enum.ToObject (typeof (TEnum), jEnum.Ordinal () + offset);
-		}
-
-
-		public static UUID ToUUID (this string Id)
-		{
-			return UUID.FromString (Id);
 		}
 
 
