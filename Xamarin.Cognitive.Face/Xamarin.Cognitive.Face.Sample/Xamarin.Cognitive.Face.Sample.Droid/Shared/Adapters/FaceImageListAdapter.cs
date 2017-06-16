@@ -61,6 +61,8 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Shared.Adapters
 
 				Faces.AddRange (faces);
 				faceThumbnails.AddRange (thumbnails);
+
+				NotifyDataSetChanged ();
 			}
 		}
 
@@ -74,16 +76,22 @@ namespace Xamarin.Cognitive.Face.Sample.Droid.Shared.Adapters
 		public Model.Face SelectedFace => SelectedIndex > -1 ? Faces [SelectedIndex] : null;
 
 
-		public Bitmap GetThumbnailForFace (Model.Face face)
+		public Bitmap GetThumbnailForPosition (int index)
 		{
-			var index = Faces.IndexOf (face);
-
 			if (index > -1 && faceThumbnails.Count > index)
 			{
 				return faceThumbnails [index];
 			}
 
 			return null;
+		}
+
+
+		public Bitmap GetThumbnailForFace (Model.Face face)
+		{
+			var index = Faces.IndexOf (face);
+
+			return GetThumbnailForPosition (index);
 		}
 
 
