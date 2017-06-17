@@ -51,7 +51,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 			ClearDetectedFaces ();
 			SetVerifyButtonEnabledStatus (false);
-			LogHelper.ClearVerificationLog ();
+			LogHelper.ClearLog (LogType.Verification);
 		}
 
 
@@ -365,7 +365,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 		void AddLog (String log)
 		{
-			LogHelper.AddVerificationLog (log);
+			LogHelper.AddLog (LogType.Verification, log);
 		}
 
 

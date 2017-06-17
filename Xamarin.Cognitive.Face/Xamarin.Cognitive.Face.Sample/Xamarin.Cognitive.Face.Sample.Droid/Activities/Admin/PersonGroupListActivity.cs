@@ -102,7 +102,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 		void AddLog (string log)
 		{
-			LogHelper.AddIdentificationLog (log);
+			LogHelper.AddLog (LogType.Admin, log);
 		}
 
 

@@ -50,7 +50,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			identify = FindViewById<Button> (Resource.Id.identify);
 			view_log = FindViewById<Button> (Resource.Id.view_log);
 
-			LogHelper.ClearIdentificationLog ();
+			LogHelper.ClearLog (LogType.Identification);
 		}
 
 
@@ -185,7 +185,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 		void AddLog (string log)
 		{
-			LogHelper.AddIdentificationLog (log);
+			LogHelper.AddLog (LogType.Identification, log);
 		}
 
 

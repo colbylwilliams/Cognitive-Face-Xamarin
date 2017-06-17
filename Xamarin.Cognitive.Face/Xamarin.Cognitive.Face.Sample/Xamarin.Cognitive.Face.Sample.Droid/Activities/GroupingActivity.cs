@@ -47,7 +47,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 			SetGroupButtonEnabledStatus (false);
 
-			LogHelper.ClearGroupingLog ();
+			LogHelper.ClearLog (LogType.Grouping);
 		}
 
 
@@ -248,7 +248,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 		void AddLog (string log)
 		{
-			LogHelper.AddGroupingLog (log);
+			LogHelper.AddLog (LogType.Grouping, log);
 		}
 
 

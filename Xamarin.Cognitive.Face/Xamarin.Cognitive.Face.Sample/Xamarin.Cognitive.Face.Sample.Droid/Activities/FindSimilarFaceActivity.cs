@@ -51,7 +51,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			faceListAdapter = new FaceImageListAdapter ();
 			FindViewById<GridView> (Resource.Id.all_faces).Adapter = faceListAdapter;
 
-			LogHelper.ClearFindSimilarFaceLog ();
+			LogHelper.ClearLog (LogType.FindSimilarFaces);
 		}
 
 
@@ -323,9 +323,9 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 		}
 
 
-		void AddLog (string _log)
+		void AddLog (string log)
 		{
-			LogHelper.AddFindSimilarFaceLog (_log);
+			LogHelper.AddLog (LogType.FindSimilarFaces, log);
 		}
 
 

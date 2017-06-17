@@ -43,7 +43,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 			view_log = FindViewById<Button> (Resource.Id.view_log);
 
 			SetDetectButtonEnabledStatus (false);
-			LogHelper.ClearDetectionLog ();
+			LogHelper.ClearLog (LogType.Detection);
 		}
 
 
@@ -198,9 +198,9 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 		}
 
 
-		void AddLog (string _log)
+		void AddLog (string log)
 		{
-			LogHelper.AddDetectionLog (_log);
+			LogHelper.AddLog (LogType.Detection, log);
 		}
 
 
