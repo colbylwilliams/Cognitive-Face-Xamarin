@@ -11,7 +11,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 	public partial class GroupingResultCollectionViewController : BaseCollectionViewController
 	{
 		List<FaceGroup> Results;
-		Dictionary<Model.Face, UIImage> faceImages;
+		Func<Model.Face, UIImage> thumbnailProvider;
 
 		public GroupingResultCollectionViewController (IntPtr handle) : base (handle)
 		{
@@ -20,16 +20,15 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 
 		protected override void Dispose (bool disposing)
 		{
-			faceImages?.Clear ();
-			faceImages = null;
+			thumbnailProvider = null;
 
 			base.Dispose (disposing);
 		}
 
 
-		public void SetFaceGroupResults (GroupResult groupResult, Dictionary<Model.Face, UIImage> faceImages)
+		public void SetFaceGroupResults (GroupResult groupResult, Func<Model.Face, UIImage> thumbnailProvider)
 		{
-			this.faceImages = faceImages;
+			this.thumbnailProvider = thumbnailProvider;
 
 			if (groupResult.MessyGroup?.Faces.Count > 0)
 			{
@@ -65,10 +64,9 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 		{
 			var cell = collectionView.Dequeue<FaceCVC> (indexPath);
 			var face = Results [indexPath.Section].Faces [indexPath.Row];
+			var thumbnail = thumbnailProvider (face);
 
-			faceImages.TryGetValue (face, out UIImage image);
-
-			cell.SetFaceImage (face, image);
+			cell.SetFaceImage (face, thumbnail);
 
 			return cell;
 		}

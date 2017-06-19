@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Foundation;
 using NomadCode.UIExtensions;
 using UIKit;
-using Xamarin.Cognitive.Face.Extensions;
 using Xamarin.Cognitive.Face.Sample.iOS.Extensions;
 using Xamarin.Cognitive.Face.Shared.Extensions;
 
@@ -108,13 +107,11 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 
 				var groupResult = await FaceClient.Shared.GroupFaces (FaceSelectionController.Faces);
 
-				var faceImages = groupResult.GetThumbnails (FaceSelectionController.GetThumbnailForFace);
-
 				this.HideHUD ();
 
 				if (groupResult.HasGroups)
 				{
-					GroupResultCVC.SetFaceGroupResults (groupResult, faceImages);
+					GroupResultCVC.SetFaceGroupResults (groupResult, FaceSelectionController.GetThumbnailForFace);
 				}
 				else
 				{

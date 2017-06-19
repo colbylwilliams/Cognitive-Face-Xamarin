@@ -82,26 +82,5 @@ namespace Xamarin.Cognitive.Face.Extensions
 		{
 			return UIImage.FromFile (face.ThumbnailPath);
 		}
-
-
-		public static Dictionary<Model.Face, UIImage> GetThumbnails (this GroupResult groupResult, Func<Model.Face, UIImage> imageProvider)
-		{
-			var faceImages = new Dictionary<Model.Face, UIImage> ();
-
-			foreach (var faceGroup in groupResult.Groups)
-			{
-				foreach (var face in faceGroup.Faces)
-				{
-					faceImages.Add (face, imageProvider (face));
-				}
-			}
-
-			foreach (var face in groupResult.MessyGroup?.Faces)
-			{
-				faceImages.Add (face, imageProvider (face));
-			}
-
-			return faceImages;
-		}
 	}
 }

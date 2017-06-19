@@ -9,7 +9,6 @@
     <Import_RootNamespace>Xamarin.Cognitive.Face.Sample.Shared</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)Extensions\StringExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\TaskExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\TaskQueue.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FaceState.cs" />

@@ -125,9 +125,6 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 					faceListAdapter.AddFaces (faces, bitmap);
 
-					//var listView = FindViewById<GridView> (Resource.Id.all_faces);
-					//listView.Adapter = faceListAdapter;
-
 					var textView = FindViewById<TextView> (Resource.Id.text_all_faces);
 					textView.Text = $"{faceListAdapter.Count} face{(faceListAdapter.Count != 1 ? "s" : "")} in total";
 				}
