@@ -21,6 +21,14 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 		}
 
 
+		public override void ViewDidLoad ()
+		{
+			base.ViewDidLoad ();
+
+			GroupsTableController.RestoreSelectionOnAppear = false;
+		}
+
+
 		public override void ViewWillAppear (bool animated)
 		{
 			base.ViewWillAppear (animated);

@@ -53,20 +53,9 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 			DetectedFaces = detectedFaces;
 			SourceImage = sourceImage;
 
-			addThumbnails (detectedFaces);
+			thumbnails = detectedFaces.GenerateThumbnails (sourceImage);
 
 			TableView.ReloadData ();
-		}
-
-
-		void addThumbnails (List<Model.Face> detectedFaces)
-		{
-			thumbnails = new List<UIImage> ();
-
-			foreach (var face in detectedFaces)
-			{
-				thumbnails.Add (face.CreateThumbnail (SourceImage));
-			}
 		}
 
 

@@ -108,7 +108,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 
 				var groupResult = await FaceClient.Shared.GroupFaces (FaceSelectionController.Faces);
 
-				var faceImages = groupResult.GetThumbnails (FaceSelectionController.GetImageForFace);
+				var faceImages = groupResult.GetThumbnails (FaceSelectionController.GetThumbnailForFace);
 
 				this.HideHUD ();
 

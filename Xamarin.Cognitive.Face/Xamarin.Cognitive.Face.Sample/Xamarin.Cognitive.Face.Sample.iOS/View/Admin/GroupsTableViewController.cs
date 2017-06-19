@@ -16,6 +16,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 
 		public bool AllowDelete { get; set; }
 		public bool AutoSelect { get; set; }
+		public bool RestoreSelectionOnAppear { get; set; } = true;
 
 		public PersonGroup SelectedPersonGroup { get; private set; }
 
@@ -75,7 +76,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 					}
 				}
 			}
-			else if (SelectedPersonGroup != null)
+			else if (SelectedPersonGroup != null && RestoreSelectionOnAppear)
 			{
 				var selectedIndex = Groups.IndexOf (SelectedPersonGroup);
 

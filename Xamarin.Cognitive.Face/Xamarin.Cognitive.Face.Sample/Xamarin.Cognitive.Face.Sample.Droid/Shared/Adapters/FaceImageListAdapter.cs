@@ -4,7 +4,7 @@ using Android.Content;
 using Android.Graphics;
 using Android.Views;
 using Android.Widget;
-using Xamarin.Cognitive.Face.Droid.Extensions;
+using Xamarin.Cognitive.Face.Extensions;
 
 namespace Xamarin.Cognitive.Face.Sample.Droid.Shared.Adapters
 {

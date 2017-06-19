@@ -10,8 +10,6 @@ using Android.OS;
 using Android.Support.V7.App;
 using Android.Views;
 using Android.Widget;
-using NomadCode.UIExtensions;
-using Xamarin.Cognitive.Face.Droid.Extensions;
 using Xamarin.Cognitive.Face.Extensions;
 using Xamarin.Cognitive.Face.Model;
 using Xamarin.Cognitive.Face.Shared;
@@ -139,7 +137,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 						await FaceClient.Shared.AddFaceForPerson (Person, Group, face, stream);
 
 						var thumbnail = faceGridViewAdapter.GetThumbnail (face);
-						face.SaveThumbnailFromCropped (thumbnail);
+						face.SaveThumbnail (thumbnail);
 					}
 				}
 

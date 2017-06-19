@@ -183,7 +183,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 
 				if (result.IsIdentical)
 				{
-					this.ShowSimpleAlert (successMsg.Fmt (result.Confidence));
+					this.ShowSimpleAlert (string.Format (successMsg, result.Confidence));
 				}
 				else
 				{

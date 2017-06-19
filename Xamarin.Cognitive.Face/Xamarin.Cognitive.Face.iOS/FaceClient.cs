@@ -156,7 +156,7 @@ namespace Xamarin.Cognitive.Face
 			var tcs = new TaskCompletionSource<List<PersonGroup>> ();
 
 			Client.ListPersonGroupsWithCompletion (
-				(personGroups, error) => AdaptListResultCallback (error, tcs, personGroups, FaceExtensions.ToPersonGroup))
+				(personGroups, error) => AdaptListResultCallback (error, tcs, personGroups, MappingExtensions.ToPersonGroup))
 				  .Resume ();
 
 			return tcs.Task;
@@ -169,7 +169,7 @@ namespace Xamarin.Cognitive.Face
 
 			Client.GetPersonGroupWithPersonGroupId (
 				personGroupId,
-				(personGroup, error) => AdaptResultResultCallback (error, tcs, personGroup, FaceExtensions.ToPersonGroup))
+				(personGroup, error) => AdaptResultResultCallback (error, tcs, personGroup, MappingExtensions.ToPersonGroup))
 				  .Resume ();
 
 			return tcs.Task;
@@ -238,7 +238,7 @@ namespace Xamarin.Cognitive.Face
 
 			Client.GetPersonGroupTrainingStatusWithPersonGroupId (
 				personGroupId,
-				(trainingStatus, error) => AdaptResultResultCallback (error, tcs, trainingStatus, FaceExtensions.ToTrainingStatus,
+				(trainingStatus, error) => AdaptResultResultCallback (error, tcs, trainingStatus, MappingExtensions.ToTrainingStatus,
 		 	(ErrorDetailException ede) =>
 			{
 				if (ede.ErrorDetail.Code == ErrorCodes.TrainingStatus.PersonGroupNotTrained)
@@ -267,7 +267,7 @@ namespace Xamarin.Cognitive.Face
 
 			Client.ListPersonsWithPersonGroupId (
 				personGroupId,
-				(people, error) => AdaptListResultCallback (error, tcs, people, FaceExtensions.ToPerson))
+				(people, error) => AdaptListResultCallback (error, tcs, people, MappingExtensions.ToPerson))
 				  .Resume ();
 
 			return tcs.Task;
@@ -326,7 +326,7 @@ namespace Xamarin.Cognitive.Face
 			Client.GetPersonWithPersonGroupId (
 				personGroupId,
 				personId,
-				(person, error) => AdaptResultResultCallback (error, tcs, person, FaceExtensions.ToPerson))
+				(person, error) => AdaptResultResultCallback (error, tcs, person, MappingExtensions.ToPerson))
 				  .Resume ();
 
 			return tcs.Task;
@@ -376,7 +376,7 @@ namespace Xamarin.Cognitive.Face
 				personGroupId,
 				personId,
 				persistedFaceId,
-				(face, error) => AdaptResultResultCallback (error, tcs, face, FaceExtensions.ToFace))
+				(face, error) => AdaptResultResultCallback (error, tcs, face, MappingExtensions.ToFace))
 				  .Resume ();
 
 			return tcs.Task;
@@ -402,7 +402,7 @@ namespace Xamarin.Cognitive.Face
 					true,
 					returnLandmarks,
 					types,
-					(detectedFaces, error) => AdaptListResultCallback (error, tcs, detectedFaces, FaceExtensions.ToFace, returnLandmarks, attributes))
+					(detectedFaces, error) => AdaptListResultCallback (error, tcs, detectedFaces, MappingExtensions.ToFace, returnLandmarks, attributes))
 					  .Resume ();
 			}
 
@@ -419,7 +419,7 @@ namespace Xamarin.Cognitive.Face
 			Client.FindSimilarWithFaceId (
 				targetFaceId,
 				faceIds,
-				(similarFaces, error) => AdaptListResultCallback (error, tcs, similarFaces, FaceExtensions.ToSimilarFaceResult))
+				(similarFaces, error) => AdaptListResultCallback (error, tcs, similarFaces, MappingExtensions.ToSimilarFaceResult))
 				  .Resume ();
 
 			return tcs.Task;
@@ -432,7 +432,7 @@ namespace Xamarin.Cognitive.Face
 
 			Client.GroupWithFaceIds (
 				targetFaceIds,
-				(groupResult, error) => AdaptResultResultCallback (error, tcs, groupResult, FaceExtensions.ToGroupResult))
+				(groupResult, error) => AdaptResultResultCallback (error, tcs, groupResult, MappingExtensions.ToGroupResult))
 				  .Resume ();
 
 			return tcs.Task;
@@ -448,7 +448,7 @@ namespace Xamarin.Cognitive.Face
 				personGroupId,
 				detectedFaceIds,
 				maxNumberOfCandidates,
-				(identifyResults, error) => AdaptListResultCallback (error, tcs, identifyResults, FaceExtensions.ToIdentificationResult))
+				(identifyResults, error) => AdaptListResultCallback (error, tcs, identifyResults, MappingExtensions.ToIdentificationResult))
 				.Resume ();
 
 			return tcs.Task;
@@ -462,7 +462,7 @@ namespace Xamarin.Cognitive.Face
 			Client.VerifyWithFirstFaceId (
 				face1Id,
 				face2Id,
-				(verifyResult, error) => AdaptResultResultCallback (error, tcs, verifyResult, FaceExtensions.ToVerifyResult))
+				(verifyResult, error) => AdaptResultResultCallback (error, tcs, verifyResult, MappingExtensions.ToVerifyResult))
 				  .Resume ();
 
 			return tcs.Task;
@@ -477,7 +477,7 @@ namespace Xamarin.Cognitive.Face
 				faceId,
 				personId,
 				personGroupId,
-				(verifyResult, error) => AdaptResultResultCallback (error, tcs, verifyResult, FaceExtensions.ToVerifyResult))
+				(verifyResult, error) => AdaptResultResultCallback (error, tcs, verifyResult, MappingExtensions.ToVerifyResult))
 				  .Resume ();
 
 			return tcs.Task;

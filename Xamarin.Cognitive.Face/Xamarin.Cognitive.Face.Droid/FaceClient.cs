@@ -200,7 +200,7 @@ namespace Xamarin.Cognitive.Face
 		{
 			return Task.Run (() =>
 			{
-				var types = attributes.Select (a => a.ToNativeFaceAttributeType ()).ToArray ();
+				var types = attributes.Select (a => a.AsJavaEnum<FaceServiceClientFaceAttributeType> (false)).ToArray ();
 
 				var detectedFaces = Client.Detect (photoStream, true, returnLandmarks, types);
 

@@ -43,8 +43,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 			{
 				faceSelectionController.PopoverPresentationController.Delegate = this;
 				faceSelectionController.ReturnSegue = Segues.FaceSelected;
-				faceSelectionController.Faces = DetectedFaces;
-				faceSelectionController.SourceImage = SourceImage;
+				faceSelectionController.SetDetectedFaces (SourceImage, DetectedFaces);
 			}
 		}
 
@@ -56,7 +55,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 
 			if (faceSelection.SelectedFace != null)
 			{
-				await AddFace (faceSelection.SelectedFace, SourceImage);
+				await AddFace (faceSelection.SelectedFace);
 			}
 		}
 
@@ -157,11 +156,13 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 
 			if (Person != null) //just to make sure we succeeded in the case we created a new person above
 			{
-				var image = await this.ShowImageSelectionDialog ();
+				//in case we've already done this
+				SourceImage?.Dispose ();
 
-				if (image != null)
+				SourceImage = await this.ShowImageSelectionDialog ();
+
+				if (SourceImage != null)
 				{
-					SourceImage = image;
 					await DetectFaces ();
 				}
 			}
@@ -182,7 +183,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 				}
 				else if (DetectedFaces.Count == 1)
 				{
-					await AddFace (DetectedFaces [0], SourceImage);
+					await AddFace (DetectedFaces [0]);
 				}
 				else // > 1 face
 				{
@@ -198,15 +199,19 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 		}
 
 
-		async Task AddFace (Model.Face face, UIImage sourceImage)
+		async Task AddFace (Model.Face face)
 		{
 			try
 			{
 				this.ShowHUD ("Adding face");
 
-				await FaceClient.Shared.AddFaceForPerson (Person, Group, face, sourceImage.AsStream);
+				await FaceClient.Shared.AddFaceForPerson (Person, Group, face, SourceImage.AsStream);
 
-				face.SaveThumbnailFromSource (sourceImage);
+				face.SaveThumbnailFromSource (SourceImage);
+
+				//we should be done with the source image now
+				SourceImage.Dispose ();
+				SourceImage = null;
 
 				this.ShowSimpleHUD ("Face added for this person");
 
@@ -223,6 +228,12 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 
 		partial void VerifyAction (NSObject sender)
 		{
+			if (Person == null)
+			{
+				this.ShowSimpleHUD ("Save this person and add face images before verifying.");
+				return;
+			}
+
 			FaceState.Current.Verification.Person = Person;
 			FaceState.Current.Verification.Group = Group;
 			FaceState.Current.Verification.Type = VerificationType.FaceAndPerson;

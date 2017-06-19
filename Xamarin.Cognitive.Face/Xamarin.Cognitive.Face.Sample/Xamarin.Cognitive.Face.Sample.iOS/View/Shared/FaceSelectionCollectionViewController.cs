@@ -9,32 +9,23 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 {
 	public partial class FaceSelectionCollectionViewController : ItemsPerRowCollectionViewController
 	{
-		public List<Model.Face> Faces { get; set; } = new List<Model.Face> ();
-		public UIImage SourceImage { get; set; }
-		public string ReturnSegue { get; set; }
+		public List<Model.Face> Faces { get; private set; } = new List<Model.Face> ();
+
 		public Model.Face SelectedFace { get; private set; }
+
+		public string ReturnSegue { get; set; }
+
 		public bool AllowSelection { get; set; } = true;
 
 		public event EventHandler FaceSelectionChanged;
 
-		List<UIImage> croppedImages;
+		List<UIImage> thumbnailImages;
 
 		public bool HasSelection => SelectedFace != null;
 
 
 		public FaceSelectionCollectionViewController (IntPtr handle) : base (handle)
 		{
-		}
-
-
-		public override void ViewDidLoad ()
-		{
-			base.ViewDidLoad ();
-
-			if (SourceImage != null)
-			{
-				addCroppedImages (Faces);
-			}
 		}
 
 
@@ -46,71 +37,52 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 		}
 
 
-		void cleanup (bool disposeCurrentImage = false, bool clearImages = true)
+		void cleanup (bool final = true)
 		{
-			if (clearImages && croppedImages != null)
+			if (thumbnailImages != null)
 			{
-				croppedImages.ForEach (i => i.Dispose ());
-				croppedImages.Clear ();
+				thumbnailImages.ForEach (i => i.Dispose ());
+				thumbnailImages.Clear ();
 			}
 
-			if (SourceImage != null)
+			if (final)
 			{
-				if (disposeCurrentImage)
-				{
-					SourceImage.Dispose ();
-				}
-
-				SourceImage = null;
+				FaceSelectionChanged = null;
+				thumbnailImages = null;
 			}
 		}
 
 
-		public void SetDetectedFaces (UIImage sourceImage, List<Model.Face> detectedFaces, bool append = false)
+		public void SetDetectedFaces (UIImage sourceImage, List<Model.Face> detectedFaces)
 		{
-			cleanup (true);
+			cleanup (false);
 
-			SourceImage = sourceImage;
 			Faces = detectedFaces;
 			SelectedFace = null;
 
-			addCroppedImages (detectedFaces);
+			thumbnailImages = detectedFaces.GenerateThumbnails (sourceImage);
 
 			CollectionView.ReloadData ();
 		}
 
 
-		public void AppendDetectedFaces (UIImage sourceImage, List<Model.Face> detectedFaces, bool append = false)
+		public void AppendDetectedFaces (UIImage sourceImage, List<Model.Face> detectedFaces)
 		{
-			cleanup (true, false);
-
-			SourceImage = sourceImage;
 			Faces.AddRange (detectedFaces);
 
-			addCroppedImages (detectedFaces, croppedImages);
+			thumbnailImages = detectedFaces.GenerateThumbnails (sourceImage, thumbnailImages);
 
 			CollectionView.ReloadData ();
 		}
 
 
-		void addCroppedImages (List<Model.Face> detectedFaces, List<UIImage> images = null)
-		{
-			croppedImages = images ?? new List<UIImage> ();
-
-			foreach (var face in detectedFaces)
-			{
-				croppedImages.Add (face.CreateThumbnail (SourceImage));
-			}
-		}
-
-
-		public UIImage GetImageForFace (Model.Face face)
+		public UIImage GetThumbnailForFace (Model.Face face)
 		{
 			var index = Faces.IndexOf (face);
 
-			if (index > -1 && croppedImages.Count > index)
+			if (index > -1 && thumbnailImages.Count > index)
 			{
-				return croppedImages [index];
+				return thumbnailImages [index];
 			}
 
 			return null;
@@ -128,7 +100,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 			var cell = collectionView.Dequeue<FaceCVC> (indexPath);
 
 			var detectedFace = Faces [indexPath.Row];
-			var image = croppedImages [indexPath.Row];
+			var image = thumbnailImages [indexPath.Row];
 
 			cell.SetFaceImage (detectedFace, image);
 
@@ -151,10 +123,9 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 
 					if (result)
 					{
-						//cleanup first
-						cleanup ();
-
 						PerformSegue (ReturnSegue, this);
+						//clean up, AFTER we've returned and any caller could get the thumbnail
+						cleanup ();
 					}
 				}
 				else

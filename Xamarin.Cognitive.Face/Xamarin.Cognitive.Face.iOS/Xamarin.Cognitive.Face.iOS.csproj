@@ -53,6 +53,8 @@
     <Compile Include="Domain\Error.cs" />
     <Compile Include="Domain\ErrorDetailException.cs" />
     <Compile Include="Extensions\MediaExtensions.cs" />
+    <Compile Include="Extensions\iOSInteropExtensions.cs" />
+    <Compile Include="Extensions\MappingExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Cognitive-Face-iOS-Xamarin\Cognitive.Face.iOS\Xamarin.Cognitive.Face.iOS.csproj">

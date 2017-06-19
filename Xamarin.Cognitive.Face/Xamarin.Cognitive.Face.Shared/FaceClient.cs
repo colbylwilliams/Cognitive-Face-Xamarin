@@ -367,8 +367,6 @@ namespace Xamarin.Cognitive.Face
 				}
 
 				face.Id = id;
-
-				face.UpdateThumbnailPath ();
 				person.Faces.Add (face);
 			}
 			catch (Exception ex)

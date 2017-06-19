@@ -147,7 +147,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 
 				foreach (var result in results)
 				{
-					Results.Add ((result, Face1SelectionController.GetImageForFace (result.Face)));
+					Results.Add ((result, Face1SelectionController.GetThumbnailForFace (result.Face)));
 				}
 
 				this.HideHUD ();

@@ -46,6 +46,8 @@
     <Compile Include="Extensions\FaceExtensions.cs" />
     <Compile Include="FaceClient.cs" />
     <Compile Include="Extensions\MediaExtensions.cs" />
+    <Compile Include="Extensions\JavaInteropExtensions.cs" />
+    <Compile Include="Extensions\MappingExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Extensions\" />

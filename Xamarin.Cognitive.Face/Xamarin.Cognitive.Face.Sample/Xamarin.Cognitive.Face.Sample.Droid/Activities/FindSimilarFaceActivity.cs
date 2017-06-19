@@ -11,7 +11,6 @@ using Android.Widget;
 using Xamarin.Cognitive.Face.Extensions;
 using System.Threading.Tasks;
 using Xamarin.Cognitive.Face.Model;
-using NomadCode.UIExtensions;
 using Xamarin.Cognitive.Face.Sample.Droid.Shared.Adapters;
 
 namespace Xamarin.Cognitive.Face.Sample.Droid
