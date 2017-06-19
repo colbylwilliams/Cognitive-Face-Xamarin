@@ -109,8 +109,6 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 		async void Detect_Click (object sender, EventArgs e)
 		{
 			await ExecuteDetection ();
-
-			SetAllButtonsEnabledStatus (false);
 		}
 
 

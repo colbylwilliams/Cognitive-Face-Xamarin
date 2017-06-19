@@ -1,6 +1,5 @@
-﻿using System.Collections.Generic;
-using Android.Icu.Text;
-using Java.Util;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Xamarin.Cognitive.Face.Sample.Droid
 {
@@ -22,28 +21,32 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 		public static List<string> GetLog (LogType logType)
 		{
-			return logs [logType];
+			if (!logs.TryGetValue (logType, out List<string> log))
+			{
+				log = new List<string> ();
+				logs [logType] = log;
+			}
+
+			return log;
 		}
 
 
 		public static void AddLog (LogType logType, string msg)
 		{
-			logs [logType].Add (GetLogHeader () + msg);
+			GetLog (logType).Add (GetLogHeader () + msg);
 		}
 
 
 		public static void ClearLog (LogType logType)
 		{
-			logs [logType].Clear ();
+			GetLog (logType).Clear ();
 		}
 
 
 		// Get the current time and add to log.
 		static string GetLogHeader ()
 		{
-			var dateFormat = new SimpleDateFormat ("HH:mm:ss", Locale.Us);
-
-			return "[" + dateFormat.Format (Calendar.GetInstance (Locale.Us).Time) + "] ";
+			return $"[{DateTime.Now.ToString ("HH:mm:ss")}] ";
 		}
 	}
 }
