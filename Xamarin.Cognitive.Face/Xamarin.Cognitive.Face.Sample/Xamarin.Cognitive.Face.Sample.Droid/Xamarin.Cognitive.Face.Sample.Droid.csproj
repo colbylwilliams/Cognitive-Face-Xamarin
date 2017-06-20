@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\packages\Xamarin.Build.Download.0.4.3\build\Xamarin.Build.Download.props" Condition="Exists('..\..\packages\Xamarin.Build.Download.0.4.3\build\Xamarin.Build.Download.props')" />
+  <Import Project="..\..\packages\Xamarin.Build.Download.0.4.5\build\Xamarin.Build.Download.props" Condition="Exists('..\..\packages\Xamarin.Build.Download.0.4.5\build\Xamarin.Build.Download.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -17,7 +17,7 @@
     <MonoAndroidResourcePrefix>Resources</MonoAndroidResourcePrefix>
     <MonoAndroidAssetsPrefix>Assets</MonoAndroidAssetsPrefix>
     <AndroidUseLatestPlatformSdk>true</AndroidUseLatestPlatformSdk>
-    <ReleaseVersion>1.3.2</ReleaseVersion>
+    <ReleaseVersion>0.3.1</ReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -90,6 +90,12 @@
     <Reference Include="Mono.Android" />
     <Reference Include="GoogleGson">
       <HintPath>..\..\packages\GoogleGson.2.6.2.0\lib\MonoAndroid\GoogleGson.dll</HintPath>
+    </Reference>
+    <Reference Include="Cognitive.Face.Droid">
+      <HintPath>..\..\packages\Xamarin.Cognitive.Face.0.3.0-preview\lib\monoandroid50\Cognitive.Face.Droid.dll</HintPath>
+    </Reference>
+    <Reference Include="Xamarin.Cognitive.Face">
+      <HintPath>..\..\packages\Xamarin.Cognitive.Face.0.3.0-preview\lib\monoandroid50\Xamarin.Cognitive.Face.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -179,19 +185,8 @@
     <Folder Include="Shared\View\" />
     <Folder Include="Activities\Log\" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\Cognitive-Face-Android-Xamarin\Cognitive.Face.Android\Cognitive.Face.Droid.csproj">
-      <Project>{A1046082-B104-4925-BC08-82D7386E5CF9}</Project>
-      <Name>Cognitive.Face.Droid</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Xamarin.Cognitive.Face.Droid\Xamarin.Cognitive.Face.Droid.csproj">
-      <Project>{8057BA86-1825-4A74-9BCC-7F63CC45AC7E}</Project>
-      <Name>Xamarin.Cognitive.Face.Droid</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="..\Xamarin.Cognitive.Face.Sample.Shared\Xamarin.Cognitive.Face.Sample.Shared.projitems" Label="Shared" Condition="Exists('..\Xamarin.Cognitive.Face.Sample.Shared\Xamarin.Cognitive.Face.Sample.Shared.projitems')" />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
-  <Import Project="..\..\packages\Xamarin.Build.Download.0.4.3\build\Xamarin.Build.Download.targets" Condition="Exists('..\..\packages\Xamarin.Build.Download.0.4.3\build\Xamarin.Build.Download.targets')" />
   <Import Project="..\..\packages\Xamarin.Android.Support.Annotations.25.3.1\build\MonoAndroid70\Xamarin.Android.Support.Annotations.targets" Condition="Exists('..\..\packages\Xamarin.Android.Support.Annotations.25.3.1\build\MonoAndroid70\Xamarin.Android.Support.Annotations.targets')" />
   <Import Project="..\..\packages\Xamarin.Android.Support.Compat.25.3.1\build\MonoAndroid70\Xamarin.Android.Support.Compat.targets" Condition="Exists('..\..\packages\Xamarin.Android.Support.Compat.25.3.1\build\MonoAndroid70\Xamarin.Android.Support.Compat.targets')" />
   <Import Project="..\..\packages\Xamarin.Android.Support.Core.UI.25.3.1\build\MonoAndroid70\Xamarin.Android.Support.Core.UI.targets" Condition="Exists('..\..\packages\Xamarin.Android.Support.Core.UI.25.3.1\build\MonoAndroid70\Xamarin.Android.Support.Core.UI.targets')" />
@@ -206,4 +201,5 @@
   <Import Project="..\..\packages\Xamarin.Android.Support.Transition.25.3.1\build\MonoAndroid70\Xamarin.Android.Support.Transition.targets" Condition="Exists('..\..\packages\Xamarin.Android.Support.Transition.25.3.1\build\MonoAndroid70\Xamarin.Android.Support.Transition.targets')" />
   <Import Project="..\..\packages\Xamarin.Android.Support.Design.25.3.1\build\MonoAndroid70\Xamarin.Android.Support.Design.targets" Condition="Exists('..\..\packages\Xamarin.Android.Support.Design.25.3.1\build\MonoAndroid70\Xamarin.Android.Support.Design.targets')" />
   <Import Project="..\..\packages\Xamarin.Android.Support.v13.25.3.1\build\MonoAndroid70\Xamarin.Android.Support.v13.targets" Condition="Exists('..\..\packages\Xamarin.Android.Support.v13.25.3.1\build\MonoAndroid70\Xamarin.Android.Support.v13.targets')" />
+  <Import Project="..\..\packages\Xamarin.Build.Download.0.4.5\build\Xamarin.Build.Download.targets" Condition="Exists('..\..\packages\Xamarin.Build.Download.0.4.5\build\Xamarin.Build.Download.targets')" />
 </Project>

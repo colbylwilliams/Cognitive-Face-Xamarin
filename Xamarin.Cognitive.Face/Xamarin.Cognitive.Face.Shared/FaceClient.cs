@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Xamarin.Cognitive.Face.Model;
-using Xamarin.Cognitive.Face.Extensions;
 
 namespace Xamarin.Cognitive.Face
 {
