@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using Android.Content;
@@ -12,6 +11,12 @@ namespace Xamarin.Cognitive.Face.Extensions
 {
 	public static class MediaExtensions
 	{
+		/// <summary>
+		/// Gets the given Bitmap as a JPEG Stream and resets the stream position to 0.
+		/// </summary>
+		/// <returns>A Stream with the image data.</returns>
+		/// <param name="bitmap">The Bitmap.</param>
+		/// <param name="quality">The quality factor to use when compressing as a JPEG.</param>
 		public static System.IO.Stream AsJpeg (this Bitmap bitmap, int quality = 100)
 		{
 			var stream = new MemoryStream ();
@@ -29,6 +34,12 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
+		/// <summary>
+		/// Saves the image in the JPEG format at the given path.
+		/// </summary>
+		/// <param name="image">Image.</param>
+		/// <param name="path">Path.</param>
+		/// <param name="quality">The quality factor to use when compressing as a JPEG.</param>
 		public static void SaveAsJpeg (this Bitmap image, string path, int quality = 100)
 		{
 			using (var fs = new FileStream (path, FileMode.OpenOrCreate))
@@ -38,9 +49,16 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static Bitmap Crop (this Bitmap originalBitmap, RectangleF rect)
+		/// <summary>
+		/// Crops the specified image using the rectangle.
+		/// </summary>
+		/// <returns>The cropped image.</returns>
+		/// <param name="image">Image.</param>
+		/// <param name="rect">Rect.</param>
+		/// <remarks>The image uses is not disposed of or released in any way.</remarks>
+		public static Bitmap Crop (this Bitmap image, RectangleF rect)
 		{
-			return Bitmap.CreateBitmap (originalBitmap, (int) rect.Left, (int) rect.Top, (int) rect.Width, (int) rect.Height);
+			return Bitmap.CreateBitmap (image, (int) rect.Left, (int) rect.Top, (int) rect.Width, (int) rect.Height);
 		}
 
 
@@ -201,149 +219,6 @@ namespace Xamarin.Cognitive.Face.Extensions
 				matrix.PostRotate (angle);
 
 				return Bitmap.CreateBitmap (bitmap, 0, 0, bitmap.Width, bitmap.Height, matrix, true);
-			}
-
-			return bitmap;
-		}
-
-
-		// Ratio to scale a detected face rectangle, the face rectangle scaled up looks more natural.
-		const double FACE_RECT_SCALE_RATIO = 1.3;
-
-
-		/// <summary>
-		/// Resize face rectangle, for better view for human.
-		/// To make the rectangle larger, faceRectEnlargeRatio should be larger than 1, recommend 1.3
-		/// </summary>
-		/// <returns>The face rectangle.</returns>
-		/// <param name="faceRectangle">Face rectangle.</param>
-		/// <param name="bitmap">the source Bitmap.</param>
-		/// <param name="faceRectEnlargeRatio">Face rect enlarge ratio.</param>
-		public static RectangleF CalculateLargeFaceRectangle (this RectangleF faceRectangle, Bitmap bitmap, double faceRectEnlargeRatio = FACE_RECT_SCALE_RATIO)
-		{
-			// Get the resized side length of the face rectangle
-			double sideLength = faceRectangle.Width * faceRectEnlargeRatio;
-			sideLength = Math.Min (sideLength, bitmap.Width);
-			sideLength = Math.Min (sideLength, bitmap.Height);
-
-			// Make the left edge to left more.
-			double left = faceRectangle.Left
-					- faceRectangle.Width * (faceRectEnlargeRatio - 1.0) * 0.5;
-			left = Math.Max (left, 0.0);
-			left = Math.Min (left, bitmap.Width - sideLength);
-
-			// Make the top edge to top more.
-			double top = faceRectangle.Top
-					- faceRectangle.Height * (faceRectEnlargeRatio - 1.0) * 0.5;
-			top = Math.Max (top, 0.0);
-			top = Math.Min (top, bitmap.Height - sideLength);
-
-			// Shift the top edge to top more, for better view for human
-			double shiftTop = faceRectEnlargeRatio - 1.0;
-			shiftTop = Math.Max (shiftTop, 0.0);
-			shiftTop = Math.Min (shiftTop, 1.0);
-			top -= 0.15 * shiftTop * faceRectangle.Height;
-			top = Math.Max (top, 0.0);
-
-			return new RectangleF
-			{
-				X = (int) left,
-				Y = (int) top,
-				Width = (int) sideLength,
-				Height = (int) sideLength
-			};
-		}
-
-
-		/// <summary>
-		/// Draw detected face rectangles in the original image. And return the image drawn.
-		/// If drawLandmarks is set to be true, draw the five main landmarks of each face.
-		/// </summary>
-		/// <returns>A new bitmap with face rectangles drawn.  Note: original bitmap will remain as is and is not disposed/released.</returns>
-		/// <param name="originalBitmap">Original bitmap.</param>
-		/// <param name="faces">Faces.</param>
-		/// <param name="drawLandmarks">If set to <c>true</c> draw landmarks.</param>
-		/// <param name="faceRectEnlargeRatio">A scale factor that dicatates how much the face rectangles should be enlarged, if at all.</param>
-		public static Bitmap DrawFaceRectangles (this Bitmap originalBitmap, IEnumerable<Model.Face> faces, bool drawLandmarks, double faceRectEnlargeRatio = FACE_RECT_SCALE_RATIO)
-		{
-			var bitmap = originalBitmap.Copy (Bitmap.Config.Argb8888, true);
-
-			using (var canvas = new Canvas (bitmap))
-			using (var paint = new Paint ())
-			{
-				paint.AntiAlias = true;
-				paint.Color = global::Android.Graphics.Color.Green;
-				paint.SetStyle (Paint.Style.Stroke);
-
-				int stokeWidth = Math.Max (originalBitmap.Width, originalBitmap.Height) / 100;
-
-				if (stokeWidth == 0)
-				{
-					stokeWidth = 1;
-				}
-
-				paint.StrokeWidth = stokeWidth;
-
-				if (faces != null)
-				{
-					foreach (var face in faces)
-					{
-						var rect = face.FaceRectangle.CalculateLargeFaceRectangle (originalBitmap, faceRectEnlargeRatio);
-
-						canvas.DrawRect (
-							rect.Left,
-							rect.Top,
-							rect.Left + rect.Width,
-							rect.Top + rect.Height,
-							paint);
-
-						if (drawLandmarks)
-						{
-							int radius = (int) rect.Width / 30;
-
-							if (radius == 0)
-							{
-								radius = 1;
-							}
-
-							paint.SetStyle (Paint.Style.Fill);
-							paint.StrokeWidth = radius;
-
-							canvas.DrawCircle (
-								face.Landmarks.PupilLeft.X,
-								face.Landmarks.PupilLeft.Y,
-								radius,
-								paint);
-
-							canvas.DrawCircle (
-								face.Landmarks.PupilRight.X,
-								face.Landmarks.PupilRight.Y,
-								radius,
-								paint);
-
-							canvas.DrawCircle (
-								face.Landmarks.NoseTip.X,
-								face.Landmarks.NoseTip.Y,
-								radius,
-								paint);
-
-							canvas.DrawCircle (
-								face.Landmarks.MouthLeft.X,
-								face.Landmarks.MouthLeft.Y,
-								radius,
-								paint);
-
-							canvas.DrawCircle (
-								face.Landmarks.MouthRight.X,
-								face.Landmarks.MouthRight.Y,
-								radius,
-								paint);
-
-							paint.SetStyle (Paint.Style.Stroke);
-							paint.StrokeWidth = stokeWidth;
-						}
-					}
-				}
 			}
 
 			return bitmap;

@@ -13,6 +13,10 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
+		/// <summary>
+		/// Updates the thumbnail path of the Face.  This will use the current Id to generate the thumbnail path for this Face.
+		/// </summary>
+		/// <param name="face">The Face.</param>
 		public static void UpdateThumbnailPath (this Model.Face face)
 		{
 			var filePath = Path.Combine (DocsDir, face.FileName);

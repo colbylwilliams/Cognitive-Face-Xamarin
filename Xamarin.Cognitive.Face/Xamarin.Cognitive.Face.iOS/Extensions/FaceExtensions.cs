@@ -1,6 +1,5 @@
 ﻿using System;
 using UIKit;
-using Xamarin.Cognitive.Face.Model;
 using System.Collections.Generic;
 
 namespace Xamarin.Cognitive.Face.Extensions
@@ -64,6 +63,11 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
+		/// <summary>
+		/// Saves a thumbnail from a source image, using the Face's FaceRectangle and ThumbnailPath.
+		/// </summary>
+		/// <param name="face">The Face to save a thumbnail for.</param>
+		/// <param name="sourceImage">The source image where the thumbnail will be cropped from.</param>
 		public static void SaveThumbnailFromSource (this Model.Face face, UIImage sourceImage)
 		{
 			using (var thumbnail = face.CreateThumbnail (sourceImage))
