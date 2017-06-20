@@ -127,14 +127,10 @@ Global
 		$1.scope = text/x-csharp
 		$0.CSharpFormattingPolicy = $2
 		$2.scope = text/x-csharp
-		$2.SpacingAfterMethodDeclarationName = True
-		$2.SpaceAfterMethodCallName = True
-		$2.SpaceAfterCast = True
-		$2.SpaceBeforeOpenSquareBracket = True
 		$0.TextStylePolicy = $3
 		$3.scope = text/plain
 		$0.DotNetNamingPolicy = $4
 		$4.DirectoryNamespaceAssociation = PrefixedHierarchical
-		version = 1.3.2
+		version = 0.4.0
 	EndGlobalSection
 EndGlobal
