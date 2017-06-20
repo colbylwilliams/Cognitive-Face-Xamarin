@@ -164,7 +164,7 @@ namespace Xamarin.Cognitive.Face
 		{
 			return Task.Run (() =>
 			{
-				var result = Client.AddPersonFace (personGroupId, personId.ToUUID (), photoStream, userData, face.FaceRectangle.ToFaceRect ());
+				var result = Client.AddPersonFace (personGroupId, personId.ToUUID (), photoStream, userData, face.FaceRectangle.ToNativeFaceRect ());
 
 				return result?.PersistedFaceId?.ToString ();
 			});

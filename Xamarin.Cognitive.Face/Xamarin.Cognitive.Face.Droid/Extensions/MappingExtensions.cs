@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Android.Runtime;
 using Java.Util;
@@ -10,7 +8,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 {
 	public static class MappingExtensions
 	{
-		public static Droid.Contract.FaceRectangle ToFaceRect (this RectangleF rect)
+		public static Droid.Contract.FaceRectangle ToNativeFaceRect (this FaceRectangle rect)
 		{
 			return new Droid.Contract.FaceRectangle
 			{
@@ -18,6 +16,18 @@ namespace Xamarin.Cognitive.Face.Extensions
 				Top = (int) rect.Top,
 				Width = (int) rect.Width,
 				Height = (int) rect.Height
+			};
+		}
+
+
+		public static FaceRectangle ToFaceRectangle (this Droid.Contract.FaceRectangle rect)
+		{
+			return new FaceRectangle
+			{
+				Left = rect.Left,
+				Top = rect.Top,
+				Width = rect.Width,
+				Height = rect.Height
 			};
 		}
 
@@ -59,18 +69,12 @@ namespace Xamarin.Cognitive.Face.Extensions
 
 		public static Model.Face ToFace (this Droid.Contract.Face thisFace, bool adaptLandmarks = false, FaceAttributeType [] attributes = null)
 		{
-			var rect = new RectangleF (thisFace.FaceRectangle.Left,
-									   thisFace.FaceRectangle.Top,
-									   thisFace.FaceRectangle.Width,
-									   thisFace.FaceRectangle.Height);
-
 			var thatFace = new Model.Face
 			{
 				Id = thisFace.FaceId.ToString (),
-				FaceRectangle = rect
+				FaceRectangle = thisFace.FaceRectangle.ToFaceRectangle (),
+				Attributes = thisFace.FaceAttributes?.ToFaceAttributes (attributes)
 			};
-
-			thatFace.Attributes = thisFace.FaceAttributes?.ToFaceAttributes (attributes);
 
 			if (adaptLandmarks)
 			{

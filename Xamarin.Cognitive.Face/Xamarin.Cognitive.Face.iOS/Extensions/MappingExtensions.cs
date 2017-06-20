@@ -8,9 +8,33 @@ namespace Xamarin.Cognitive.Face.Extensions
 {
 	public static class MappingExtensions
 	{
-		public static MPOFaceRectangle ToMPOFaceRect (this RectangleF rect)
+		public static MPOFaceRectangle ToMPOFaceRect (this FaceRectangle rect)
 		{
 			return new MPOFaceRectangle
+			{
+				Left = rect.Left,
+				Top = rect.Top,
+				Width = rect.Width,
+				Height = rect.Height
+			};
+		}
+
+
+		internal static RectangleF ToRectangle (this FaceRectangle rect)
+		{
+			return new RectangleF
+			{
+				X = rect.Left,
+				Y = rect.Top,
+				Width = rect.Width,
+				Height = rect.Height
+			};
+		}
+
+
+		public static FaceRectangle ToFaceRectangle (this MPOFaceRectangle rect)
+		{
+			return new FaceRectangle
 			{
 				Left = rect.Left,
 				Top = rect.Top,
@@ -57,18 +81,12 @@ namespace Xamarin.Cognitive.Face.Extensions
 
 		public static Model.Face ToFace (this MPOFace mpoFace, bool adaptLandmarks = false, FaceAttributeType [] attributes = null)
 		{
-			var rect = new RectangleF (mpoFace.FaceRectangle.Left,
-									   mpoFace.FaceRectangle.Top,
-									   mpoFace.FaceRectangle.Width,
-									   mpoFace.FaceRectangle.Height);
-
 			var face = new Model.Face
 			{
 				Id = mpoFace.FaceId,
-				FaceRectangle = rect
+				FaceRectangle = mpoFace.FaceRectangle.ToFaceRectangle (),
+				Attributes = mpoFace.Attributes?.ToFaceAttributes (attributes)
 			};
-
-			face.Attributes = mpoFace.Attributes?.ToFaceAttributes (attributes);
 
 			if (adaptLandmarks)
 			{

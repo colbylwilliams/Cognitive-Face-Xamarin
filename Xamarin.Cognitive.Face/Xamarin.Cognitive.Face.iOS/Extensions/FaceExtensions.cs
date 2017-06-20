@@ -14,7 +14,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		/// <param name="sourceImage">The source image or photo to crop the thumbnail from.</param>
 		public static UIImage CreateThumbnail (this Model.Face face, UIImage sourceImage)
 		{
-			return sourceImage.Crop (face.FaceRectangle);
+			return sourceImage.Crop (face.FaceRectangle.ToRectangle ());
 		}
 
 

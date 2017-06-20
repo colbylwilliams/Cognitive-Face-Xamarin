@@ -52,5 +52,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Util\Log.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\FindSimilarMatchMode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\FaceExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\FaceRectangle.cs" />
   </ItemGroup>
 </Project>

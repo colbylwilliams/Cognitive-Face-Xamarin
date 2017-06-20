@@ -1,6 +1,4 @@
-﻿using System.Drawing;
-
-namespace Xamarin.Cognitive.Face.Model
+﻿namespace Xamarin.Cognitive.Face.Model
 {
 	public class Face : FaceModel
 	{
@@ -13,7 +11,7 @@ namespace Xamarin.Cognitive.Face.Model
 		public string FileName => string.Format (ThumbnailPathTemplate, Id);
 
 
-		public RectangleF FaceRectangle { get; set; }
+		public FaceRectangle FaceRectangle { get; set; }
 
 
 		public FaceLandmarks Landmarks { get; set; }
