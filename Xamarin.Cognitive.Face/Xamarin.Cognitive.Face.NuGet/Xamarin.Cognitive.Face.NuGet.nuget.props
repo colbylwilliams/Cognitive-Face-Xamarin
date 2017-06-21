@@ -4,6 +4,6 @@
     <NuGetPackageRoot>/Users/nater/.nuget/packages/</NuGetPackageRoot>
   </PropertyGroup>
   <ImportGroup>
-    <Import Project="$(NuGetPackageRoot)nuget.build.packaging/0.1.318/build/NuGet.Build.Packaging.props" Condition="Exists('$(NuGetPackageRoot)nuget.build.packaging/0.1.318/build/NuGet.Build.Packaging.props')" />
+    <Import Project="$(NuGetPackageRoot)nuget.build.packaging/0.1.323/build/NuGet.Build.Packaging.props" Condition="Exists('$(NuGetPackageRoot)nuget.build.packaging/0.1.323/build/NuGet.Build.Packaging.props')" />
   </ImportGroup>
 </Project>

@@ -24,6 +24,7 @@
     <PackageProjectUrl>https://github.com/colbylwilliams/Cognitive-Face-Xamarin</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/colbylwilliams/Cognitive-Face-Xamarin/blob/master/LICENSE</PackageLicenseUrl>
     <ReleaseVersion>0.4.0</ReleaseVersion>
+    <IntersectionAssemblyReferencePath>/Library/Frameworks/Mono.framework/External/xbuild-frameworks/MonoAndroid/v7.1/;/Library/Frameworks/Xamarin.iOS.framework/Versions/Current/lib/mono/Xamarin.iOS/</IntersectionAssemblyReferencePath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -36,20 +37,25 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Xamarin.Cognitive.Face.Droid\Xamarin.Cognitive.Face.Droid.csproj">
-      <Project>{8057BA86-1825-4A74-9BCC-7F63CC45AC7E}</Project>
-      <Name>Xamarin.Cognitive.Face.Droid</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Xamarin.Cognitive.Face.iOS\Xamarin.Cognitive.Face.iOS.csproj">
-      <Project>{2F1B0B37-6328-42CB-9EA3-DE55F9967FA0}</Project>
-      <Name>Xamarin.Cognitive.Face.iOS</Name>
-    </ProjectReference>
+    <ReferenceAssemblyFramework Include=".NETPortable,Version=v4.5,Profile=Profile111" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="NuGet.Build.Packaging">
-      <Version>0.1.318</Version>
+      <Version>0.1.323</Version>
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Xamarin.Cognitive.Face.iOS\Xamarin.Cognitive.Face.iOS.csproj">
+      <Project>{2F1B0B37-6328-42CB-9EA3-DE55F9967FA0}</Project>
+      <Name>Xamarin.Cognitive.Face.iOS</Name>
+      <IncludeInPackage>true</IncludeInPackage>
+    </ProjectReference>
+    <ProjectReference Include="..\Xamarin.Cognitive.Face.Droid\Xamarin.Cognitive.Face.Droid.csproj">
+      <Project>{8057BA86-1825-4A74-9BCC-7F63CC45AC7E}</Project>
+      <Name>Xamarin.Cognitive.Face.Droid</Name>
+      <IncludeInPackage>true</IncludeInPackage>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.Common.targets" />
   <Import Project="$(NuGetAuthoringPath)\NuGet.Packaging.Authoring.targets" Condition="Exists('$(NuGetAuthoringPath)\NuGet.Packaging.Authoring.targets')" />
