@@ -8,7 +8,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 {
 	public static class MappingExtensions
 	{
-		public static MPOFaceRectangle ToMPOFaceRect (this FaceRectangle rect)
+		internal static MPOFaceRectangle ToMPOFaceRect (this FaceRectangle rect)
 		{
 			return new MPOFaceRectangle
 			{
@@ -32,7 +32,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static FaceRectangle ToFaceRectangle (this MPOFaceRectangle rect)
+		internal static FaceRectangle ToFaceRectangle (this MPOFaceRectangle rect)
 		{
 			return new FaceRectangle
 			{
@@ -44,7 +44,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static PersonGroup ToPersonGroup (this MPOPersonGroup personGroup)
+		internal static PersonGroup ToPersonGroup (this MPOPersonGroup personGroup)
 		{
 			return new PersonGroup
 			{
@@ -55,7 +55,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static Person ToPerson (this MPOPerson person)
+		internal static Person ToPerson (this MPOPerson person)
 		{
 			return new Person
 			{
@@ -67,7 +67,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static TrainingStatus ToTrainingStatus (this MPOTrainingStatus status)
+		internal static TrainingStatus ToTrainingStatus (this MPOTrainingStatus status)
 		{
 			var traingingStatus = TrainingStatus.FromString (status.Status);
 
@@ -79,7 +79,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static Model.Face ToFace (this MPOFace mpoFace, bool adaptLandmarks = false, FaceAttributeType [] attributes = null)
+		internal static Model.Face ToFace (this MPOFace mpoFace, bool adaptLandmarks = false, FaceAttributeType [] attributes = null)
 		{
 			var face = new Model.Face
 			{
@@ -99,7 +99,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static Model.Face ToFace (this MPOPersonFace mpoFace)
+		internal static Model.Face ToFace (this MPOPersonFace mpoFace)
 		{
 			var face = new Model.Face
 			{
@@ -113,7 +113,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static FaceLandmarks ToFaceLandmarks (this MPOFaceLandmarks landmarks)
+		internal static FaceLandmarks ToFaceLandmarks (this MPOFaceLandmarks landmarks)
 		{
 			return new FaceLandmarks
 			{
@@ -150,7 +150,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static FeatureCoordinate ToFeatureCoordinate (this MPOFaceFeatureCoordinate feature)
+		internal static FeatureCoordinate ToFeatureCoordinate (this MPOFaceFeatureCoordinate feature)
 		{
 			return new FeatureCoordinate
 			{
@@ -160,7 +160,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static FaceAttributes ToFaceAttributes (this MPOFaceAttributes attrs, FaceAttributeType [] attributes = null)
+		internal static FaceAttributes ToFaceAttributes (this MPOFaceAttributes attrs, FaceAttributeType [] attributes = null)
 		{
 			if (attributes?.Length > 0)
 			{
@@ -222,7 +222,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static FacialHair ToFacialHair (this MPOFacialHair mpoFacialHair)
+		internal static FacialHair ToFacialHair (this MPOFacialHair mpoFacialHair)
 		{
 			return new FacialHair
 			{
@@ -233,7 +233,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static FaceHeadPose ToFaceHeadPose (this MPOFaceHeadPose mpoHeadPose)
+		internal static FaceHeadPose ToFaceHeadPose (this MPOFaceHeadPose mpoHeadPose)
 		{
 			return new FaceHeadPose
 			{
@@ -245,7 +245,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static FaceEmotion ToFaceEmotion (this MPOFaceEmotion mpoEmotion)
+		internal static FaceEmotion ToFaceEmotion (this MPOFaceEmotion mpoEmotion)
 		{
 			if (mpoEmotion.MostEmotionValue != null)
 			{
@@ -268,7 +268,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static Hair ToHair (this MPOHair mpoHair)
+		internal static Hair ToHair (this MPOHair mpoHair)
 		{
 			if (mpoHair.HairColor?.Length > 0)
 			{
@@ -294,7 +294,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static Makeup ToMakeup (this MPOMakeup mpoMakeup)
+		internal static Makeup ToMakeup (this MPOMakeup mpoMakeup)
 		{
 			return new Makeup
 			{
@@ -304,7 +304,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static Occlusion ToOcclusion (this MPOOcclusion mpoOcclusion)
+		internal static Occlusion ToOcclusion (this MPOOcclusion mpoOcclusion)
 		{
 			return new Occlusion
 			{
@@ -315,7 +315,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static Accessories ToAccessories (this MPOAccessories mpoAccessories)
+		internal static Accessories ToAccessories (this MPOAccessories mpoAccessories)
 		{
 			var accessories = new Accessories
 			{
@@ -337,7 +337,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static Blur ToBlur (this MPOBlur mpoBlur)
+		internal static Blur ToBlur (this MPOBlur mpoBlur)
 		{
 			if (mpoBlur.Value != null)
 			{
@@ -352,7 +352,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static Exposure ToExposure (this MPOExposure mpoExposure)
+		internal static Exposure ToExposure (this MPOExposure mpoExposure)
 		{
 			if (mpoExposure.Value != null)
 			{
@@ -367,7 +367,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static Noise ToNoise (this MPONoise mpoNoise)
+		internal static Noise ToNoise (this MPONoise mpoNoise)
 		{
 			if (mpoNoise.Value != null)
 			{
@@ -382,13 +382,13 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static MPOFaceAttributeType ToNativeFaceAttributeType (this FaceAttributeType type)
+		internal static MPOFaceAttributeType ToNativeFaceAttributeType (this FaceAttributeType type)
 		{
 			return (MPOFaceAttributeType) ((int) type + 1);
 		}
 
 
-		public static SimilarFaceResult ToSimilarFaceResult (this MPOSimilarFace similarFace)
+		internal static SimilarFaceResult ToSimilarFaceResult (this MPOSimilarFace similarFace)
 		{
 			return new SimilarFaceResult
 			{
@@ -398,7 +398,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static GroupResult ToGroupResult (this MPOGroupResult groupResult)
+		internal static GroupResult ToGroupResult (this MPOGroupResult groupResult)
 		{
 			var groupingResult = new GroupResult
 			{
@@ -422,7 +422,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static IdentificationResult ToIdentificationResult (this MPOIdentifyResult result)
+		internal static IdentificationResult ToIdentificationResult (this MPOIdentifyResult result)
 		{
 			return new IdentificationResult
 			{
@@ -439,7 +439,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static VerifyResult ToVerifyResult (this MPOVerifyResult result)
+		internal static VerifyResult ToVerifyResult (this MPOVerifyResult result)
 		{
 			return new VerifyResult
 			{

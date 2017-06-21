@@ -8,7 +8,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 {
 	public static class MappingExtensions
 	{
-		public static Droid.Contract.FaceRectangle ToNativeFaceRect (this FaceRectangle rect)
+		internal static Droid.Contract.FaceRectangle ToNativeFaceRect (this FaceRectangle rect)
 		{
 			return new Droid.Contract.FaceRectangle
 			{
@@ -20,7 +20,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static FaceRectangle ToFaceRectangle (this Droid.Contract.FaceRectangle rect)
+		internal static FaceRectangle ToFaceRectangle (this Droid.Contract.FaceRectangle rect)
 		{
 			return new FaceRectangle
 			{
@@ -32,7 +32,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static PersonGroup ToPersonGroup (this Droid.Contract.PersonGroup personGroup)
+		internal static PersonGroup ToPersonGroup (this Droid.Contract.PersonGroup personGroup)
 		{
 			return new PersonGroup
 			{
@@ -43,7 +43,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static Person ToPerson (this Droid.Contract.Person person)
+		internal static Person ToPerson (this Droid.Contract.Person person)
 		{
 			return new Person
 			{
@@ -55,7 +55,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static TrainingStatus ToTrainingStatus (this Droid.Contract.TrainingStatus status)
+		internal static TrainingStatus ToTrainingStatus (this Droid.Contract.TrainingStatus status)
 		{
 			return new TrainingStatus
 			{
@@ -67,7 +67,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static Model.Face ToFace (this Droid.Contract.Face thisFace, bool adaptLandmarks = false, FaceAttributeType [] attributes = null)
+		internal static Model.Face ToFace (this Droid.Contract.Face thisFace, bool adaptLandmarks = false, FaceAttributeType [] attributes = null)
 		{
 			var thatFace = new Model.Face
 			{
@@ -87,7 +87,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static Model.Face ToFace (this Droid.Contract.PersonFace personFace)
+		internal static Model.Face ToFace (this Droid.Contract.PersonFace personFace)
 		{
 			var face = new Model.Face
 			{
@@ -101,7 +101,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static FaceLandmarks ToFaceLandmarks (this Droid.Contract.FaceLandmarks landmarks)
+		internal static FaceLandmarks ToFaceLandmarks (this Droid.Contract.FaceLandmarks landmarks)
 		{
 			return new FaceLandmarks
 			{
@@ -136,7 +136,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static FeatureCoordinate ToFeatureCoordinate (this Droid.Contract.FeatureCoordinate feature)
+		internal static FeatureCoordinate ToFeatureCoordinate (this Droid.Contract.FeatureCoordinate feature)
 		{
 			return new FeatureCoordinate
 			{
@@ -146,7 +146,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static FaceAttributes ToFaceAttributes (this Droid.Contract.FaceAttribute attrs, FaceAttributeType [] attributes = null)
+		internal static FaceAttributes ToFaceAttributes (this Droid.Contract.FaceAttribute attrs, FaceAttributeType [] attributes = null)
 		{
 			if (attributes?.Length > 0)
 			{
@@ -208,7 +208,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static FacialHair ToFacialHair (this Droid.Contract.FacialHair facialHair)
+		internal static FacialHair ToFacialHair (this Droid.Contract.FacialHair facialHair)
 		{
 			return new FacialHair
 			{
@@ -219,7 +219,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static FaceHeadPose ToFaceHeadPose (this Droid.Contract.HeadPose headPose)
+		internal static FaceHeadPose ToFaceHeadPose (this Droid.Contract.HeadPose headPose)
 		{
 			return new FaceHeadPose
 			{
@@ -231,7 +231,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static FaceEmotion ToFaceEmotion (this Droid.Contract.Emotion emotion)
+		internal static FaceEmotion ToFaceEmotion (this Droid.Contract.Emotion emotion)
 		{
 			var faceEmotion = new FaceEmotion
 			{
@@ -293,7 +293,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static Hair ToHair (this Droid.Contract.Hair hair)
+		internal static Hair ToHair (this Droid.Contract.Hair hair)
 		{
 			var theHair = new Hair
 			{
@@ -333,7 +333,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static Makeup ToMakeup (this Droid.Contract.Makeup makeup)
+		internal static Makeup ToMakeup (this Droid.Contract.Makeup makeup)
 		{
 			return new Makeup
 			{
@@ -343,7 +343,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static Occlusion ToOcclusion (this Droid.Contract.Occlusion occlusion)
+		internal static Occlusion ToOcclusion (this Droid.Contract.Occlusion occlusion)
 		{
 			return new Occlusion
 			{
@@ -354,7 +354,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static Accessories ToAccessories (this IList<Droid.Contract.Accessory> accessoryList)
+		internal static Accessories ToAccessories (this IList<Droid.Contract.Accessory> accessoryList)
 		{
 			var accessories = new Accessories ();
 
@@ -376,7 +376,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static Blur ToBlur (this Droid.Contract.Blur blur)
+		internal static Blur ToBlur (this Droid.Contract.Blur blur)
 		{
 			return new Blur
 			{
@@ -386,7 +386,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static Exposure ToExposure (this Droid.Contract.Exposure exposure)
+		internal static Exposure ToExposure (this Droid.Contract.Exposure exposure)
 		{
 			return new Exposure
 			{
@@ -396,7 +396,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static Noise ToNoise (this Droid.Contract.Noise noise)
+		internal static Noise ToNoise (this Droid.Contract.Noise noise)
 		{
 			return new Noise
 			{
@@ -406,7 +406,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static SimilarFaceResult ToSimilarFaceResult (this Droid.Contract.SimilarFace similarFace)
+		internal static SimilarFaceResult ToSimilarFaceResult (this Droid.Contract.SimilarFace similarFace)
 		{
 			return new SimilarFaceResult
 			{
@@ -416,7 +416,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static GroupResult ToGroupResult (this Droid.Contract.GroupResult groupResult)
+		internal static GroupResult ToGroupResult (this Droid.Contract.GroupResult groupResult)
 		{
 			var typedList = ((JavaList) groupResult.Groups).JavaCast<JavaList<UUID []>> ();
 
@@ -442,7 +442,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static IdentificationResult ToIdentificationResult (this Droid.Contract.IdentifyResult result)
+		internal static IdentificationResult ToIdentificationResult (this Droid.Contract.IdentifyResult result)
 		{
 			return new IdentificationResult
 			{
@@ -459,7 +459,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		}
 
 
-		public static VerifyResult ToVerifyResult (this Droid.Contract.VerifyResult result)
+		internal static VerifyResult ToVerifyResult (this Droid.Contract.VerifyResult result)
 		{
 			return new VerifyResult
 			{
