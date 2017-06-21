@@ -131,6 +131,6 @@ Global
 		$3.scope = text/plain
 		$0.DotNetNamingPolicy = $4
 		$4.DirectoryNamespaceAssociation = PrefixedHierarchical
-		version = 0.4.0
+		version = 0.5.0
 	EndGlobalSection
 EndGlobal
