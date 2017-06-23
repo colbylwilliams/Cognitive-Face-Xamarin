@@ -5,6 +5,9 @@ using Java.Util;
 
 namespace Xamarin.Cognitive.Face.Extensions
 {
+	/// <summary>
+	/// Contains extension methods for working with and mapping native Java/Android types.
+	/// </summary>
 	public static class JavaInteropExtensions
 	{
 		static readonly DateTime epoch;

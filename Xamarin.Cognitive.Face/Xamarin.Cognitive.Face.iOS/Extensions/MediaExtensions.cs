@@ -3,6 +3,9 @@ using UIKit;
 
 namespace Xamarin.Cognitive.Face.Extensions
 {
+	/// <summary>
+	/// Contains extension methods for working with media: images, etc.
+	/// </summary>
 	public static class MediaExtensions
 	{
 		/// <summary>

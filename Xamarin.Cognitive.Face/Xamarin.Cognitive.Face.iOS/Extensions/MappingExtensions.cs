@@ -6,6 +6,9 @@ using Xamarin.Cognitive.Face.Model;
 
 namespace Xamarin.Cognitive.Face.Extensions
 {
+	/// <summary>
+	/// Contains extension methods for working with and mapping native MPO* types from the bound iOS Face SDK.
+	/// </summary>
 	public static class MappingExtensions
 	{
 		internal static MPOFaceRectangle ToMPOFaceRect (this FaceRectangle rect)

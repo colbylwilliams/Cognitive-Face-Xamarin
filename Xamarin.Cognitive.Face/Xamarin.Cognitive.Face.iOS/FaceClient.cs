@@ -20,6 +20,9 @@ namespace Xamarin.Cognitive.Face
 		FaceClient () { }
 
 
+		#region Callbacks & Plumbing
+
+
 		void ProcessError (NSError error)
 		{
 			if (error != null)
@@ -40,9 +43,6 @@ namespace Xamarin.Cognitive.Face
 		}
 
 
-		#region Callback Plumbing
-
-
 		void NoopResultCallback (NSError error, TaskCompletionSource<bool> tcs)
 		{
 			try
@@ -52,12 +52,13 @@ namespace Xamarin.Cognitive.Face
 			}
 			catch (Exception ex)
 			{
+				Log.Error (ex);
 				tcs.TrySetException (ex);
 			}
 		}
 
 
-		void AdaptResultResultCallback<TInput, TResult> (NSError error, TaskCompletionSource<TResult> tcs, TInput data, Func<TInput, TResult> adapter)
+		void AdaptResultCallback<TInput, TResult> (NSError error, TaskCompletionSource<TResult> tcs, TInput data, Func<TInput, TResult> adapter)
 		{
 			try
 			{
@@ -66,13 +67,14 @@ namespace Xamarin.Cognitive.Face
 			}
 			catch (Exception ex)
 			{
+				Log.Error (ex);
 				tcs.TrySetException (ex);
 			}
 		}
 
 
-		void AdaptResultResultCallback<TInput, TResult, TException> (NSError error, TaskCompletionSource<TResult> tcs, TInput data, Func<TInput, TResult> adapter, Func<TException, bool> exceptionProcessor)
-		where TException : Exception
+		void AdaptResultCallback<TInput, TResult, TException> (NSError error, TaskCompletionSource<TResult> tcs, TInput data, Func<TInput, TResult> adapter, Func<TException, bool> exceptionProcessor)
+			where TException : Exception
 		{
 			try
 			{
@@ -89,6 +91,7 @@ namespace Xamarin.Cognitive.Face
 					}
 				}
 
+				Log.Error (ex);
 				tcs.TrySetException (ex);
 			}
 		}
@@ -106,6 +109,7 @@ namespace Xamarin.Cognitive.Face
 			}
 			catch (Exception ex)
 			{
+				Log.Error (ex);
 				tcs.TrySetException (ex);
 			}
 		}
@@ -123,6 +127,7 @@ namespace Xamarin.Cognitive.Face
 			}
 			catch (Exception ex)
 			{
+				Log.Error (ex);
 				tcs.TrySetException (ex);
 			}
 		}
@@ -140,6 +145,7 @@ namespace Xamarin.Cognitive.Face
 			}
 			catch (Exception ex)
 			{
+				Log.Error (ex);
 				tcs.TrySetException (ex);
 			}
 		}
@@ -169,7 +175,7 @@ namespace Xamarin.Cognitive.Face
 
 			Client.GetPersonGroupWithPersonGroupId (
 				personGroupId,
-				(personGroup, error) => AdaptResultResultCallback (error, tcs, personGroup, MappingExtensions.ToPersonGroup))
+				(personGroup, error) => AdaptResultCallback (error, tcs, personGroup, MappingExtensions.ToPersonGroup))
 				  .Resume ();
 
 			return tcs.Task;
@@ -191,7 +197,14 @@ namespace Xamarin.Cognitive.Face
 		}
 
 
-		internal Task UpdatePersonGroup (string personGroupId, string groupName, string userData = null)
+		/// <summary>
+		/// Updates a <see cref="PersonGroup"/> with the given name and (optionally) custom user data.
+		/// </summary>
+		/// <param name="personGroupId">The Id of the <see cref="PersonGroup"/> to update.</param>
+		/// <param name="groupName">The updated name of the group.</param>
+		/// <param name="userData">An updated custom user data string to store with the group.</param>
+		/// <remarks>Note that this method does not perform or respect any caching - any cached group loaded via <see cref="GetPersonGroups(bool)"/> or similar methods will not be affected.</remarks>
+		public Task UpdatePersonGroup (string personGroupId, string groupName, string userData = null)
 		{
 			var tcs = new TaskCompletionSource<bool> ();
 
@@ -206,7 +219,12 @@ namespace Xamarin.Cognitive.Face
 		}
 
 
-		internal Task DeletePersonGroup (string personGroupId)
+		/// <summary>
+		/// Deletes a <see cref="PersonGroup"/> with the given <c>personGroupId</c>.
+		/// </summary>
+		/// <param name="personGroupId">The Id of the <see cref="PersonGroup"/> to delete.</param>
+		/// <remarks>Note that this method does not perform or respect any caching - any cached group loaded via <see cref="GetPersonGroups(bool)"/> or similar methods will not be affected.</remarks>
+		public Task DeletePersonGroup (string personGroupId)
 		{
 			var tcs = new TaskCompletionSource<bool> ();
 
@@ -219,7 +237,11 @@ namespace Xamarin.Cognitive.Face
 		}
 
 
-		internal Task TrainPersonGroup (string personGroupId)
+		/// <summary>
+		/// Trains a <see cref="PersonGroup"/> with the given <c>personGroupId</c>.
+		/// </summary>
+		/// <param name="personGroupId">The Id of the <see cref="PersonGroup"/> to train.</param>
+		public Task TrainPersonGroup (string personGroupId)
 		{
 			var tcs = new TaskCompletionSource<bool> ();
 
@@ -232,23 +254,29 @@ namespace Xamarin.Cognitive.Face
 		}
 
 
-		internal Task<TrainingStatus> GetGroupTrainingStatus (string personGroupId)
+		/// <summary>
+		/// Gets the <see cref="TrainingStatus"/> for the given <see cref="PersonGroup"/>: notstarted, running, succeeded, failed.
+		/// </summary>
+		/// <returns>The group training status.</returns>
+		/// <param name="personGroupId">The Id of the <see cref="PersonGroup"/> to get training status for.</param>
+		/// <seealso cref="TrainPersonGroup(string)"/>
+		public Task<TrainingStatus> GetGroupTrainingStatus (string personGroupId)
 		{
 			var tcs = new TaskCompletionSource<TrainingStatus> ();
 
 			Client.GetPersonGroupTrainingStatusWithPersonGroupId (
 				personGroupId,
-				(trainingStatus, error) => AdaptResultResultCallback (error, tcs, trainingStatus, MappingExtensions.ToTrainingStatus,
-		 	(ErrorDetailException ede) =>
-			{
-				if (ede.ErrorDetail.Code == ErrorCodes.TrainingStatus.PersonGroupNotTrained)
-				{
-					tcs.SetResult (TrainingStatus.FromStatus (TrainingStatus.TrainingStatusType.NotStarted));
-					return true;
-				}
+				(trainingStatus, error) => AdaptResultCallback (error, tcs, trainingStatus, MappingExtensions.ToTrainingStatus,
+				 	(ErrorDetailException ede) =>
+					{
+						if (ede.ErrorDetail.Code == ErrorCodes.TrainingStatus.PersonGroupNotTrained)
+						{
+							tcs.SetResult (TrainingStatus.FromStatus (TrainingStatus.TrainingStatusType.NotStarted));
+							return true;
+						}
 
-				return false;
-			}))
+						return false;
+					}))
 				  .Resume ();
 
 			return tcs.Task;
@@ -261,7 +289,13 @@ namespace Xamarin.Cognitive.Face
 		#region Person
 
 
-		internal Task<List<Person>> GetPeopleForGroup (string personGroupId)
+		/// <summary>
+		/// Gets the group's list of <see cref="Person"/>.
+		/// </summary>
+		/// <returns>A list of <see cref="Person"/> for the group.</returns>
+		/// <param name="personGroupId">The Id of the <see cref="PersonGroup"/> to get people for.</param>
+		/// <remarks>Note that this method does not perform or respect any caching.</remarks>
+		public Task<List<Person>> GetPeopleForGroup (string personGroupId)
 		{
 			var tcs = new TaskCompletionSource<List<Person>> ();
 
@@ -274,7 +308,14 @@ namespace Xamarin.Cognitive.Face
 		}
 
 
-		internal Task<string> CreatePerson (string personName, string personGroupId, string userData)
+		/// <summary>
+		/// Creates a <see cref="Person"/> with the given name and (optionally) custom user data.
+		/// </summary>
+		/// <returns>The newly created person's Id.</returns>
+		/// <param name="personName">The name of the new person.</param>
+		/// <param name="personGroupId">The Id of the <see cref="PersonGroup"/> this person will be a part of.</param>
+		/// <param name="userData">A custom user data string to store with the person.</param>
+		public Task<string> CreatePerson (string personName, string personGroupId, string userData = null)
 		{
 			var tcs = new TaskCompletionSource<string> ();
 
@@ -282,14 +323,21 @@ namespace Xamarin.Cognitive.Face
 				personGroupId,
 				personName,
 				userData,
-				(result, error) => AdaptResultResultCallback (error, tcs, result, r => r.PersonId))
+				(result, error) => AdaptResultCallback (error, tcs, result, r => r.PersonId))
 				  .Resume ();
 
 			return tcs.Task;
 		}
 
 
-		internal Task UpdatePerson (string personId, string personGroupId, string personName, string userData)
+		/// <summary>
+		/// Updates a <see cref="Person"/> with the given name and (optionally) custom user data.
+		/// </summary>
+		/// <param name="personId">The Id of the <see cref="Person"/> to update.</param>
+		/// <param name="personGroupId">The Id of the <see cref="PersonGroup"/> this person is a part of.</param>
+		/// <param name="personName">The name of the updated person.</param>
+		/// <param name="userData">A custom user data string to store with the person.</param>
+		public Task UpdatePerson (string personId, string personGroupId, string personName, string userData)
 		{
 			var tcs = new TaskCompletionSource<bool> ();
 
@@ -305,7 +353,12 @@ namespace Xamarin.Cognitive.Face
 		}
 
 
-		internal Task DeletePerson (string personGroupId, string personId)
+		/// <summary>
+		/// Deletes the <see cref="Person"/> with the given <c>personId</c>.
+		/// </summary>
+		/// <param name="personGroupId">The Id of the <see cref="PersonGroup"/> the person is a part of.</param>
+		/// <param name="personId">The Id of the <see cref="Person"/> to delete.</param>
+		public Task DeletePerson (string personGroupId, string personId)
 		{
 			var tcs = new TaskCompletionSource<bool> ();
 
@@ -319,25 +372,42 @@ namespace Xamarin.Cognitive.Face
 		}
 
 
-		internal Task<Person> GetPerson (string personGroupId, string personId)
+		/// <summary>
+		/// Gets the <see cref="Person"/> with the specified <c>personId</c> and belonging to the <see cref="PersonGroup"/> with the given <c>personGroupId</c>.
+		/// </summary>
+		/// <returns>The <see cref="Person"/>.</returns>
+		/// <param name="personGroupId">The Id of the <see cref="PersonGroup"/> the person is a part of.</param>
+		/// <param name="personId">The Id of the <see cref="Person"/> to get.</param>
+		public Task<Person> GetPerson (string personGroupId, string personId)
 		{
 			var tcs = new TaskCompletionSource<Person> ();
 
 			Client.GetPersonWithPersonGroupId (
 				personGroupId,
 				personId,
-				(person, error) => AdaptResultResultCallback (error, tcs, person, MappingExtensions.ToPerson))
+				(person, error) => AdaptResultCallback (error, tcs, person, MappingExtensions.ToPerson))
 				  .Resume ();
 
 			return tcs.Task;
 		}
 
 
-		internal Task<string> AddFaceForPerson (string personId, string personGroupId, Model.Face face, Stream photoStream, string userData = null)
+		/// <summary>
+		/// Adds (saves/persists) a detected <see cref="Face"/> for the given <see cref="Person"/>.
+		/// </summary>
+		/// <param name="personId">The Id of the <see cref="Person"/> to add a face for.</param>
+		/// <param name="personGroupId">The Id of the <see cref="PersonGroup"/> the person is a part of.</param>
+		/// <param name="face">The detected <see cref="Face"/> to add.  This will typically come from the Detect method.</param>
+		/// <param name="stream">A stream to the image data containing the Face.</param>
+		/// <param name="userData">A custom user data string to store with the person's Face.</param>
+		/// <remarks>The Stream passed in to this method will NOT be disposed and should be handled by the calling client code.  
+		/// The image stream provided should be the same original image that was used to detect the Face - the <see cref="FaceRectangle"/> must be valid and should contain the correct face.</remarks>
+		/// <seealso cref="DetectFacesInPhoto(Stream, bool, FaceAttributeType [])"/>
+		public Task<string> AddFaceForPerson (string personId, string personGroupId, Model.Face face, Stream stream, string userData = null)
 		{
 			var tcs = new TaskCompletionSource<string> ();
 
-			using (var data = NSData.FromStream (photoStream))
+			using (var data = NSData.FromStream (stream))
 			{
 				Client.AddPersonFaceWithPersonGroupId (
 					personGroupId,
@@ -345,7 +415,7 @@ namespace Xamarin.Cognitive.Face
 					data,
 					userData,
 					face.FaceRectangle.ToMPOFaceRect (),
-					(result, error) => AdaptResultResultCallback (error, tcs, result, r => r.PersistedFaceId))
+					(result, error) => AdaptResultCallback (error, tcs, result, r => r.PersistedFaceId))
 					  .Resume ();
 
 				return tcs.Task;
@@ -353,7 +423,13 @@ namespace Xamarin.Cognitive.Face
 		}
 
 
-		internal Task DeletePersonFace (string personId, string personGroupId, string faceId)
+		/// <summary>
+		/// Deletes a persisted <see cref="Face"/> for the given <see cref="Person"/>.
+		/// </summary>
+		/// <param name="personId">The Id of the <see cref="Person"/> the given <see cref="Face"/> belongs to.</param>
+		/// <param name="personGroupId">The Id of the <see cref="PersonGroup"/> the person is a part of.</param>
+		/// <param name="faceId">The Id of a persisted <see cref="Face"/> to delete.</param>
+		public Task DeletePersonFace (string personId, string personGroupId, string faceId)
 		{
 			var tcs = new TaskCompletionSource<bool> ();
 
@@ -368,7 +444,13 @@ namespace Xamarin.Cognitive.Face
 		}
 
 
-		internal Task<Model.Face> GetFaceForPerson (string personId, string personGroupId, string persistedFaceId)
+		/// <summary>
+		/// Gets a persisted <see cref="Face"/> with the given <c>persistedFaceId</c> for the given <see cref="Person"/>.
+		/// </summary>
+		/// <param name="personId">The Id of the <see cref="Person"/> the given <see cref="Face"/> belongs to.</param>
+		/// <param name="personGroupId">The Id of the <see cref="PersonGroup"/> the person is a part of.</param>
+		/// <param name="persistedFaceId">The Id of the persisted <see cref="Face"/> to retrieve.</param>
+		public Task<Model.Face> GetFaceForPerson (string personId, string personGroupId, string persistedFaceId)
 		{
 			var tcs = new TaskCompletionSource<Model.Face> ();
 
@@ -376,7 +458,7 @@ namespace Xamarin.Cognitive.Face
 				personGroupId,
 				personId,
 				persistedFaceId,
-				(face, error) => AdaptResultResultCallback (error, tcs, face, MappingExtensions.ToFace))
+				(face, error) => AdaptResultCallback (error, tcs, face, MappingExtensions.ToFace))
 				  .Resume ();
 
 			return tcs.Task;
@@ -410,7 +492,16 @@ namespace Xamarin.Cognitive.Face
 		}
 
 
-		internal Task<List<SimilarFaceResult>> FindSimilarInternal (string targetFaceId, string [] faceIds, int maxCandidatesReturned = 1, FindSimilarMatchMode matchMode = FindSimilarMatchMode.MatchPerson)
+		/// <summary>
+		/// Finds faces similar to a target face in the given list of face Ids.
+		/// </summary>
+		/// <returns>A list of <see cref="SimilarFaceResult"/> indicating similar face(s) and associated confidence factor.</returns>
+		/// <param name="targetFaceId">The Id of the target <see cref="Face"/> to find similar faces to.</param>
+		/// <param name="faceIds">The face list containing face Ids to compare to the target Face.</param>
+		/// <param name="maxCandidatesReturned">The maximum number of candidate faces to return.</param>
+		/// <param name="matchMode">The <see cref="FindSimilarMatchMode"/> to use when comparing - matchFace or matchPerson (default).</param>
+		/// <remarks><c>maxCandidatesReturned</c> and <c>matchMode</c> are not currently respsected on iOS due to native SDK limiations.</remarks>
+		public Task<List<SimilarFaceResult>> FindSimilar (string targetFaceId, string [] faceIds, int maxCandidatesReturned = 1, FindSimilarMatchMode matchMode = FindSimilarMatchMode.MatchPerson)
 		{
 			var tcs = new TaskCompletionSource<List<SimilarFaceResult>> ();
 
@@ -426,20 +517,32 @@ namespace Xamarin.Cognitive.Face
 		}
 
 
-		internal Task<GroupResult> GroupFaces (string [] targetFaceIds)
+		/// <summary>
+		/// Groups similar faces within the list of target face Ids and returns a <see cref="GroupResult"/> with results of the grouping operation.
+		/// </summary>
+		/// <returns>A <see cref="GroupResult"/> containing <see cref="FaceGroup"/> groups with similar faces and any leftover/messy group.</returns>
+		/// <param name="targetFaceIds">The list of target <see cref="Face"/> Ids to perform a grouping operation on.</param>
+		public Task<GroupResult> GroupFaces (string [] targetFaceIds)
 		{
 			var tcs = new TaskCompletionSource<GroupResult> ();
 
 			Client.GroupWithFaceIds (
 				targetFaceIds,
-				(groupResult, error) => AdaptResultResultCallback (error, tcs, groupResult, MappingExtensions.ToGroupResult))
+				(groupResult, error) => AdaptResultCallback (error, tcs, groupResult, MappingExtensions.ToGroupResult))
 				  .Resume ();
 
 			return tcs.Task;
 		}
 
 
-		internal Task<List<IdentificationResult>> Identify (string personGroupId, string [] detectedFaceIds, int maxNumberOfCandidates = 1)
+		/// <summary>
+		/// Attempts to Identify the given list of detected face Ids against a trained <see cref="PersonGroup"/> containing 1 or more faces.
+		/// </summary>
+		/// <returns>A list of <see cref="IdentificationResult"/> containing <see cref="CandidateResult"/> indicating potential identification matches and the confidence factor for the match.</returns>
+		/// <param name="personGroupId">The Id of the <see cref="PersonGroup"/> to identify a <see cref="Face"/> against.</param>
+		/// <param name="detectedFaceIds">A list of detected face Ids to use for the identification.</param>
+		/// <param name="maxNumberOfCandidates">The max number of candidate matches to return.</param>
+		public Task<List<IdentificationResult>> Identify (string personGroupId, string [] detectedFaceIds, int maxNumberOfCandidates = 1)
 		{
 			var results = new List<IdentificationResult> ();
 			var tcs = new TaskCompletionSource<List<IdentificationResult>> ();
@@ -455,21 +558,34 @@ namespace Xamarin.Cognitive.Face
 		}
 
 
-		internal Task<VerifyResult> Verify (string face1Id, string face2Id)
+		/// <summary>
+		/// Verifies that the specified faces with Face Ids belong to the same person.
+		/// </summary>
+		/// <returns>A <see cref="VerifyResult"/> indicating equivalence, with a confidence factor.</returns>
+		/// <param name="face1Id">The Id of the first <see cref="Face"/>.</param>
+		/// <param name="face2Id">The Id of the second <see cref="Face"/>.</param>
+		public Task<VerifyResult> Verify (string face1Id, string face2Id)
 		{
 			var tcs = new TaskCompletionSource<VerifyResult> ();
 
 			Client.VerifyWithFirstFaceId (
 				face1Id,
 				face2Id,
-				(verifyResult, error) => AdaptResultResultCallback (error, tcs, verifyResult, MappingExtensions.ToVerifyResult))
+				(verifyResult, error) => AdaptResultCallback (error, tcs, verifyResult, MappingExtensions.ToVerifyResult))
 				  .Resume ();
 
 			return tcs.Task;
 		}
 
 
-		internal Task<VerifyResult> Verify (string faceId, string personId, string personGroupId)
+		/// <summary>
+		/// Verifies that the given face with <c>faceId</c> belongs to the specified <see cref="Person"/> with <c>personId</c>.
+		/// </summary>
+		/// <returns>A <see cref="VerifyResult"/> indicating equivalence, with a confidence factor.</returns>
+		/// <param name="faceId">The Id of the <see cref="Face"/> to verify.</param>
+		/// <param name="personId">The Id of the <see cref="Person"/> to verify the face against.</param>
+		/// <param name="personGroupId">The Id of the <see cref="PersonGroup"/> the given person belongs to.</param>
+		public Task<VerifyResult> Verify (string faceId, string personId, string personGroupId)
 		{
 			var tcs = new TaskCompletionSource<VerifyResult> ();
 
@@ -477,7 +593,7 @@ namespace Xamarin.Cognitive.Face
 				faceId,
 				personId,
 				personGroupId,
-				(verifyResult, error) => AdaptResultResultCallback (error, tcs, verifyResult, MappingExtensions.ToVerifyResult))
+				(verifyResult, error) => AdaptResultCallback (error, tcs, verifyResult, MappingExtensions.ToVerifyResult))
 				  .Resume ();
 
 			return tcs.Task;

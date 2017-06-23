@@ -6,6 +6,9 @@ using Xamarin.Cognitive.Face.Model;
 
 namespace Xamarin.Cognitive.Face.Extensions
 {
+	/// <summary>
+	/// Contains extension methods for working with and mapping native Droid.Contact.* types from the bound Android Face SDK.
+	/// </summary>
 	public static class MappingExtensions
 	{
 		internal static Droid.Contract.FaceRectangle ToNativeFaceRect (this FaceRectangle rect)

@@ -4,6 +4,9 @@ using System.Collections.Generic;
 
 namespace Xamarin.Cognitive.Face.Extensions
 {
+	/// <summary>
+	/// Contains extension methods for working with <see cref="Face"/>.
+	/// </summary>
 	public static partial class FaceExtensions
 	{
 		/// <summary>

@@ -3,6 +3,9 @@ using Foundation;
 
 namespace Xamarin.Cognitive.Face.Extensions
 {
+	/// <summary>
+	/// Contains extension methods for working with and mapping native iOS types.
+	/// </summary>
 	public static class iOSInteropExtensions
 	{
 		internal static float AsFloatSafe (this NSNumber number, float defaultValue = 0)
