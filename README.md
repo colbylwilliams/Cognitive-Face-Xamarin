@@ -133,7 +133,7 @@ If you'd like to addres any of the above, we're happy to review and merge any qu
 		List<IdentificationResult> results = await FaceClient.Shared.Identify (MyPersonGroup, MyFaceToIdentify);
 		```
 		
-	...And much more.  Take a look at the [Sample Apps](/Xamarin.Cognitive.Face.Sample) to see the usage of these and more features.
+	...And much more.  Take a look at the [Sample Apps](Xamarin.Cognitive.Face.Sample) to see the usage of these and more features.
 	
 	
 # Contributing
