@@ -7,7 +7,7 @@
     <ProjectGuid>{DA36DEFA-D104-4483-8727-8FEFAE2DA627}</ProjectGuid>
     <Description>Microsoft Cognitive Services Face API client library for Xamarin.iOS, Xamarin.Android, and Xamarin.Forms (or portable projects used for Android/iOS apps).</Description>
     <PackageId>Xamarin.Cognitive.Face</PackageId>
-    <PackageVersion>0.5.0-preview</PackageVersion>
+    <PackageVersion>0.5.1-preview</PackageVersion>
     <Authors>Nate Rickard, Colby Williams</Authors>
     <DevelopmentDependency>false</DevelopmentDependency>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
@@ -20,10 +20,10 @@
     <Copyright>Copyright © 2017 Nate Rickard, Colby Williams</Copyright>
     <PackageTags>Xamarin, Xamarin.iOS, Xamarin.Android, iOS, Android, Face, Facial, Oxford, ProjectOxford, Microsoft, Cognitive, CognitiveServices</PackageTags>
     <Title>Xamarin.Cognitive.Face</Title>
-    <Summary>Microsoft Cognitive Services Face API client library for Xamarin.iOS and Xamarin.Android.</Summary>
+    <Summary>Microsoft Cognitive Services Face API client library for Xamarin.iOS, Xamarin.Android, and Xamarin.Forms (or portable projects used for Android/iOS apps).</Summary>
     <PackageProjectUrl>https://github.com/colbylwilliams/Cognitive-Face-Xamarin</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/colbylwilliams/Cognitive-Face-Xamarin/blob/master/LICENSE</PackageLicenseUrl>
-    <ReleaseVersion>0.5.0</ReleaseVersion>
+    <ReleaseVersion>0.5.1</ReleaseVersion>
     <IntersectionAssemblyReferencePath>/Library/Frameworks/Mono.framework/External/xbuild-frameworks/MonoAndroid/v7.1/;/Library/Frameworks/Xamarin.iOS.framework/Versions/Current/lib/mono/Xamarin.iOS/</IntersectionAssemblyReferencePath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">

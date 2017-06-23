@@ -9,7 +9,7 @@
     <RootNamespace>Xamarin.Cognitive.Face.Sample.iOS</RootNamespace>
     <AssemblyName>Xamarin.Cognitive.Face.Sample.iOS</AssemblyName>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
-    <ReleaseVersion>0.5.0</ReleaseVersion>
+    <ReleaseVersion>0.5.1</ReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhoneSimulator' ">
     <DebugSymbols>true</DebugSymbols>
