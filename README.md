@@ -60,7 +60,7 @@ These samples are based off of and heavily influenced by the original samples fo
 - There's no unified API for or samples showing [FaceLists](https://westus.dev.cognitive.microsoft.com/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395250)
 - Performance and/or memory profiling has not been done, so buyer beware!
 
-If you'd like to addres any of the above, we're happy to review and merge any quality [pull requests](/pulls)!
+If you'd like to addres any of the above, we're happy to review and merge any quality [pull requests](pulls)!
 
 
 # Use
@@ -148,4 +148,4 @@ Contributions are welcome.  Feel free to file issues and pull requests on the re
 
 ## License
 
-Licensed under the MIT License (MIT). See [LICENSE](LICENSE.md) for details.
+Licensed under the MIT License (MIT). See [LICENSE](LICENSE) for details.
