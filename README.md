@@ -41,7 +41,8 @@ This higher-level library contains a number of value-adds and niceties that make
 
 - Full `async/await` support for awesome, responsive apps.
 - A full set of extended domain/model classes that improve upon the native classes.
-- Extensions to easily work with face thumbnails/images on both platforms.
+- Extensions to ease working with and consuming native images (UIImage/Bitmap) on each platform.
+- Simple support for storing face thumbnail images on disk.
 - Data caching on retrieved items like `PersonGroup` lists, etc.
 
 ## Sample Apps
@@ -49,7 +50,7 @@ This higher-level library contains a number of value-adds and niceties that make
 - `Xamarin.Cognitive.Face.Sample.iOS` 
 - `Xamarin.Cognitive.Face.Sample.Droid` 
 
-These samples exercise most areas of the Face API, including `Person`/`PersonGroup`/'`Face` management, face detection, person identification, verification, face grouping, and more.
+These samples exercise most areas of the Face API, including `Person`/`PersonGroup`/`Face` management, face detection, person identification, verification, face grouping, and more.
 
 These samples are based off of and heavily influenced by the original samples found in the native client libraries (linked above), but have been heavily updated to Xamarin-ize and use the [Xamarin Client Library](#Xamarin Client Library).
 
@@ -60,7 +61,7 @@ These samples are based off of and heavily influenced by the original samples fo
 - There's no unified API for or samples showing [FaceLists](https://westus.dev.cognitive.microsoft.com/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395250)
 - Performance and/or memory profiling has not been done, so buyer beware!
 
-If you'd like to addres any of the above, we're happy to review and merge any quality [pull requests](https://github.com/colbylwilliams/Cognitive-Face-Xamarin/pulls)!
+If you'd like to address any of the above, we're happy to review and merge any quality [pull requests](https://github.com/colbylwilliams/Cognitive-Face-Xamarin/pulls)!
 
 
 # Use
@@ -72,7 +73,7 @@ If you'd like to addres any of the above, we're happy to review and merge any qu
 	Initialize the `FaceClient` with a subscription key ([get one here!](https://azure.microsoft.com/en-us/try/cognitive-services/)), and, optionally, set the endpoint (defaults to WestUS):
 
 	```
-	FaceClient.Shared.Endpoint = FaceClient.Endpoints.WestUS;
+	FaceClient.Shared.Endpoint = Endpoints.WestUS;
 	FaceClient.Shared.SubscriptionKey = faceApiKey;
 	```
 
@@ -97,14 +98,14 @@ If you'd like to addres any of the above, we're happy to review and merge any qu
 	- **Detect faces in an image**
 	
 		```
-		List<Face> detectedFaces = await FaceClient.Shared.DetectFacesInPhoto (SourceImage.AsStream);
+		List<Face> detectedFaces = await FaceClient.Shared.DetectFacesInPhoto (SourceImage.AsJpegStream);
 		```
 	
 		Or, with facial landmarks and face attributes specified:
 	
 		```
 		List<Face> detectedFaces = await FaceClient.Shared.DetectFacesInPhoto (
-								SourceImage.AsStream,
+								SourceImage.AsJpegStream,
 								true, //return landmarks
 								FaceAttributeType.Age,
 								FaceAttributeType.Gender,
@@ -122,6 +123,8 @@ If you'd like to addres any of the above, we're happy to review and merge any qu
 								FaceAttributeType.Accessories);
 		```
 		
+		`SourceImage` can be either a Bitmap (Android) or UIImage (iOS).
+		
 	- **Person Identification**
 	
 		To identify a face to a `Person` within a `PersonGroup`:
@@ -135,6 +138,77 @@ If you'd like to addres any of the above, we're happy to review and merge any qu
 		
 	...And much more.  Take a look at the [Sample Apps](../master/Xamarin.Cognitive.Face/Xamarin.Cognitive.Face.Sample) to see the usage of these and more features.
 	
+
+# Gotchas
+
+## Face thumbnail images
+
+It is **not possible** to retrieve stored Face images via the Face API.  If your use case requires working with face thubnail images, `Xamarin.Cognitive.Face` provides simple support for working with and storing any persisted Face images to disk on both platforms.
+
+The following extensions are available on the `Face` class:
+
+iOS:
+
+- `UIImage CreateThumbnail (this Model.Face face, UIImage sourceImage)`
+- `List<UIImage> GenerateThumbnails (this List<Model.Face> faces, UIImage photo, List<UIImage> thumbnailList = null)`
+- `void SaveThumbnail (this Model.Face face, UIImage thumbnail)`
+- `void SaveThumbnailFromSource (this Model.Face face, UIImage sourceImage)`
+- `UIImage GetThumbnailImage (this Model.Face face)`
+
+	Example:
+	
+	```
+	Person myPerson;
+	PersonGroup myPersonGroup;
+	Face myFace;
+	UIImage sourceImage;
+	...
+	await FaceClient.Shared.AddFaceForPerson (myPerson, myPersonGroup, myFace, sourceImage.AsStream);
+	face.SaveThumbnailFromSource (sourceImage);
+	```
+
+Android:
+
+- `Bitmap CreateThumbnail (this Model.Face face, Bitmap sourceImage)`
+- `List<Bitmap> GenerateThumbnails (this List<Model.Face> faces, Bitmap photo, List<Bitmap> thumbnailList = null)`
+- `void SaveThumbnail (this Model.Face face, Bitmap thumbnail)`
+- `void SaveThumbnailFromSource (this Model.Face face, Bitmap sourceImage)`
+- `Bitmap GetThumbnailImage (this Model.Face face)`
+
+	Example:
+
+	```
+	Person myPerson;
+	PersonGroup myPersonGroup;
+	Face myFace;
+	Bitmap sourceImage;
+	...
+	await FaceClient.Shared.AddFaceForPerson (myPerson, myPersonGroup, myFace, sourceImage.AsStream);
+	face.SaveThumbnailFromSource (sourceImage);
+	```
+
+On either platform, if you already have a cropped face thumbnail image (via `CreateThumbnail()`), you may call `face.SaveThumbnail (thumbnail)` rather than `SaveThumbnailFromSource(sourceImage)`.
+
+**NOTE:** Any images persisted via the `SaveThumbnail*` methods will be stored on disk at the path found on the `ThumbnailPath` property of the `Face`.  These thumbnails will only be available (via `GetThumbnailImage ()`) for the life of the app on a given device, i.e. they will not persist across app removals, etc.  If you desire long-term face thumbnail storage, we suggest using another storage option for your thumbnail images.
+
+## Exceptions
+
+The Face API throws a handful of exceptions for most API methods.  A list of possible exceptions that may be thrown for a given operation can be found [in the API documentation](https://westus.dev.cognitive.microsoft.com/docs/services/563879b61984550e40cbbe8d/).
+
+Any API exception received from the Face API will be raised to the caller in the form of an `ErrorDetailException`.
+
+### Rate limiting
+
+A common example of one of these exceptions is a "rate limit exceeded" exception.  Too many API calls made within a window of time may result in this exception being returned.  In this case, the caller will receive an `ErrorDetailException` wrapping an `Error` similar to this:
+
+```
+Error
+{
+	Code: "429",
+	Message: "Rate limit is exceeded. Try again in XXX seconds"
+}
+```
+
 	
 # Contributing
 
