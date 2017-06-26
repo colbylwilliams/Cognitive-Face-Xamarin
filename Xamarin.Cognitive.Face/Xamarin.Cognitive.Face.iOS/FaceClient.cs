@@ -7,7 +7,6 @@ using Foundation;
 using Newtonsoft.Json;
 using Xamarin.Cognitive.Face.Extensions;
 using Xamarin.Cognitive.Face.iOS;
-using Xamarin.Cognitive.Face.iOS.Domain;
 using Xamarin.Cognitive.Face.Model;
 
 namespace Xamarin.Cognitive.Face

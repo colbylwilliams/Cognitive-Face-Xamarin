@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Xamarin.Cognitive.Face.iOS.Domain
+namespace Xamarin.Cognitive.Face
 {
 	/// <summary>
 	/// Error detail exception is an exception that wraps a native <see cref="Error"/> returned from the Face API.
@@ -15,7 +15,7 @@ namespace Xamarin.Cognitive.Face.iOS.Domain
 
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="T:Xamarin.Cognitive.Face.iOS.Domain.ErrorDetailException"/> class.
+		/// Initializes a new instance of the <see cref="T:Xamarin.Cognitive.Face.Domain.ErrorDetailException"/> class.
 		/// </summary>
 		/// <param name="error">Error.</param>
 		public ErrorDetailException (Error error)

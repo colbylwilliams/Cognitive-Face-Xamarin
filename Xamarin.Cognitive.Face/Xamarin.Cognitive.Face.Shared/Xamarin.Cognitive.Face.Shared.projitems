@@ -12,6 +12,7 @@
     <Folder Include="$(MSBuildThisFileDirectory)Extensions\" />
     <Folder Include="$(MSBuildThisFileDirectory)Model\" />
     <Folder Include="$(MSBuildThisFileDirectory)Util\" />
+    <Folder Include="$(MSBuildThisFileDirectory)Domain\" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)FaceClient.cs" />
@@ -53,7 +54,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)Model\FindSimilarMatchMode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\FaceExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\FaceRectangle.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ErrorCodes.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Endpoints.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Domain\Error.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Domain\ErrorDetailException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Domain\Endpoints.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Domain\ErrorCodes.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Domain\ErrorDetail.cs" />
   </ItemGroup>
 </Project>
