@@ -18,13 +18,13 @@ namespace Xamarin.Cognitive.Face.Extensions
 		/// Gets the given Bitmap as a JPEG Stream and resets the stream position to 0.
 		/// </summary>
 		/// <returns>A Stream with the image data.</returns>
-		/// <param name="bitmap">The Bitmap.</param>
+		/// <param name="image">The Bitmap image.</param>
 		/// <param name="quality">The quality factor to use when compressing as a JPEG.</param>
-		public static System.IO.Stream AsJpeg (this Bitmap bitmap, int quality = 100)
+		public static System.IO.Stream AsJpegStream (this Bitmap image, int quality = 100)
 		{
 			var stream = new MemoryStream ();
 
-			if (!bitmap.Compress (Bitmap.CompressFormat.Jpeg, quality, stream))
+			if (!image.Compress (Bitmap.CompressFormat.Jpeg, quality, stream))
 			{
 				stream?.Dispose ();
 
@@ -58,7 +58,7 @@ namespace Xamarin.Cognitive.Face.Extensions
 		/// <returns>The cropped image.</returns>
 		/// <param name="image">Image.</param>
 		/// <param name="rect">Rect.</param>
-		/// <remarks>The image uses is not disposed of or released in any way.</remarks>
+		/// <remarks>The original image is not disposed of or released in any way.</remarks>
 		public static Bitmap Crop (this Bitmap image, RectangleF rect)
 		{
 			return Bitmap.CreateBitmap (image, (int) rect.Left, (int) rect.Top, (int) rect.Width, (int) rect.Height);

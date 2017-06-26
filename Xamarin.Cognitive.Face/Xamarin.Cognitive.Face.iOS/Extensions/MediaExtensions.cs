@@ -1,4 +1,5 @@
-﻿using CoreGraphics;
+﻿using System.IO;
+using CoreGraphics;
 using UIKit;
 
 namespace Xamarin.Cognitive.Face.Extensions
@@ -9,12 +10,26 @@ namespace Xamarin.Cognitive.Face.Extensions
 	public static class MediaExtensions
 	{
 		/// <summary>
+		/// Gets the given UIImage as a JPEG Stream.
+		/// </summary>
+		/// <returns>A Stream with the image data.</returns>
+		/// <param name="image">The UIImage.</param>
+		public static Stream AsJpegStream (this UIImage image)
+		{
+			//will NSAutoreleasePool kill the intermediary NSData once the image and stream go away??
+			var data = image.AsJPEG ();
+
+			return data.AsStream ();
+		}
+
+
+		/// <summary>
 		/// Crops the specified image using the rectangle.
 		/// </summary>
 		/// <returns>The cropped image.</returns>
 		/// <param name="image">Image.</param>
 		/// <param name="rect">Rect.</param>
-		/// <remarks>The image uses is not disposed of or released in any way.</remarks>
+		/// <remarks>The original image is not disposed of or released in any way.</remarks>
 		public static UIImage Crop (this UIImage image, CGRect rect)
 		{
 			rect = new CGRect (rect.X * image.CurrentScale,
