@@ -39,11 +39,12 @@ The `Xamarin.Cognitive.Face` package contains pre-compiled versions of these bin
 
 This higher-level library contains a number of value-adds and niceties that make it easy to work with the Face API:
 
-- Full `async/await` support for awesome, responsive apps.
+- Full `async/await` support across the API, for awesome and responsive apps.
 - A full set of extended domain/model classes that improve upon the native classes.
 - Extensions to ease working with and consuming native images (UIImage/Bitmap) on each platform.
-- Simple support for storing face thumbnail images on disk.
+- Simple support for storing face thumbnail images "on disk."
 - Data caching on retrieved items like `PersonGroup` lists, etc.
+- API equivalnce on both platforms, i.e. the ability to also use the client library's API in a Shared Project.
 
 ## Sample Apps
 
@@ -143,7 +144,7 @@ If you'd like to address any of the above, we're happy to review and merge any q
 
 ## Face thumbnail images
 
-It is **not possible** to retrieve stored Face images via the Face API.  If your use case requires working with face thubnail images, `Xamarin.Cognitive.Face` provides simple support for working with and storing any persisted Face images to disk on both platforms.
+It is **not possible** to retrieve stored Face images via the Face API.  If your use case requires working with face thubnail images, `Xamarin.Cognitive.Face` provides simple support for working with and storing any persisted Face images to the local file system on both platforms.
 
 The following extensions are available on the `Face` class:
 
