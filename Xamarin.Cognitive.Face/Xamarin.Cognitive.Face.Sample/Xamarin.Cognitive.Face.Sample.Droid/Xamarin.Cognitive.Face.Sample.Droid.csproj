@@ -17,7 +17,7 @@
     <MonoAndroidResourcePrefix>Resources</MonoAndroidResourcePrefix>
     <MonoAndroidAssetsPrefix>Assets</MonoAndroidAssetsPrefix>
     <AndroidUseLatestPlatformSdk>true</AndroidUseLatestPlatformSdk>
-    <ReleaseVersion>0.5.1</ReleaseVersion>
+    <ReleaseVersion>0.5.2</ReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -92,10 +92,10 @@
       <HintPath>..\..\packages\GoogleGson.2.6.2.0\lib\MonoAndroid\GoogleGson.dll</HintPath>
     </Reference>
     <Reference Include="Cognitive.Face.Droid">
-      <HintPath>..\..\packages\Xamarin.Cognitive.Face.0.5.1-preview\lib\monoandroid50\Cognitive.Face.Droid.dll</HintPath>
+      <HintPath>..\..\packages\Xamarin.Cognitive.Face.0.5.2\lib\monoandroid50\Cognitive.Face.Droid.dll</HintPath>
     </Reference>
     <Reference Include="Xamarin.Cognitive.Face">
-      <HintPath>..\..\packages\Xamarin.Cognitive.Face.0.5.1-preview\lib\monoandroid50\Xamarin.Cognitive.Face.dll</HintPath>
+      <HintPath>..\..\packages\Xamarin.Cognitive.Face.0.5.2\lib\monoandroid50\Xamarin.Cognitive.Face.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

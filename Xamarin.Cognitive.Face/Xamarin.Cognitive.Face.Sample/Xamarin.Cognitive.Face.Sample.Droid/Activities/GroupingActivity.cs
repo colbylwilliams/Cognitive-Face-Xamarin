@@ -104,7 +104,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 				SetInfo ("Detecting...");
 
 				var faces = await FaceClient.Shared.DetectFacesInPhoto (
-					() => bitmap.AsJpeg (),
+					() => bitmap.AsJpegStream (),
 					true,
 					FaceAttributeType.Age,
 					FaceAttributeType.Gender,

@@ -22,7 +22,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 				throw new Exception ("No API key set.  Please sign up for a Face API key at https://azure.microsoft.com/en-us/services/cognitive-services/face/");
 			}
 
-			FaceClient.Shared.Endpoint = FaceClient.Endpoints.WestUS;
+			FaceClient.Shared.Endpoint = Endpoints.WestUS;
 			FaceClient.Shared.SubscriptionKey = faceApiKey;
 		}
 	}

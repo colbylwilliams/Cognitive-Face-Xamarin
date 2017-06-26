@@ -122,7 +122,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 				AddLog ($"Request: Detecting in image {imageUri}");
 
 				var faces = await FaceClient.Shared.DetectFacesInPhoto (
-					() => bitmap.AsJpeg (),
+					() => bitmap.AsJpegStream (),
 					true,
 			   		FaceAttributeType.Age,
 					FaceAttributeType.Gender,

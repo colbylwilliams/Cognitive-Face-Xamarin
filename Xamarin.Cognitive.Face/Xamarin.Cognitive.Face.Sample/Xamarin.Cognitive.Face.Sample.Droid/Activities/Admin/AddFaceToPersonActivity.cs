@@ -77,7 +77,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 
 			try
 			{
-				var faces = await FaceClient.Shared.DetectFacesInPhoto (() => sourceImage.AsJpeg ());
+				var faces = await FaceClient.Shared.DetectFacesInPhoto (() => sourceImage.AsJpegStream ());
 
 				if (faces?.Count > 0)
 				{
@@ -128,7 +128,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 				progressDialog.SetMessage ("Adding face...");
 				SetInfo ("Adding face...");
 
-				using (var stream = sourceImage.AsJpeg ())
+				using (var stream = sourceImage.AsJpegStream ())
 				{
 					foreach (var face in faces)
 					{

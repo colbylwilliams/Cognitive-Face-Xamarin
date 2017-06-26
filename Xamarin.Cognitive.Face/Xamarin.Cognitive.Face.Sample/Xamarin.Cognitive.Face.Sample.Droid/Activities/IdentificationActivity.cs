@@ -319,7 +319,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 				progressDialog.SetMessage ("Detecting...");
 				SetInfo ("Detecting...");
 
-				var faces = await FaceClient.Shared.DetectFacesInPhoto (() => bitmap.AsJpeg ());
+				var faces = await FaceClient.Shared.DetectFacesInPhoto (() => bitmap.AsJpegStream ());
 
 				SetAllButtonsEnabledStatus (true);
 

@@ -164,7 +164,7 @@ namespace Xamarin.Cognitive.Face.Sample.Droid
 				progressDialog.SetMessage ("Detecting...");
 				SetInfo ("Detecting...");
 
-				var faces = await FaceClient.Shared.DetectFacesInPhoto (() => photo.AsJpeg ());
+				var faces = await FaceClient.Shared.DetectFacesInPhoto (() => photo.AsJpegStream ());
 
 				AddLog ($"Response: Success. Detected {faces.Count} face(s) in image");
 				SetInfo ($"{faces.Count} face{(faces.Count != 1 ? "s" : "")} detected");
