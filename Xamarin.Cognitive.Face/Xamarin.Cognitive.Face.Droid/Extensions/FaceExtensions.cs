@@ -79,6 +79,20 @@ namespace Xamarin.Cognitive.Face.Extensions
 
 
 		/// <summary>
+		/// Saves a thumbnail from a source image, using the Face's FaceRectangle and ThumbnailPath.
+		/// </summary>
+		/// <param name="face">The Face to save a thumbnail for.</param>
+		/// <param name="sourceImage">The source image where the thumbnail will be cropped from.</param>
+		public static void SaveThumbnailFromSource (this Model.Face face, Bitmap sourceImage)
+		{
+			using (var thumbnail = face.CreateThumbnail (sourceImage))
+			{
+				face.SaveThumbnail (thumbnail);
+			}
+		}
+
+
+		/// <summary>
 		/// Gets the thumbnail image for the given Face.  This assumes the thumbnail has already been saved using the <see cref="SaveThumbnail"/> method.
 		/// </summary>
 		/// <returns>The thumbnail image.</returns>
