@@ -94,10 +94,10 @@
       <HintPath>..\..\packages\Newtonsoft.Json.9.0.1\lib\portable-net45+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Xamarin.Cognitive.Face">
-      <HintPath>..\..\packages\Xamarin.Cognitive.Face.0.5.0-preview\lib\xamarinios10\Xamarin.Cognitive.Face.dll</HintPath>
+      <HintPath>..\..\packages\Xamarin.Cognitive.Face.0.5.2\lib\xamarinios10\Xamarin.Cognitive.Face.dll</HintPath>
     </Reference>
     <Reference Include="Xamarin.Cognitive.Face.iOS">
-      <HintPath>..\..\packages\Xamarin.Cognitive.Face.0.5.0-preview\lib\xamarinios10\Xamarin.Cognitive.Face.iOS.dll</HintPath>
+      <HintPath>..\..\packages\Xamarin.Cognitive.Face.0.5.2\lib\xamarinios10\Xamarin.Cognitive.Face.iOS.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

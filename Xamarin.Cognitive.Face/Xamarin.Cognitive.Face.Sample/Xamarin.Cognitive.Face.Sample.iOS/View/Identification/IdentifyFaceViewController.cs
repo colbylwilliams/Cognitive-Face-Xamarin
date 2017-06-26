@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Foundation;
 using NomadCode.UIExtensions;
 using UIKit;
+using Xamarin.Cognitive.Face.Extensions;
 using Xamarin.Cognitive.Face.iOS.Domain;
 using Xamarin.Cognitive.Face.Model;
 using Xamarin.Cognitive.Face.Sample.iOS.Extensions;
@@ -100,7 +101,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 
 					this.ShowHUD ("Detecting faces");
 
-					var detectedFaces = await FaceClient.Shared.DetectFacesInPhoto (sourceImage.AsStream);
+					var detectedFaces = await FaceClient.Shared.DetectFacesInPhoto (sourceImage.AsJpegStream);
 
 					if (detectedFaces.Count == 0)
 					{
@@ -163,7 +164,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 			}
 			catch (ErrorDetailException ede)
 			{
-				if (ede.ErrorDetail.Code == FaceClient.ErrorCodes.TrainingStatus.PersonGroupNotTrained)
+				if (ede.ErrorDetail.Code == ErrorCodes.TrainingStatus.PersonGroupNotTrained)
 				{
 					this.HideHUD ().ShowSimpleAlert ("Person group must be trained before identification.");
 				}

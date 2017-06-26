@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Foundation;
 using NomadCode.UIExtensions;
 using UIKit;
+using Xamarin.Cognitive.Face.Extensions;
 using Xamarin.Cognitive.Face.Model;
 using Xamarin.Cognitive.Face.Sample.iOS.Extensions;
 using Xamarin.Cognitive.Face.Shared.Extensions;
@@ -85,7 +86,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 			{
 				this.ShowHUD ("Detecting faces");
 
-				DetectedFaces = await FaceClient.Shared.DetectFacesInPhoto (SourceImage.AsStream,
+				DetectedFaces = await FaceClient.Shared.DetectFacesInPhoto (SourceImage.AsJpegStream,
 																			true, //return landmarks
 																			FaceAttributeType.Age,
 																			FaceAttributeType.Gender,

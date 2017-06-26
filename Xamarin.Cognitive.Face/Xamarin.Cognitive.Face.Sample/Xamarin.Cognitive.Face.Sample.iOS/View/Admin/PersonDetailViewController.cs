@@ -175,7 +175,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 			{
 				this.ShowHUD ("Detecting faces");
 
-				DetectedFaces = await FaceClient.Shared.DetectFacesInPhoto (SourceImage.AsStream);
+				DetectedFaces = await FaceClient.Shared.DetectFacesInPhoto (SourceImage.AsJpegStream);
 
 				if (DetectedFaces.Count == 0)
 				{
@@ -205,7 +205,7 @@ namespace Xamarin.Cognitive.Face.Sample.iOS
 			{
 				this.ShowHUD ("Adding face");
 
-				await FaceClient.Shared.AddFaceForPerson (Person, Group, face, SourceImage.AsStream);
+				await FaceClient.Shared.AddFaceForPerson (Person, Group, face, SourceImage.AsJpegStream);
 
 				face.SaveThumbnailFromSource (SourceImage);
 
