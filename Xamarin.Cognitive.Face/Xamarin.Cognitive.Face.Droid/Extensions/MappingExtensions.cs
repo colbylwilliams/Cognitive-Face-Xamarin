@@ -470,5 +470,15 @@ namespace Xamarin.Cognitive.Face.Extensions
 				Confidence = (float) result.Confidence
 			};
 		}
+
+
+		internal static Error ToError (this Droid.Rest.ClientException ce)
+		{
+			return new Error
+			{
+				Code = ce?.Error?.Code,
+				Message = ce?.Error?.Message
+			};
+		}
 	}
 }

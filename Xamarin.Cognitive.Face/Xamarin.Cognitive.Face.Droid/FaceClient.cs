@@ -31,6 +31,12 @@ namespace Xamarin.Cognitive.Face
 				catch (Exception ex)
 				{
 					Log.Error (ex);
+
+					if (ex is Droid.Rest.ClientException ce)
+					{
+						throw new ErrorDetailException (ce.ToError ());
+					}
+
 					throw;
 				}
 			});
@@ -49,6 +55,12 @@ namespace Xamarin.Cognitive.Face
 				catch (Exception ex)
 				{
 					Log.Error (ex);
+
+					if (ex is Droid.Rest.ClientException ce)
+					{
+						throw new ErrorDetailException (ce.ToError ());
+					}
+
 					throw;
 				}
 			});
@@ -79,6 +91,12 @@ namespace Xamarin.Cognitive.Face
 					}
 
 					Log.Error (ex);
+
+					if (ex is Droid.Rest.ClientException ce)
+					{
+						throw new ErrorDetailException (ce.ToError ());
+					}
+
 					throw;
 				}
 			});
@@ -97,6 +115,12 @@ namespace Xamarin.Cognitive.Face
 				catch (Exception ex)
 				{
 					Log.Error (ex);
+
+					if (ex is Droid.Rest.ClientException ce)
+					{
+						throw new ErrorDetailException (ce.ToError ());
+					}
+
 					throw;
 				}
 			});
