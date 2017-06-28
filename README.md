@@ -1,4 +1,4 @@
-# Xamarin.Cognitive.Face
+# Xamarin.Cognitive.Face ![NuGet](https://img.shields.io/nuget/v/Xamarin.Cognitive.Face.svg?label=NuGet)
 
 `Xamarin.Cognitive.Face` is a client library that makes it easy to work with the [Microsoft Cognitive Services Face API](https://azure.microsoft.com/en-us/services/cognitive-services/face/) on Xamarin.iOS, Xamarin.Android, and Xamarin.Forms and/or Portable Class Library (PCL) projects.
 
