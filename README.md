@@ -73,7 +73,7 @@ If you'd like to address any of the above, we're happy to review and merge any q
 
 	Initialize the `FaceClient` with a subscription key ([get one here!](https://azure.microsoft.com/en-us/try/cognitive-services/)), and, optionally, set the endpoint (defaults to WestUS):
 
-	```
+	```C#
 	FaceClient.Shared.Endpoint = Endpoints.WestUS;
 	FaceClient.Shared.SubscriptionKey = faceApiKey;
 	```
@@ -86,25 +86,25 @@ If you'd like to address any of the above, we're happy to review and merge any q
 
 	- **Get all `PersonGroup`**
 	
-		```
+		```C#
 		List<PersonGroup> groups = await FaceClient.Shared.GetPersonGroups ();
 		```
 		
 		This operation will cache the list of groups the first time and continue to return the cahced list until your next session, or you tell it to refresh the cache:
 		
-		```
+		```C#
 		List<PersonGroup> groups = await FaceClient.Shared.GetPersonGroups (true); //true == force refresh
 		```
 		
 	- **Detect faces in an image**
 	
-		```
+		```C#
 		List<Face> detectedFaces = await FaceClient.Shared.DetectFacesInPhoto (SourceImage.AsJpegStream);
 		```
 	
 		Or, with facial landmarks and face attributes specified:
 	
-		```
+		```C#
 		List<Face> detectedFaces = await FaceClient.Shared.DetectFacesInPhoto (
 								SourceImage.AsJpegStream,
 								true, //return landmarks
@@ -130,7 +130,7 @@ If you'd like to address any of the above, we're happy to review and merge any q
 	
 		To identify a face to a `Person` within a `PersonGroup`:
 	
-		```
+		```C#
 		PersonGroup MyPersonGroup;
 		Face MyFaceToIdentify;
 		
@@ -158,7 +158,7 @@ iOS:
 
 	Example:
 	
-	```
+	```C#
 	Person myPerson;
 	PersonGroup myPersonGroup;
 	Face myFace;
@@ -178,7 +178,7 @@ Android:
 
 	Example:
 
-	```
+	```C#
 	Person myPerson;
 	PersonGroup myPersonGroup;
 	Face myFace;
