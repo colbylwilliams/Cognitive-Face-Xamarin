@@ -213,7 +213,7 @@ Error
 	
 # Contributing
 
-Contributions are welcome.  Feel free to file issues and pull requests on the repo and we'll address them as we can.
+Contributions are welcome.  Feel free to file issues and pull requests on the repo and we'll address them as time permits.
 
 
 # About
@@ -224,3 +224,5 @@ Contributions are welcome.  Feel free to file issues and pull requests on the re
 ## License
 
 Licensed under the MIT License (MIT). See [LICENSE](LICENSE) for details.
+
+Microsoft will receive the images you upload and may use them to improve Face API and related services. By submitting an image, you confirm you have consent from everyone in it.
